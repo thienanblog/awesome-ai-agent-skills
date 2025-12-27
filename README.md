@@ -22,11 +22,11 @@ Skills are self-contained instruction sets that teach AI agents specific workflo
 **Step 2: Install skills**
 
 ```
-# Install a specific skill
-/plugin install documentation-guidelines@awesome-ai-agent-skills
+# Install a plugin (can bundle multiple skills)
+/plugin install documentation-skills@awesome-ai-agent-skills
 
-# Install another skill
-/plugin install laravel-11-12-app-guidelines@awesome-ai-agent-skills
+# Install another plugin
+/plugin install laravel-app-skills@awesome-ai-agent-skills
 ```
 
 **Updating the marketplace**
@@ -57,6 +57,15 @@ You can also copy individual skill instructions directly into your AI agent's co
 | [laravel-11-12-app-guidelines](./skills/laravel-11-12-app-guidelines) | Guidelines and workflow for working on Laravel 11 or Laravel 12 applications across common stacks (API-only or full-stack), including optional Docker Compose/Sail, Inertia + React, Livewire, Vue, Blade, Tailwind v4, Fortify, Wayfinder, PHPUnit, Pint, and Laravel Boost MCP tools. Use when implementing features, fixing bugs, or making UI/backend changes while following project-specific instructions (AGENTS.md, docs/). |
 <!-- SKILLS_TABLE_END -->
 
+## Plugin Groups
+
+Plugins bundle related skills so you can install by domain. The source of truth is `plugin-groups.json`.
+
+| Plugin | Description | Skills |
+|--------|-------------|--------|
+| [documentation-skills](./plugins/documentation-skills) | Skills for authoring AI agent instructions and backend documentation. | [agents-md-generator](./skills/agents-md-generator)<br>[documentation-guidelines](./skills/documentation-guidelines) |
+| [laravel-app-skills](./plugins/laravel-app-skills) | Guidelines for building Laravel 11/12 apps across common stacks and tooling. | [laravel-11-12-app-guidelines](./skills/laravel-11-12-app-guidelines) |
+
 ## Contributing
 
 We welcome contributions! Here's a quick start:
@@ -81,7 +90,7 @@ See **[CONTRIBUTING.md](./CONTRIBUTING.md)** for detailed guidelines, validation
 
 ## For AI Agents
 
-See [CLAUDE.md](./CLAUDE.md) (or [AGENTS.md](./AGENTS.md)) for instructions on how to work with this repository, including how to scan and update the marketplace when new skills are added.
+See [CLAUDE.md](./CLAUDE.md) (or [AGENTS.md](./AGENTS.md)) for instructions on how to work with this repository, including how to group skills into plugins and update the marketplace when new skills are added.
 
 ## Compatibility
 

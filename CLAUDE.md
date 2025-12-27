@@ -49,9 +49,10 @@ For each `SKILL.md`, extract the `name` and `description` from the YAML frontmat
 ### 3. Update marketplace.json
 Update `.claude-plugin/marketplace.json`:
 - Keep the existing `name`, `owner`, and `metadata` sections
-- Update the `plugins` array - each skill becomes its own plugin (so users can install individually)
-- Each plugin requires: `name`, `description`, `source: "./"`, `strict: false`, and a `skills` array
+- Update the `plugins` array based on `plugin-groups.json` so each plugin can contain multiple related skills
+- Each plugin requires: `name` (ending with `-skills`), `description`, `source: "./plugins/<plugin-name>"`, `strict: false`, and a `skills` array
 - The `skills` array lists the skill paths for that plugin
+- Sync `plugins/<plugin-name>/skills/<skill>` so each plugin bundles only its own skill set
 
 ### 4. Update README.md
 Update the "Available Skills" table in `README.md` to match the current skills.
@@ -64,7 +65,7 @@ Report to the user:
 
 ### Example Update
 
-If a new skill `api-testing` is added to `skills/api-testing/SKILL.md`, add a new plugin entry:
+If a new skill `api-testing` is added to `skills/api-testing/SKILL.md`, update `plugin-groups.json` and add or extend the matching plugin entry:
 
 ```json
 {
@@ -79,31 +80,29 @@ If a new skill `api-testing` is added to `skills/api-testing/SKILL.md`, add a ne
   },
   "plugins": [
     {
-      "name": "agents-md-generator",
-      "description": "Generate or update CLAUDE.md/AGENTS.md files for AI coding agents",
-      "source": "./",
+      "name": "documentation-skills",
+      "description": "Skills for authoring AI agent instructions and backend documentation.",
+      "source": "./plugins/documentation-skills",
       "strict": false,
-      "skills": ["./skills/agents-md-generator"]
+      "skills": [
+        "./skills/agents-md-generator",
+        "./skills/documentation-guidelines"
+      ]
     },
     {
-      "name": "documentation-guidelines",
-      "description": "Backend feature documentation following DOCUMENTATION_GUIDELINES.md",
-      "source": "./",
+      "name": "laravel-app-skills",
+      "description": "Guidelines for building Laravel 11/12 apps across common stacks and tooling.",
+      "source": "./plugins/laravel-app-skills",
       "strict": false,
-      "skills": ["./skills/documentation-guidelines"]
-    },
-    {
-      "name": "api-testing",
-      "description": "Description from SKILL.md frontmatter",
-      "source": "./",
-      "strict": false,
-      "skills": ["./skills/api-testing"]
+      "skills": [
+        "./skills/laravel-11-12-app-guidelines"
+      ]
     }
   ]
 }
 ```
 
-**Note:** Contributors can group related skills in one plugin (like Anthropic's `document-skills` with xlsx, docx, pptx, pdf). Just add multiple paths to the `skills` array.
+**Note:** Contributors can group related skills in one plugin (like Anthropic's `document-skills` with xlsx, docx, pptx, pdf). Update `plugin-groups.json` to add multiple skills to the same plugin.
 
 ## Current Skills
 

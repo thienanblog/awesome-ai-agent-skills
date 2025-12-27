@@ -1,0 +1,19 @@
+{
+  "plugins": [
+    {
+      "name": "documentation-skills",
+      "description": "Skills for authoring AI agent instructions and backend documentation.",
+      "skills": [
+        "agents-md-generator",
+        "documentation-guidelines"
+      ]
+    },
+    {
+      "name": "laravel-app-skills",
+      "description": "Guidelines for building Laravel 11/12 apps across common stacks and tooling.",
+      "skills": [
+        "laravel-11-12-app-guidelines"
+      ]
+    }
+  ]
+}

@@ -6,6 +6,8 @@ import { parse as parseYaml } from 'yaml';
 
 const SKILLS_DIR = 'skills';
 const MARKETPLACE_FILE = '.claude-plugin/marketplace.json';
+const PLUGINS_DIR = 'plugins';
+const PLUGIN_SUFFIX = '-skills';
 
 let errors = [];
 let warnings = [];
@@ -26,6 +28,10 @@ function warn(message) {
 
 function success(message) {
   console.log(`✅ ${message}`);
+}
+
+function hasPluginSuffix(value) {
+  return value.endsWith(PLUGIN_SUFFIX);
 }
 
 /**
@@ -138,14 +144,23 @@ function validateMarketplace(skillsInFolder) {
       error(`${MARKETPLACE_FILE}: Plugin missing "name" field`);
       continue;
     }
+    if (!hasPluginSuffix(plugin.name)) {
+      error(`${MARKETPLACE_FILE}: Plugin "${plugin.name}" must end with "${PLUGIN_SUFFIX}"`);
+    }
     if (!plugin.source) {
       error(`${MARKETPLACE_FILE}: Plugin "${plugin.name}" missing "source" field`);
       continue;
     }
 
-    // Validate source is "./"
-    if (plugin.source !== './') {
-      warn(`${MARKETPLACE_FILE}: Plugin "${plugin.name}" has source "${plugin.source}" instead of "./"`);
+    // Validate source is "./plugins/<plugin-name>"
+    const expectedSource = `./${PLUGINS_DIR}/${plugin.name}`;
+    if (plugin.source !== expectedSource) {
+      error(`${MARKETPLACE_FILE}: Plugin "${plugin.name}" has invalid source "${plugin.source}" (expected "${expectedSource}")`);
+    } else {
+      const sourcePath = path.join(process.cwd(), plugin.source);
+      if (!fs.existsSync(sourcePath)) {
+        warn(`${MARKETPLACE_FILE}: Plugin "${plugin.name}" source path "${plugin.source}" does not exist`);
+      }
     }
 
     // Validate skills array exists
@@ -158,6 +173,9 @@ function validateMarketplace(skillsInFolder) {
     for (const skillPath of plugin.skills) {
       const match = skillPath.match(/\.\/skills\/(.+)/);
       if (match) {
+        if (skillsInMarketplace.has(match[1])) {
+          error(`${MARKETPLACE_FILE}: Skill "${match[1]}" listed in multiple plugins`);
+        }
         skillsInMarketplace.add(match[1]);
       } else {
         warn(`${MARKETPLACE_FILE}: Invalid skill path "${skillPath}" in plugin "${plugin.name}"`);

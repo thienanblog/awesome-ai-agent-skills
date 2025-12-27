@@ -7,6 +7,9 @@ import { parse as parseYaml } from 'yaml';
 const SKILLS_DIR = 'skills';
 const MARKETPLACE_FILE = '.claude-plugin/marketplace.json';
 const README_FILE = 'README.md';
+const PLUGINS_DIR = 'plugins';
+const PLUGIN_GROUPS_FILE = 'plugin-groups.json';
+const PLUGIN_SUFFIX = '-skills';
 
 function log(message) {
   console.log(message);
@@ -14,6 +17,78 @@ function log(message) {
 
 function success(message) {
   console.log(`✅ ${message}`);
+}
+
+function loadPluginGroups(skills) {
+  if (!fs.existsSync(PLUGIN_GROUPS_FILE)) {
+    log(`❌ Missing ${PLUGIN_GROUPS_FILE}. Add plugin groups to continue.`);
+    process.exit(1);
+  }
+
+  let config;
+  try {
+    config = JSON.parse(fs.readFileSync(PLUGIN_GROUPS_FILE, 'utf-8'));
+  } catch (e) {
+    log(`❌ ${PLUGIN_GROUPS_FILE}: Invalid JSON - ${e.message}`);
+    process.exit(1);
+  }
+
+  if (!config || !Array.isArray(config.plugins)) {
+    log(`❌ ${PLUGIN_GROUPS_FILE}: Missing "plugins" array`);
+    process.exit(1);
+  }
+
+  const skillMap = new Map(skills.map(skill => [skill.folderName, skill]));
+  const assignedSkills = new Set();
+  let hasErrors = false;
+
+  for (const plugin of config.plugins) {
+    if (!plugin.name) {
+      log(`❌ ${PLUGIN_GROUPS_FILE}: Plugin missing "name"`);
+      hasErrors = true;
+      continue;
+    }
+    if (!plugin.description) {
+      log(`❌ ${PLUGIN_GROUPS_FILE}: Plugin "${plugin.name}" missing "description"`);
+      hasErrors = true;
+    }
+    if (!Array.isArray(plugin.skills) || plugin.skills.length === 0) {
+      log(`❌ ${PLUGIN_GROUPS_FILE}: Plugin "${plugin.name}" missing "skills" array`);
+      hasErrors = true;
+      continue;
+    }
+    if (!plugin.name.endsWith(PLUGIN_SUFFIX)) {
+      log(`❌ ${PLUGIN_GROUPS_FILE}: Plugin "${plugin.name}" must end with "${PLUGIN_SUFFIX}"`);
+      hasErrors = true;
+    }
+
+    for (const skillName of plugin.skills) {
+      if (!skillMap.has(skillName)) {
+        log(`❌ ${PLUGIN_GROUPS_FILE}: Plugin "${plugin.name}" references unknown skill "${skillName}"`);
+        hasErrors = true;
+        continue;
+      }
+      if (assignedSkills.has(skillName)) {
+        log(`❌ ${PLUGIN_GROUPS_FILE}: Skill "${skillName}" listed in multiple plugins`);
+        hasErrors = true;
+        continue;
+      }
+      assignedSkills.add(skillName);
+    }
+  }
+
+  for (const skill of skills) {
+    if (!assignedSkills.has(skill.folderName)) {
+      log(`❌ ${PLUGIN_GROUPS_FILE}: Skill "${skill.folderName}" not assigned to any plugin`);
+      hasErrors = true;
+    }
+  }
+
+  if (hasErrors) {
+    process.exit(1);
+  }
+
+  return config.plugins;
 }
 
 /**
@@ -74,7 +149,7 @@ function getSkills() {
  * Update marketplace.json with skills
  * Each skill becomes its own plugin so users can install them individually
  */
-function updateMarketplace(skills) {
+function updateMarketplace(skills, pluginGroups) {
   let marketplace = {
     name: 'awesome-ai-agent-skills',
     owner: {
@@ -106,19 +181,19 @@ function updateMarketplace(skills) {
     marketplace.plugins?.map(p => p.name) || []
   );
 
-  // Build one plugin per skill (so users can install individually)
-  // Each plugin has source: "./" and skills array with one skill
-  marketplace.plugins = skills.map(skill => ({
-    name: skill.name,
-    description: skill.description,
-    source: './',
+  // Build one plugin per domain group
+  // Each plugin has source: "./plugins/<plugin>" and skills array with matching skill paths
+  marketplace.plugins = pluginGroups.map(plugin => ({
+    name: plugin.name,
+    description: plugin.description,
+    source: `./${PLUGINS_DIR}/${plugin.name}`,
     strict: false,
-    skills: [`./skills/${skill.folderName}`]
+    skills: plugin.skills.map(skillName => `./skills/${skillName}`)
   }));
 
   // Determine changes
-  const newPluginNames = new Set(skills.map(s => s.name));
-  const added = skills.filter(s => !existingPluginNames.has(s.name)).map(s => s.name);
+  const newPluginNames = new Set(pluginGroups.map(p => p.name));
+  const added = pluginGroups.filter(p => !existingPluginNames.has(p.name)).map(p => p.name);
   const removed = [...existingPluginNames].filter(name => !newPluginNames.has(name));
 
   // Write marketplace.json
@@ -128,6 +203,43 @@ function updateMarketplace(skills) {
   );
 
   return { added, removed };
+}
+
+/**
+ * Sync each skill into its own plugin directory
+ */
+function syncPluginDirectories(skills, pluginGroups) {
+  const expectedPluginDirs = new Set(pluginGroups.map(plugin => plugin.name));
+
+  if (!fs.existsSync(PLUGINS_DIR)) {
+    fs.mkdirSync(PLUGINS_DIR, { recursive: true });
+  } else {
+    const existingDirs = fs.readdirSync(PLUGINS_DIR, { withFileTypes: true })
+      .filter(dirent => dirent.isDirectory())
+      .map(dirent => dirent.name);
+
+    for (const dirName of existingDirs) {
+      if (!expectedPluginDirs.has(dirName)) {
+        fs.rmSync(path.join(PLUGINS_DIR, dirName), { recursive: true, force: true });
+      }
+    }
+  }
+
+  for (const plugin of pluginGroups) {
+    const pluginRoot = path.join(PLUGINS_DIR, plugin.name);
+    if (fs.existsSync(pluginRoot)) {
+      fs.rmSync(pluginRoot, { recursive: true, force: true });
+    }
+
+    const pluginSkillsRoot = path.join(pluginRoot, 'skills');
+    fs.mkdirSync(pluginSkillsRoot, { recursive: true });
+
+    for (const skillName of plugin.skills) {
+      const sourceSkillPath = path.join(SKILLS_DIR, skillName);
+      const pluginSkillPath = path.join(pluginSkillsRoot, skillName);
+      fs.cpSync(sourceSkillPath, pluginSkillPath, { recursive: true });
+    }
+  }
 }
 
 /**
@@ -184,9 +296,17 @@ function main() {
   log(`Found ${skills.length} valid skill(s)`);
   log('');
 
+  // Load plugin groups
+  const pluginGroups = loadPluginGroups(skills);
+
+  // Sync plugin directories so each plugin ships only its skill
+  log('📦 Syncing plugin directories...');
+  syncPluginDirectories(skills, pluginGroups);
+  log('');
+
   // Update marketplace.json
-  log('📦 Updating marketplace.json...');
-  const { added, removed } = updateMarketplace(skills);
+  log('🧩 Updating marketplace.json...');
+  const { added, removed } = updateMarketplace(skills, pluginGroups);
 
   if (added.length > 0) {
     success(`Added: ${added.join(', ')}`);

@@ -94,7 +94,8 @@ This checks:
 - Each skill folder has a `SKILL.md` file
 - `SKILL.md` has valid YAML frontmatter with `name` and `description`
 - All skills are listed in a plugin's `skills` array in `marketplace.json`
-- Each plugin has `source: "./"` and a valid `skills` array
+- Each plugin has `source: "./plugins/<plugin-name>"` and a valid `skills` array
+- Each plugin name ends with `-skills`
 
 ### Expected Output
 
@@ -135,10 +136,24 @@ npm run sync
 
 This will:
 - Scan all skills in `skills/` folder
-- Update `marketplace.json` with discovered skills
+- Update `marketplace.json` based on `plugin-groups.json`
+- Sync per-plugin bundles under `plugins/`
 - Update the skills table in `README.md`
 
 **Note:** The sync happens automatically on merge via GitHub Actions, so this step is optional.
+
+### Update Plugin Groups
+
+If you're adding a new skill or re-organizing skills by domain, update `plugin-groups.json` to assign each skill to a plugin and keep plugin names ending in `-skills`.
+
+Domain guidance:
+- Group skills by audience or workflow domain, not by implementation details.
+- Keep plugins cohesive; if a skill feels unrelated, create a new plugin instead of expanding the scope.
+- Prefer stable, future-proof names (avoid temporary project names).
+- Ensure each skill appears in exactly one plugin.
+- Keep plugin descriptions short, clear, and action-focused.
+
+After updating `plugin-groups.json`, update the "Plugin Groups" table in `README.md` to match.
 
 ## Submitting Your Skill
 
