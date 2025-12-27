@@ -2,24 +2,24 @@
   "name": "awesome-ai-agent-skills",
   "owner": {
     "name": "Ân Vũ",
-    "email": "8651688+thienanblog@users.noreply.github.com",
-    "github": "thienanblog"
+    "email": "8651688+thienanblog@users.noreply.github.com"
   },
   "metadata": {
     "description": "Community-shared AI agent skills for Claude Code",
-    "version": "1.0.0",
-    "repository": "https://github.com/thienanblog/awesome-ai-agent-skills"
+    "version": "1.0.0"
   },
   "plugins": [
     {
-      "name": "community-skills",
-      "description": "Collection of community-shared skills for AI agents",
-      "source": "./",
-      "strict": false,
-      "skills": [
-        "./skills/documentation-guidelines",
-        "./skills/laravel-11-12-app-guidelines"
-      ]
+      "name": "documentation-guidelines",
+      "source": "./skills/documentation-guidelines",
+      "description": "Write or update backend feature documentation following DOCUMENTATION_GUIDELINES.md. Use for module docs, API contracts, and backend documentation with architecture, endpoints, payloads, Mermaid diagrams, and seeding instructions.",
+      "strict": false
+    },
+    {
+      "name": "laravel-11-12-app-guidelines",
+      "source": "./skills/laravel-11-12-app-guidelines",
+      "description": "Guidelines for Laravel 11/12 applications across common stacks (API-only or full-stack), including Docker Compose/Sail, Inertia + React, Livewire, Vue, Blade, Tailwind v4, Fortify, Wayfinder, PHPUnit, Pint, and Laravel Boost MCP tools.",
+      "strict": false
     }
   ]
 }

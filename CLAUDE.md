@@ -1,10 +1,10 @@
 # AI Agent Instructions
 
-This repository contains community-shared skills for Claude Code and other AI agents.
+This repository contains community-shared skills for AI coding agents (Claude Code, OpenAI Codex, GitHub Copilot, and others).
 
 ## Repository Purpose
 
-This is a skill library repository. Skills are self-contained modules that teach AI agents specific workflows, guidelines, or capabilities.
+This is a universal skill library. Skills are self-contained instruction sets that teach AI agents specific workflows, guidelines, or capabilities. The format is designed to work across different AI tools.
 
 ## Skill Structure
 
@@ -40,11 +40,14 @@ For each `SKILL.md`, extract the `name` and `description` from the YAML frontmat
 
 ### 3. Update marketplace.json
 Update `.claude-plugin/marketplace.json`:
-- Keep the existing `owner` and `metadata` sections
-- Update the `skills` array in `plugins[0]` to include all discovered skills
-- Use the format `./skills/skill-name` for each skill path
+- Keep the existing `name`, `owner`, and `metadata` sections
+- Update the `plugins` array - each skill is a separate plugin entry
+- Each plugin entry requires: `name`, `source`, `description`, and `strict: false`
 
-### 4. Report Changes
+### 4. Update README.md
+Update the "Available Skills" table in `README.md` to match the current skills.
+
+### 5. Report Changes
 Report to the user:
 - New skills added
 - Skills removed (if any were deleted)
@@ -52,17 +55,37 @@ Report to the user:
 
 ### Example Update
 
-If a new skill `api-testing` is added to `skills/api-testing/SKILL.md`, update:
+If a new skill `api-testing` is added to `skills/api-testing/SKILL.md`, add a new plugin entry:
 
 ```json
 {
+  "name": "awesome-ai-agent-skills",
+  "owner": {
+    "name": "Ân Vũ",
+    "email": "8651688+thienanblog@users.noreply.github.com"
+  },
+  "metadata": {
+    "description": "Community-shared AI agent skills for Claude Code",
+    "version": "1.0.0"
+  },
   "plugins": [
     {
-      "skills": [
-        "./skills/documentation-guidelines",
-        "./skills/laravel-11-12-app-guidelines",
-        "./skills/api-testing"  // New skill added
-      ]
+      "name": "documentation-guidelines",
+      "source": "./skills/documentation-guidelines",
+      "description": "Backend feature documentation following DOCUMENTATION_GUIDELINES.md",
+      "strict": false
+    },
+    {
+      "name": "laravel-11-12-app-guidelines",
+      "source": "./skills/laravel-11-12-app-guidelines",
+      "description": "Laravel 11/12 application development guidelines",
+      "strict": false
+    },
+    {
+      "name": "api-testing",
+      "source": "./skills/api-testing",
+      "description": "Description from SKILL.md frontmatter",
+      "strict": false
     }
   ]
 }
@@ -84,3 +107,4 @@ When reviewing or creating skills:
 3. **Reference Documentation**: Provide detailed references for complex topics
 4. **Consistent Naming**: Use kebab-case for folder and skill names
 5. **Complete Metadata**: Always include `name` and `description` in YAML frontmatter
+6. **Universal Compatibility**: Write instructions that work across different AI tools, avoid tool-specific syntax when possible
