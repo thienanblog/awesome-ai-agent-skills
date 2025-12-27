@@ -1,0 +1,25 @@
+{
+  "name": "awesome-ai-agent-skills",
+  "owner": {
+    "name": "Ân Vũ",
+    "email": "8651688+thienanblog@users.noreply.github.com",
+    "github": "thienanblog"
+  },
+  "metadata": {
+    "description": "Community-shared AI agent skills for Claude Code",
+    "version": "1.0.0",
+    "repository": "https://github.com/thienanblog/awesome-ai-agent-skills"
+  },
+  "plugins": [
+    {
+      "name": "community-skills",
+      "description": "Collection of community-shared skills for AI agents",
+      "source": "./",
+      "strict": false,
+      "skills": [
+        "./skills/documentation-guidelines",
+        "./skills/laravel-11-12-app-guidelines"
+      ]
+    }
+  ]
+}
