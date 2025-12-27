@@ -10,13 +10,29 @@
   },
   "plugins": [
     {
-      "name": "community-skills",
-      "description": "Collection of community-shared skills for AI coding agents including AGENTS.md generation, documentation guidelines, and development workflows",
+      "name": "agents-md-generator",
+      "description": "Generate or update CLAUDE.md/AGENTS.md files for AI coding agents through auto-scanning project files combined with interactive Q&A. Supports multiple tech stacks, development environments, and preserves customizations when updating.",
       "source": "./",
       "strict": false,
       "skills": [
-        "./skills/agents-md-generator",
-        "./skills/documentation-guidelines",
+        "./skills/agents-md-generator"
+      ]
+    },
+    {
+      "name": "documentation-guidelines",
+      "description": "Write or update backend feature documentation that follows a repo's DOCUMENTATION_GUIDELINES.md (or equivalent) across any project. Use when asked to create/update module docs, API contracts, or backend documentation that must include architecture, endpoints, payloads, Mermaid diagrams, and seeding instructions.",
+      "source": "./",
+      "strict": false,
+      "skills": [
+        "./skills/documentation-guidelines"
+      ]
+    },
+    {
+      "name": "laravel-11-12-app-guidelines",
+      "description": "Guidelines and workflow for working on Laravel 11 or Laravel 12 applications across common stacks (API-only or full-stack), including optional Docker Compose/Sail, Inertia + React, Livewire, Vue, Blade, Tailwind v4, Fortify, Wayfinder, PHPUnit, Pint, and Laravel Boost MCP tools. Use when implementing features, fixing bugs, or making UI/backend changes while following project-specific instructions (AGENTS.md, docs/).",
+      "source": "./",
+      "strict": false,
+      "skills": [
         "./skills/laravel-11-12-app-guidelines"
       ]
     }

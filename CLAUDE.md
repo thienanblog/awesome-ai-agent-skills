@@ -49,9 +49,9 @@ For each `SKILL.md`, extract the `name` and `description` from the YAML frontmat
 ### 3. Update marketplace.json
 Update `.claude-plugin/marketplace.json`:
 - Keep the existing `name`, `owner`, and `metadata` sections
-- Update the `plugins` array - use a single plugin called `community-skills` that groups all skills
-- The plugin requires: `name`, `description`, `source: "./"`, `strict: false`, and a `skills` array
-- The `skills` array lists all skill paths (e.g., `./skills/skill-name`)
+- Update the `plugins` array - each skill becomes its own plugin (so users can install individually)
+- Each plugin requires: `name`, `description`, `source: "./"`, `strict: false`, and a `skills` array
+- The `skills` array contains the skill path (e.g., `["./skills/skill-name"]`)
 
 ### 4. Update README.md
 Update the "Available Skills" table in `README.md` to match the current skills.
@@ -64,7 +64,7 @@ Report to the user:
 
 ### Example Update
 
-If a new skill `api-testing` is added to `skills/api-testing/SKILL.md`, add it to the `skills` array:
+If a new skill `api-testing` is added to `skills/api-testing/SKILL.md`, add a new plugin entry:
 
 ```json
 {
@@ -79,16 +79,25 @@ If a new skill `api-testing` is added to `skills/api-testing/SKILL.md`, add it t
   },
   "plugins": [
     {
-      "name": "community-skills",
-      "description": "Collection of community-shared skills for AI coding agents",
+      "name": "agents-md-generator",
+      "description": "Generate or update CLAUDE.md/AGENTS.md files for AI coding agents",
       "source": "./",
       "strict": false,
-      "skills": [
-        "./skills/agents-md-generator",
-        "./skills/documentation-guidelines",
-        "./skills/laravel-11-12-app-guidelines",
-        "./skills/api-testing"
-      ]
+      "skills": ["./skills/agents-md-generator"]
+    },
+    {
+      "name": "documentation-guidelines",
+      "description": "Backend feature documentation following DOCUMENTATION_GUIDELINES.md",
+      "source": "./",
+      "strict": false,
+      "skills": ["./skills/documentation-guidelines"]
+    },
+    {
+      "name": "api-testing",
+      "description": "Description from SKILL.md frontmatter",
+      "source": "./",
+      "strict": false,
+      "skills": ["./skills/api-testing"]
     }
   ]
 }

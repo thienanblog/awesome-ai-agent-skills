@@ -72,6 +72,7 @@ function getSkills() {
 
 /**
  * Update marketplace.json with skills
+ * Each skill becomes its own plugin so users can install them individually
  */
 function updateMarketplace(skills) {
   let marketplace = {
@@ -100,31 +101,24 @@ function updateMarketplace(skills) {
     }
   }
 
-  // Get existing skills from the community-skills plugin for comparison
-  const existingSkillPaths = new Set();
-  const existingPlugin = marketplace.plugins?.find(p => p.name === 'community-skills');
-  if (existingPlugin?.skills) {
-    existingPlugin.skills.forEach(s => existingSkillPaths.add(s));
-  }
+  // Get existing plugin names for comparison
+  const existingPluginNames = new Set(
+    marketplace.plugins?.map(p => p.name) || []
+  );
 
-  // Build skills array with paths
-  const skillPaths = skills.map(skill => `./skills/${skill.folderName}`);
-
-  // Build plugin with correct structure (single plugin with skills array)
-  marketplace.plugins = [
-    {
-      name: 'community-skills',
-      description: 'Collection of community-shared skills for AI coding agents including AGENTS.md generation, documentation guidelines, and development workflows',
-      source: './',
-      strict: false,
-      skills: skillPaths
-    }
-  ];
+  // Build one plugin per skill (so users can install individually)
+  marketplace.plugins = skills.map(skill => ({
+    name: skill.name,
+    description: skill.description,
+    source: './',
+    strict: false,
+    skills: [`./skills/${skill.folderName}`]
+  }));
 
   // Determine changes
-  const newSkillPaths = new Set(skillPaths);
-  const added = skillPaths.filter(s => !existingSkillPaths.has(s));
-  const removed = [...existingSkillPaths].filter(s => !newSkillPaths.has(s));
+  const newPluginNames = new Set(skills.map(s => s.name));
+  const added = skills.filter(s => !existingPluginNames.has(s.name)).map(s => s.name);
+  const removed = [...existingPluginNames].filter(name => !newPluginNames.has(name));
 
   // Write marketplace.json
   fs.writeFileSync(
