@@ -10,6 +10,12 @@
   },
   "plugins": [
     {
+      "name": "agents-md-generator",
+      "source": "./skills/agents-md-generator",
+      "description": "Generate or update CLAUDE.md/AGENTS.md files for AI coding agents through auto-scanning project files combined with interactive Q&A. Supports multiple tech stacks, development environments, and preserves customizations when updating.",
+      "strict": false
+    },
+    {
       "name": "documentation-guidelines",
       "source": "./skills/documentation-guidelines",
       "description": "Write or update backend feature documentation that follows a repo's DOCUMENTATION_GUIDELINES.md (or equivalent) across any project. Use when asked to create/update module docs, API contracts, or backend documentation that must include architecture, endpoints, payloads, Mermaid diagrams, and seeding instructions.",
