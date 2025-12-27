@@ -131,7 +131,7 @@ function validateMarketplace(skillsInFolder) {
     return marketplace;
   }
 
-  // Get skills listed in marketplace
+  // Get skills listed in marketplace from the skills array
   const skillsInMarketplace = new Set();
   for (const plugin of marketplace.plugins) {
     if (!plugin.name) {
@@ -143,17 +143,32 @@ function validateMarketplace(skillsInFolder) {
       continue;
     }
 
-    // Extract skill name from source path
-    const match = plugin.source.match(/\.\/skills\/(.+)/);
-    if (match) {
-      skillsInMarketplace.add(match[1]);
+    // Validate plugin has correct structure (source should be "./")
+    if (plugin.source !== './') {
+      warn(`${MARKETPLACE_FILE}: Plugin "${plugin.name}" has source "${plugin.source}" instead of "./"`);
+    }
+
+    // Validate skills array exists
+    if (!Array.isArray(plugin.skills)) {
+      error(`${MARKETPLACE_FILE}: Plugin "${plugin.name}" missing "skills" array`);
+      continue;
+    }
+
+    // Extract skill names from skills array
+    for (const skillPath of plugin.skills) {
+      const match = skillPath.match(/\.\/skills\/(.+)/);
+      if (match) {
+        skillsInMarketplace.add(match[1]);
+      } else {
+        warn(`${MARKETPLACE_FILE}: Invalid skill path "${skillPath}" in plugin "${plugin.name}"`);
+      }
     }
   }
 
   // Check for skills in folder but not in marketplace
   for (const skill of skillsInFolder) {
     if (!skillsInMarketplace.has(skill)) {
-      error(`Skill "${skill}" exists in folder but not in marketplace.json`);
+      error(`Skill "${skill}" exists in folder but not in marketplace.json skills array`);
     }
   }
 

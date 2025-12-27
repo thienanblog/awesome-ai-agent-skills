@@ -93,8 +93,8 @@ npm run validate
 This checks:
 - Each skill folder has a `SKILL.md` file
 - `SKILL.md` has valid YAML frontmatter with `name` and `description`
-- All skills are listed in `marketplace.json`
-- `marketplace.json` is valid JSON
+- All skills are listed in `marketplace.json` `skills` array
+- `marketplace.json` has correct structure (single plugin with `skills` array)
 
 ### Expected Output
 
@@ -122,7 +122,8 @@ Fix the reported errors before pushing. Common issues:
 | No valid YAML frontmatter | Add `---\nname: ...\ndescription: ...\n---` at top of SKILL.md |
 | Missing "name" in frontmatter | Add `name: your-skill-name` to frontmatter |
 | Missing "description" in frontmatter | Add `description: ...` to frontmatter |
-| Skill not in marketplace.json | Run `npm run sync` to auto-add it |
+| Skill not in marketplace.json skills array | Run `npm run sync` to auto-add it |
+| Missing "skills" array | Run `npm run sync` to fix marketplace.json structure |
 
 ### Sync Marketplace (Optional)
 

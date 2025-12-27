@@ -49,8 +49,9 @@ For each `SKILL.md`, extract the `name` and `description` from the YAML frontmat
 ### 3. Update marketplace.json
 Update `.claude-plugin/marketplace.json`:
 - Keep the existing `name`, `owner`, and `metadata` sections
-- Update the `plugins` array - each skill is a separate plugin entry
-- Each plugin entry requires: `name`, `source`, `description`, and `strict: false`
+- Update the `plugins` array - use a single plugin called `community-skills` that groups all skills
+- The plugin requires: `name`, `description`, `source: "./"`, `strict: false`, and a `skills` array
+- The `skills` array lists all skill paths (e.g., `./skills/skill-name`)
 
 ### 4. Update README.md
 Update the "Available Skills" table in `README.md` to match the current skills.
@@ -63,7 +64,7 @@ Report to the user:
 
 ### Example Update
 
-If a new skill `api-testing` is added to `skills/api-testing/SKILL.md`, add a new plugin entry:
+If a new skill `api-testing` is added to `skills/api-testing/SKILL.md`, add it to the `skills` array:
 
 ```json
 {
@@ -78,22 +79,16 @@ If a new skill `api-testing` is added to `skills/api-testing/SKILL.md`, add a ne
   },
   "plugins": [
     {
-      "name": "documentation-guidelines",
-      "source": "./skills/documentation-guidelines",
-      "description": "Backend feature documentation following DOCUMENTATION_GUIDELINES.md",
-      "strict": false
-    },
-    {
-      "name": "laravel-11-12-app-guidelines",
-      "source": "./skills/laravel-11-12-app-guidelines",
-      "description": "Laravel 11/12 application development guidelines",
-      "strict": false
-    },
-    {
-      "name": "api-testing",
-      "source": "./skills/api-testing",
-      "description": "Description from SKILL.md frontmatter",
-      "strict": false
+      "name": "community-skills",
+      "description": "Collection of community-shared skills for AI coding agents",
+      "source": "./",
+      "strict": false,
+      "skills": [
+        "./skills/agents-md-generator",
+        "./skills/documentation-guidelines",
+        "./skills/laravel-11-12-app-guidelines",
+        "./skills/api-testing"
+      ]
     }
   ]
 }
@@ -101,10 +96,37 @@ If a new skill `api-testing` is added to `skills/api-testing/SKILL.md`, add a ne
 
 ## Current Skills
 
-| Skill | Path | Description |
-|-------|------|-------------|
-| documentation-guidelines | `./skills/documentation-guidelines` | Backend feature documentation following DOCUMENTATION_GUIDELINES.md |
-| laravel-11-12-app-guidelines | `./skills/laravel-11-12-app-guidelines` | Laravel 11/12 application development guidelines |
+| Skill                        | Path                                   | Description                                                        |
+|------------------------------|----------------------------------------|--------------------------------------------------------------------|
+| agents-md-generator          | `./skills/agents-md-generator`         | Generate or update CLAUDE.md/AGENTS.md files for AI coding agents |
+| documentation-guidelines     | `./skills/documentation-guidelines`    | Backend feature documentation following DOCUMENTATION_GUIDELINES.md |
+| laravel-11-12-app-guidelines | `./skills/laravel-11-12-app-guidelines`| Laravel 11/12 application development guidelines                   |
+
+## GitHub CI Validation
+
+This repository uses GitHub Actions for automated validation and syncing:
+
+### On Pull Requests (validate-pr.yml)
+- Runs `npm run validate` to check:
+  - Each skill folder has a valid `SKILL.md`
+  - YAML frontmatter contains required `name` and `description` fields
+  - All skills in `skills/` are listed in `marketplace.json`
+  - The `marketplace.json` has correct structure with `skills` array
+- If validation fails, a comment is added to the PR with common issues
+
+### On Merge to Main (sync-marketplace.yml)
+- Automatically runs `npm run sync` to:
+  - Scan all skills in `skills/` folder
+  - Update `marketplace.json` with the `skills` array
+  - Update the skills table in `README.md`
+  - Commit and push changes if any
+
+### Local Validation Commands
+Before pushing changes, always run:
+```bash
+npm run validate   # Check skill structure and marketplace.json
+npm run sync       # Update marketplace.json and README.md (optional, auto-runs on merge)
+```
 
 ## Quality Guidelines for New Skills
 
