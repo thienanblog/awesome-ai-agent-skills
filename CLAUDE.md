@@ -51,7 +51,7 @@ Update `.claude-plugin/marketplace.json`:
 - Keep the existing `name`, `owner`, and `metadata` sections
 - Update the `plugins` array - each skill becomes its own plugin (so users can install individually)
 - Each plugin requires: `name`, `description`, `source: "./"`, `strict: false`, and a `skills` array
-- The `skills` array contains the skill path (e.g., `["./skills/skill-name"]`)
+- The `skills` array lists the skill paths for that plugin
 
 ### 4. Update README.md
 Update the "Available Skills" table in `README.md` to match the current skills.
@@ -103,6 +103,8 @@ If a new skill `api-testing` is added to `skills/api-testing/SKILL.md`, add a ne
 }
 ```
 
+**Note:** Contributors can group related skills in one plugin (like Anthropic's `document-skills` with xlsx, docx, pptx, pdf). Just add multiple paths to the `skills` array.
+
 ## Current Skills
 
 | Skill                        | Path                                   | Description                                                        |
@@ -119,14 +121,14 @@ This repository uses GitHub Actions for automated validation and syncing:
 - Runs `npm run validate` to check:
   - Each skill folder has a valid `SKILL.md`
   - YAML frontmatter contains required `name` and `description` fields
-  - All skills in `skills/` are listed in `marketplace.json`
-  - The `marketplace.json` has correct structure with `skills` array
+  - All skills in `skills/` are listed in a plugin's `skills` array
+  - Each plugin has `source: "./"` and a valid `skills` array
 - If validation fails, a comment is added to the PR with common issues
 
 ### On Merge to Main (sync-marketplace.yml)
 - Automatically runs `npm run sync` to:
   - Scan all skills in `skills/` folder
-  - Update `marketplace.json` with the `skills` array
+  - Update `marketplace.json` with one plugin per skill
   - Update the skills table in `README.md`
   - Commit and push changes if any
 

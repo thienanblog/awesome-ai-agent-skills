@@ -38,5 +38,5 @@ jobs:
               issue_number: context.issue.number,
               owner: context.repo.owner,
               repo: context.repo.repo,
-              body: '❌ **Skill validation failed!**\n\nPlease check the workflow logs for details and fix the issues before merging.\n\nCommon issues:\n- Missing `SKILL.md` file in skill folder\n- Missing `name` or `description` in SKILL.md frontmatter\n- Skill not in `marketplace.json` skills array (run `npm run sync` locally)\n- Invalid marketplace.json structure (must use `skills` array format)'
+              body: '❌ **Skill validation failed!**\n\nPlease check the workflow logs for details and fix the issues before merging.\n\nCommon issues:\n- Missing `SKILL.md` file in skill folder\n- Missing `name` or `description` in SKILL.md frontmatter\n- Skill not in any plugin\'s `skills` array (run `npm run sync` locally)\n- Plugin missing `skills` array or has wrong `source` (should be `"./"`)'
             })

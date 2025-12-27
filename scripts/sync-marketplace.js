@@ -107,6 +107,7 @@ function updateMarketplace(skills) {
   );
 
   // Build one plugin per skill (so users can install individually)
+  // Each plugin has source: "./" and skills array with one skill
   marketplace.plugins = skills.map(skill => ({
     name: skill.name,
     description: skill.description,

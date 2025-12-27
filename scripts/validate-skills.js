@@ -131,7 +131,7 @@ function validateMarketplace(skillsInFolder) {
     return marketplace;
   }
 
-  // Get skills listed in marketplace from the skills array
+  // Get skills listed in marketplace from the skills arrays
   const skillsInMarketplace = new Set();
   for (const plugin of marketplace.plugins) {
     if (!plugin.name) {
@@ -143,7 +143,7 @@ function validateMarketplace(skillsInFolder) {
       continue;
     }
 
-    // Validate plugin has correct structure (source should be "./")
+    // Validate source is "./"
     if (plugin.source !== './') {
       warn(`${MARKETPLACE_FILE}: Plugin "${plugin.name}" has source "${plugin.source}" instead of "./"`);
     }
@@ -168,7 +168,7 @@ function validateMarketplace(skillsInFolder) {
   // Check for skills in folder but not in marketplace
   for (const skill of skillsInFolder) {
     if (!skillsInMarketplace.has(skill)) {
-      error(`Skill "${skill}" exists in folder but not in marketplace.json skills array`);
+      error(`Skill "${skill}" exists in folder but not in any plugin's skills array`);
     }
   }
 
