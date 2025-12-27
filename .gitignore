@@ -3,3 +3,6 @@ __pycache__/
 .idea/
 .vscode/
 node_modules/
+
+# Claude Code local settings (may contain sensitive data)
+.claude/settings.local.json
