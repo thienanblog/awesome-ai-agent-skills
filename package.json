@@ -1,0 +1,14 @@
+{
+  "name": "awesome-ai-agent-skills",
+  "version": "1.0.0",
+  "description": "Community-shared AI agent skills for Claude Code and other AI tools",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "validate": "node scripts/validate-skills.js",
+    "sync": "node scripts/sync-marketplace.js"
+  },
+  "devDependencies": {
+    "yaml": "^2.3.4"
+  }
+}

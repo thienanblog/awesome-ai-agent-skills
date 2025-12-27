@@ -49,52 +49,34 @@ You can also copy individual skill instructions directly into your AI agent's co
 
 ## Available Skills
 
+<!-- SKILLS_TABLE_START -->
 | Skill | Description |
 |-------|-------------|
-| [documentation-guidelines](./skills/documentation-guidelines) | Write or update backend feature documentation following DOCUMENTATION_GUIDELINES.md. Use for module docs, API contracts, and backend documentation with architecture, endpoints, payloads, Mermaid diagrams, and seeding instructions. |
-| [laravel-11-12-app-guidelines](./skills/laravel-11-12-app-guidelines) | Guidelines for Laravel 11/12 applications across common stacks (API-only or full-stack), including Docker Compose/Sail, Inertia + React, Livewire, Vue, Blade, Tailwind v4, Fortify, Wayfinder, PHPUnit, Pint, and Laravel Boost MCP tools. |
+| [documentation-guidelines](./skills/documentation-guidelines) | Write or update backend feature documentation that follows a repo's DOCUMENTATION_GUIDELINES.md (or equivalent) across any project. Use when asked to create/update module docs, API contracts, or backend documentation that must include architecture, endpoints, payloads, Mermaid diagrams, and seeding instructions. |
+| [laravel-11-12-app-guidelines](./skills/laravel-11-12-app-guidelines) | Guidelines and workflow for working on Laravel 11 or Laravel 12 applications across common stacks (API-only or full-stack), including optional Docker Compose/Sail, Inertia + React, Livewire, Vue, Blade, Tailwind v4, Fortify, Wayfinder, PHPUnit, Pint, and Laravel Boost MCP tools. Use when implementing features, fixing bugs, or making UI/backend changes while following project-specific instructions (AGENTS.md, docs/). |
+<!-- SKILLS_TABLE_END -->
 
 ## Contributing
 
-### Adding a New Skill
+We welcome contributions! Here's a quick start:
 
 1. Fork this repository
-2. Create a new folder in `skills/` with your skill name (use kebab-case)
-3. Add a `SKILL.md` file with the required metadata header:
+2. Create a skill folder: `skills/your-skill-name/`
+3. Add a `SKILL.md` with metadata:
    ```yaml
    ---
    name: your-skill-name
-   description: Brief description of what the skill does and when to use it.
+   description: What the skill does and when to use it.
    ---
    ```
-4. Add reference documentation in a `references/` subfolder if needed
+4. **Validate locally before pushing:**
+   ```bash
+   npm install
+   npm run validate
+   ```
 5. Submit a pull request
-6. Maintainer will scan and update the marketplace
 
-### Skill Structure
-
-```
-skills/
-  your-skill-name/
-    SKILL.md              # Required: Skill definition with metadata
-    references/           # Optional: Reference documentation
-      your-reference.md
-    assets/               # Optional: Images, templates, etc.
-    scripts/              # Optional: Helper scripts
-```
-
-### Skill Metadata Requirements
-
-The `SKILL.md` must include a YAML frontmatter with:
-- `name`: Skill identifier (should match folder name)
-- `description`: Clear description of what the skill does and when to use it
-
-### Quality Guidelines
-
-- **Clear Purpose**: Solve a specific, well-defined problem
-- **Actionable Instructions**: Include step-by-step workflows
-- **Reference Documentation**: Provide detailed references for complex topics
-- **Universal Compatibility**: Write instructions that work across different AI tools
+See **[CONTRIBUTING.md](./CONTRIBUTING.md)** for detailed guidelines, validation instructions, and troubleshooting.
 
 ## For AI Agents
 

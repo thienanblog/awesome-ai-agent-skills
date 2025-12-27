@@ -12,13 +12,13 @@
     {
       "name": "documentation-guidelines",
       "source": "./skills/documentation-guidelines",
-      "description": "Write or update backend feature documentation following DOCUMENTATION_GUIDELINES.md. Use for module docs, API contracts, and backend documentation with architecture, endpoints, payloads, Mermaid diagrams, and seeding instructions.",
+      "description": "Write or update backend feature documentation that follows a repo's DOCUMENTATION_GUIDELINES.md (or equivalent) across any project. Use when asked to create/update module docs, API contracts, or backend documentation that must include architecture, endpoints, payloads, Mermaid diagrams, and seeding instructions.",
       "strict": false
     },
     {
       "name": "laravel-11-12-app-guidelines",
       "source": "./skills/laravel-11-12-app-guidelines",
-      "description": "Guidelines for Laravel 11/12 applications across common stacks (API-only or full-stack), including Docker Compose/Sail, Inertia + React, Livewire, Vue, Blade, Tailwind v4, Fortify, Wayfinder, PHPUnit, Pint, and Laravel Boost MCP tools.",
+      "description": "Guidelines and workflow for working on Laravel 11 or Laravel 12 applications across common stacks (API-only or full-stack), including optional Docker Compose/Sail, Inertia + React, Livewire, Vue, Blade, Tailwind v4, Fortify, Wayfinder, PHPUnit, Pint, and Laravel Boost MCP tools. Use when implementing features, fixing bugs, or making UI/backend changes while following project-specific instructions (AGENTS.md, docs/).",
       "strict": false
     }
   ]
