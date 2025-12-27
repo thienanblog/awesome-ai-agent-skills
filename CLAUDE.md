@@ -1,10 +1,18 @@
 # AI Agent Instructions
 
-This repository contains community-shared skills for AI coding agents (Claude Code, OpenAI Codex, GitHub Copilot, and others).
+This repository is a **community-shared skill library** for AI coding agents. It works with any AI coding tool that supports skills or custom instructions:
+
+- Claude Code (Anthropic)
+- OpenAI Codex
+- Cursor
+- Kilo Code
+- GitHub Copilot
+- Windsurf
+- And any other AI coding assistant
 
 ## Repository Purpose
 
-This is a universal skill library. Skills are self-contained instruction sets that teach AI agents specific workflows, guidelines, or capabilities. The format is designed to work across different AI tools.
+This is a universal, community-driven skill library. Skills are self-contained instruction sets that teach AI agents specific workflows, guidelines, or capabilities. The format is designed to be tool-agnostic and work across different AI platforms.
 
 ## Skill Structure
 
@@ -65,7 +73,7 @@ If a new skill `api-testing` is added to `skills/api-testing/SKILL.md`, add a ne
     "email": "8651688+thienanblog@users.noreply.github.com"
   },
   "metadata": {
-    "description": "Community-shared AI agent skills for Claude Code",
+    "description": "Community-shared skills for AI coding agents",
     "version": "1.0.0"
   },
   "plugins": [

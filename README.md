@@ -1,6 +1,6 @@
 # Awesome AI Agent Skills
 
-A community-shared collection of reusable skills for AI coding agents. Works with Claude Code, OpenAI Codex, and any AI tools that support the SKILL format.
+A community-shared collection of reusable skills for AI coding agents. Works with Claude Code, Cursor, Kilo Code, Windsurf, OpenAI Codex, and any AI tools that support skills or custom instructions.
 
 ## What are Skills?
 
@@ -87,7 +87,10 @@ See [CLAUDE.md](./CLAUDE.md) (or [AGENTS.md](./AGENTS.md)) for instructions on h
 This skill format is designed to be universal and works with:
 - Claude Code (Anthropic)
 - OpenAI Codex
-- GitHub Copilot (with custom instructions)
+- Cursor
+- Kilo Code
+- GitHub Copilot
+- Windsurf
 - Any AI coding assistant that supports custom instructions or skills
 
 ## License

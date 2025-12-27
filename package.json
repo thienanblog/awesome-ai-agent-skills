@@ -1,7 +1,7 @@
 {
   "name": "awesome-ai-agent-skills",
   "version": "1.0.0",
-  "description": "Community-shared AI agent skills for Claude Code and other AI tools",
+  "description": "Community-shared skills for AI coding agents",
   "private": true,
   "type": "module",
   "scripts": {
