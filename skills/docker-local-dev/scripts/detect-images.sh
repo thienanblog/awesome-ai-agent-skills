@@ -16,7 +16,7 @@ get_images_json() {
     local pattern=$1
     local first=true
 
-    docker images --format '{{.Repository}}:{{.Tag}}|{{.Size}}' 2>/dev/null | grep -E "^($pattern):" | while IFS='|' read -r repo_tag size; do
+    while IFS='|' read -r repo_tag size; do
         repo=$(echo "$repo_tag" | cut -d':' -f1)
         tag=$(echo "$repo_tag" | cut -d':' -f2)
 
@@ -26,7 +26,7 @@ get_images_json() {
             echo ","
         fi
         echo -n "    {\"repository\": \"$repo\", \"tag\": \"$tag\", \"size\": \"$size\"}"
-    done
+    done < <(docker images --format '{{.Repository}}:{{.Tag}}|{{.Size}}' 2>/dev/null | grep -E "^($pattern):" || true)
 }
 
 # Start JSON output
@@ -44,11 +44,7 @@ echo "  ],"
 
 # PHP images
 echo '  "php": ['
-PHP_OUTPUT=$(docker images --format '{{.Repository}}:{{.Tag}}|{{.Size}}' 2>/dev/null | grep -E "^php:" | while IFS='|' read -r repo_tag size; do
-    repo=$(echo "$repo_tag" | cut -d':' -f1)
-    tag=$(echo "$repo_tag" | cut -d':' -f2)
-    echo -n "    {\"repository\": \"$repo\", \"tag\": \"$tag\", \"size\": \"$size\"},"
-done | sed 's/,$//')
+PHP_OUTPUT=$(get_images_json "php")
 if [ -n "$PHP_OUTPUT" ]; then
     echo "$PHP_OUTPUT"
 fi
@@ -57,11 +53,7 @@ echo "  ],"
 
 # Node.js images
 echo '  "node": ['
-NODE_OUTPUT=$(docker images --format '{{.Repository}}:{{.Tag}}|{{.Size}}' 2>/dev/null | grep -E "^node:" | while IFS='|' read -r repo_tag size; do
-    repo=$(echo "$repo_tag" | cut -d':' -f1)
-    tag=$(echo "$repo_tag" | cut -d':' -f2)
-    echo -n "    {\"repository\": \"$repo\", \"tag\": \"$tag\", \"size\": \"$size\"},"
-done | sed 's/,$//')
+NODE_OUTPUT=$(get_images_json "node")
 if [ -n "$NODE_OUTPUT" ]; then
     echo "$NODE_OUTPUT"
 fi
@@ -70,11 +62,7 @@ echo "  ],"
 
 # Python images
 echo '  "python": ['
-PYTHON_OUTPUT=$(docker images --format '{{.Repository}}:{{.Tag}}|{{.Size}}' 2>/dev/null | grep -E "^python:" | while IFS='|' read -r repo_tag size; do
-    repo=$(echo "$repo_tag" | cut -d':' -f1)
-    tag=$(echo "$repo_tag" | cut -d':' -f2)
-    echo -n "    {\"repository\": \"$repo\", \"tag\": \"$tag\", \"size\": \"$size\"},"
-done | sed 's/,$//')
+PYTHON_OUTPUT=$(get_images_json "python")
 if [ -n "$PYTHON_OUTPUT" ]; then
     echo "$PYTHON_OUTPUT"
 fi
@@ -101,11 +89,7 @@ echo "  ],"
 
 # Nginx images
 echo '  "nginx": ['
-NGINX_OUTPUT=$(docker images --format '{{.Repository}}:{{.Tag}}|{{.Size}}' 2>/dev/null | grep -E "^nginx:" | while IFS='|' read -r repo_tag size; do
-    repo=$(echo "$repo_tag" | cut -d':' -f1)
-    tag=$(echo "$repo_tag" | cut -d':' -f2)
-    echo -n "    {\"repository\": \"$repo\", \"tag\": \"$tag\", \"size\": \"$size\"},"
-done | sed 's/,$//')
+NGINX_OUTPUT=$(get_images_json "nginx")
 if [ -n "$NGINX_OUTPUT" ]; then
     echo "$NGINX_OUTPUT"
 fi
