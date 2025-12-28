@@ -1,0 +1,80 @@
+# Laravel Docker Compose Template
+# Template markers: {{PROJECT_NAME}}, {{PHP_VERSION}}, {{DB_IMAGE}}, {{APP_PORT}}, {{DB_PORT}}
+
+version: '3.8'
+
+services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    volumes:
+      - ./:/var/www
+    depends_on:
+      - db
+      - redis
+    networks:
+      - {{PROJECT_NAME}}_network
+
+  nginx:
+    image: nginx:alpine
+    ports:
+      - "${APP_PORT:-8080}:80"
+    volumes:
+      - ./:/var/www
+      - ./docker/nginx/default.conf:/etc/nginx/conf.d/default.conf
+    depends_on:
+      - app
+    networks:
+      - {{PROJECT_NAME}}_network
+
+  db:
+    image: {{DB_IMAGE}}
+    environment:
+      MYSQL_ROOT_PASSWORD: ${DB_PASSWORD:-secret}
+      MYSQL_DATABASE: ${DB_DATABASE:-laravel}
+      MYSQL_USER: ${DB_USERNAME:-laravel}
+      MYSQL_PASSWORD: ${DB_PASSWORD:-secret}
+    volumes:
+      - db_data:/var/lib/mysql
+    ports:
+      - "${DB_PORT:-3306}:3306"
+    networks:
+      - {{PROJECT_NAME}}_network
+
+  redis:
+    image: redis:alpine
+    volumes:
+      - redis_data:/data
+    networks:
+      - {{PROJECT_NAME}}_network
+
+  mailpit:
+    image: axllent/mailpit:latest
+    ports:
+      - "${MAIL_PORT:-1025}:1025"
+      - "${MAIL_UI_PORT:-8025}:8025"
+    networks:
+      - {{PROJECT_NAME}}_network
+
+  # Uncomment for queue workers
+  # worker:
+  #   build:
+  #     context: .
+  #     dockerfile: Dockerfile
+  #   command: php artisan queue:work --sleep=3 --tries=3
+  #   volumes:
+  #     - ./:/var/www
+  #   depends_on:
+  #     - db
+  #     - redis
+  #   networks:
+  #     - {{PROJECT_NAME}}_network
+
+networks:
+  {{PROJECT_NAME}}_network:
+    driver: bridge
+
+volumes:
+  db_data:
+  redis_data:

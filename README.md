@@ -25,8 +25,11 @@ Skills are self-contained instruction sets that teach AI agents specific workflo
 # Install a plugin (can bundle multiple skills)
 /plugin install documentation-skills@awesome-ai-agent-skills
 
-# Install another plugin
+# Install Laravel guidelines
 /plugin install laravel-app-skills@awesome-ai-agent-skills
+
+# Install Docker local development skill
+/plugin install devops-skills@awesome-ai-agent-skills
 ```
 
 **Updating the marketplace**
@@ -53,6 +56,7 @@ You can also copy individual skill instructions directly into your AI agent's co
 | Skill | Description |
 |-------|-------------|
 | [agents-md-generator](./skills/agents-md-generator) | Generate or update CLAUDE.md/AGENTS.md files for AI coding agents through auto-scanning project files combined with interactive Q&A. Supports multiple tech stacks, development environments, and preserves customizations when updating. |
+| [docker-local-dev](./skills/docker-local-dev) | Generate Docker Compose and Dockerfile configurations for local development through interactive Q&A. Supports PHP/Laravel, WordPress, Drupal, Joomla, Node.js, and Python stacks with Nginx, Supervisor/PM2, databases, Redis, and email testing. Always asks clarifying questions before generating configurations. |
 | [documentation-guidelines](./skills/documentation-guidelines) | Write or update backend feature documentation that follows a repo's DOCUMENTATION_GUIDELINES.md (or equivalent) across any project. Use when asked to create/update module docs, API contracts, or backend documentation that must include architecture, endpoints, payloads, Mermaid diagrams, and seeding instructions. |
 | [laravel-11-12-app-guidelines](./skills/laravel-11-12-app-guidelines) | Guidelines and workflow for working on Laravel 11 or Laravel 12 applications across common stacks (API-only or full-stack), including optional Docker Compose/Sail, Inertia + React, Livewire, Vue, Blade, Tailwind v4, Fortify, Wayfinder, PHPUnit, Pint, and Laravel Boost MCP tools. Use when implementing features, fixing bugs, or making UI/backend changes while following project-specific instructions (AGENTS.md, docs/). |
 <!-- SKILLS_TABLE_END -->
@@ -65,6 +69,7 @@ Plugins bundle related skills so you can install by domain. The source of truth 
 |--------|-------------|--------|
 | [documentation-skills](./plugins/documentation-skills) | Skills for authoring AI agent instructions and backend documentation. | [agents-md-generator](./skills/agents-md-generator)<br>[documentation-guidelines](./skills/documentation-guidelines) |
 | [laravel-app-skills](./plugins/laravel-app-skills) | Guidelines for building Laravel 11/12 apps across common stacks and tooling. | [laravel-11-12-app-guidelines](./skills/laravel-11-12-app-guidelines) |
+| [devops-skills](./plugins/devops-skills) | Skills for Docker, CI/CD, and local development environment configuration. | [docker-local-dev](./skills/docker-local-dev) |
 
 ## Contributing
 
