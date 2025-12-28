@@ -12,10 +12,12 @@ RUN apt-get update && apt-get install -y \
     libpng-dev \
     libjpeg-dev \
     libfreetype6-dev \
+    libmagickwand-dev \
     libonig-dev \
     libxml2-dev \
     libzip-dev \
     libicu-dev \
+    mariadb-client \
     && rm -rf /var/lib/apt/lists/*
 
 # Configure and install PHP extensions
@@ -31,6 +33,9 @@ RUN docker-php-ext-configure gd --with-freetype --with-jpeg \
         intl \
         xml \
         opcache
+
+# Install ImageMagick
+RUN pecl install imagick && docker-php-ext-enable imagick
 
 # Install Redis extension
 RUN pecl install redis && docker-php-ext-enable redis

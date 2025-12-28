@@ -578,6 +578,10 @@ docker compose logs -f
 | Redis | localhost:6379 | - |
 | Mail UI | http://localhost:8025 | - |
 
+## Container Networking (Important)
+
+When the app runs inside Docker, `localhost` points to the app container. To connect to other services, use the Docker Compose service name (for example `db`, `redis`, `mailpit`) instead of `localhost`.
+
 ## Stack-Specific Commands
 
 ### Laravel
