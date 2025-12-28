@@ -25,8 +25,11 @@ Skills are self-contained instruction sets that teach AI agents specific workflo
 # Install a plugin (can bundle multiple skills)
 /plugin install documentation-skills@awesome-ai-agent-skills
 
-# Install another plugin
+# Install Laravel guidelines
 /plugin install laravel-app-skills@awesome-ai-agent-skills
+
+# Install Docker local development skill
+/plugin install devops-skills@awesome-ai-agent-skills
 ```
 
 **Updating the marketplace**
@@ -66,6 +69,7 @@ Plugins bundle related skills so you can install by domain. The source of truth 
 |--------|-------------|--------|
 | [documentation-skills](./plugins/documentation-skills) | Skills for authoring AI agent instructions and backend documentation. | [agents-md-generator](./skills/agents-md-generator)<br>[documentation-guidelines](./skills/documentation-guidelines) |
 | [laravel-app-skills](./plugins/laravel-app-skills) | Guidelines for building Laravel 11/12 apps across common stacks and tooling. | [laravel-11-12-app-guidelines](./skills/laravel-11-12-app-guidelines) |
+| [devops-skills](./plugins/devops-skills) | Skills for Docker, CI/CD, and local development environment configuration. | [docker-local-dev](./skills/docker-local-dev) |
 
 ## Contributing
 
