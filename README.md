@@ -38,6 +38,10 @@ Skills are self-contained instruction sets that teach AI agents specific workflo
 /plugin marketplace update
 ```
 
+**Why plugins use `source: "./"`**
+
+Claude Code currently indexes skills from the repository root, and `/skills` can show all marketplace skills even when you install only one plugin. This appears to be a Claude Code limitation. We follow the official Claude Skills marketplace example and keep `source: "./"` with explicit `skills` lists so the intended plugin contents are clear and other tools can scope installs properly. If `/skills` looks larger than expected, use the plugin's `skills` list and the tables below as the source of truth.
+
 ### OpenAI Codex / Other AI Tools
 
 Clone or reference this repository and point your AI tool to the `skills/` directory. Each skill follows a standard format with `SKILL.md` containing the instructions.
@@ -67,9 +71,9 @@ Plugins bundle related skills so you can install by domain. The source of truth 
 
 | Plugin | Description | Skills |
 |--------|-------------|--------|
-| [documentation-skills](./plugins/documentation-skills) | Skills for authoring AI agent instructions and backend documentation. | [agents-md-generator](./skills/agents-md-generator)<br>[documentation-guidelines](./skills/documentation-guidelines) |
-| [laravel-app-skills](./plugins/laravel-app-skills) | Guidelines for building Laravel 11/12 apps across common stacks and tooling. | [laravel-11-12-app-guidelines](./skills/laravel-11-12-app-guidelines) |
-| [devops-skills](./plugins/devops-skills) | Skills for Docker, CI/CD, and local development environment configuration. | [docker-local-dev](./skills/docker-local-dev) |
+| [documentation-skills](./plugin-groups.json) | Skills for authoring AI agent instructions and backend documentation. | [agents-md-generator](./skills/agents-md-generator)<br>[documentation-guidelines](./skills/documentation-guidelines) |
+| [laravel-app-skills](./plugin-groups.json) | Guidelines for building Laravel 11/12 apps across common stacks and tooling. | [laravel-11-12-app-guidelines](./skills/laravel-11-12-app-guidelines) |
+| [devops-skills](./plugin-groups.json) | Skills for Docker, CI/CD, and local development environment configuration. | [docker-local-dev](./skills/docker-local-dev) |
 
 ## Contributing
 
@@ -107,6 +111,10 @@ This skill format is designed to be universal and works with:
 - GitHub Copilot
 - Windsurf
 - Any AI coding assistant that supports custom instructions or skills
+
+## Known Limitations
+
+- Claude Code currently indexes skills from the repository root, so `/skills` can list all marketplace skills even if you installed only one plugin. Use the plugin `skills` list and the tables above as the source of truth for what each plugin installs.
 
 ## License
 

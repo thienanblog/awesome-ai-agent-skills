@@ -12,7 +12,7 @@
     {
       "name": "documentation-skills",
       "description": "Skills for authoring AI agent instructions and backend documentation.",
-      "source": "./plugins/documentation-skills",
+      "source": "./",
       "strict": false,
       "skills": [
         "./skills/agents-md-generator",
@@ -22,7 +22,7 @@
     {
       "name": "laravel-app-skills",
       "description": "Guidelines for building Laravel 11/12 apps across common stacks and tooling.",
-      "source": "./plugins/laravel-app-skills",
+      "source": "./",
       "strict": false,
       "skills": [
         "./skills/laravel-11-12-app-guidelines"
@@ -31,7 +31,7 @@
     {
       "name": "devops-skills",
       "description": "Skills for Docker, CI/CD, and local development environment configuration.",
-      "source": "./plugins/devops-skills",
+      "source": "./",
       "strict": false,
       "skills": [
         "./skills/docker-local-dev"

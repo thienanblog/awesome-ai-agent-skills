@@ -6,8 +6,8 @@ import { parse as parseYaml } from 'yaml';
 
 const SKILLS_DIR = 'skills';
 const MARKETPLACE_FILE = '.claude-plugin/marketplace.json';
-const PLUGINS_DIR = 'plugins';
 const PLUGIN_SUFFIX = '-skills';
+const PLUGIN_SOURCE = './';
 
 let errors = [];
 let warnings = [];
@@ -152,12 +152,11 @@ function validateMarketplace(skillsInFolder) {
       continue;
     }
 
-    // Validate source is "./plugins/<plugin-name>"
-    const expectedSource = `./${PLUGINS_DIR}/${plugin.name}`;
-    if (plugin.source !== expectedSource) {
-      error(`${MARKETPLACE_FILE}: Plugin "${plugin.name}" has invalid source "${plugin.source}" (expected "${expectedSource}")`);
+    // Validate source is "./"
+    if (plugin.source !== PLUGIN_SOURCE) {
+      error(`${MARKETPLACE_FILE}: Plugin "${plugin.name}" has invalid source "${plugin.source}" (expected "${PLUGIN_SOURCE}")`);
     } else {
-      const sourcePath = path.join(process.cwd(), plugin.source);
+      const sourcePath = path.resolve(process.cwd(), plugin.source);
       if (!fs.existsSync(sourcePath)) {
         warn(`${MARKETPLACE_FILE}: Plugin "${plugin.name}" source path "${plugin.source}" does not exist`);
       }
