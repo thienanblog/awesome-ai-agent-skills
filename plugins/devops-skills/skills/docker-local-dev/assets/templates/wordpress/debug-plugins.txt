@@ -1,0 +1,16 @@
+# WordPress Debug Plugins
+# Install with: wp plugin install <plugin-slug> --activate
+
+# Query Monitor - Database queries, hooks, conditionals
+query-monitor
+
+# Debug Bar - Debug information in admin bar
+debug-bar
+
+# Log Deprecated Notices - Track deprecated functions
+log-deprecated-notices
+
+# Optional plugins:
+# debug-bar-console - PHP console in debug bar
+# debug-bar-cron - Cron information
+# debug-bar-transients - Transient information

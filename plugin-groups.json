@@ -14,6 +14,13 @@
       "skills": [
         "laravel-11-12-app-guidelines"
       ]
+    },
+    {
+      "name": "devops-skills",
+      "description": "Skills for Docker, CI/CD, and local development environment configuration.",
+      "skills": [
+        "docker-local-dev"
+      ]
     }
   ]
 }

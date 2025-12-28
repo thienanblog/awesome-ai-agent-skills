@@ -1,0 +1,15 @@
+# Base Docker Compose Template
+# Template markers: {{PROJECT_NAME}}, {{NETWORK_NAME}}
+
+version: '3.8'
+
+services:
+  # Services will be added based on detected stack
+
+networks:
+  {{NETWORK_NAME}}:
+    driver: bridge
+
+volumes:
+  db_data:
+  redis_data:

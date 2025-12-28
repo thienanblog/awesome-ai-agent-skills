@@ -1,0 +1,123 @@
+# Contributing to docker-local-dev
+
+Thank you for your interest in improving the docker-local-dev skill!
+
+## Adding Support for New Tech Stacks
+
+### 1. Detection Patterns
+
+Add detection logic to `scripts/detect-stack.sh`:
+
+```bash
+# Example: Adding Ruby on Rails detection
+if file_exists "Gemfile" && string_in_file "rails" "Gemfile"; then
+    LANGUAGE="ruby"
+    FRAMEWORK="rails"
+    # Detect version
+    FRAMEWORK_VERSION=$(grep 'rails' "$PROJECT_ROOT/Gemfile" | grep -oE '[0-9]+\.[0-9]+' | head -1)
+fi
+```
+
+### 2. Dockerfile Template
+
+Create `assets/templates/dockerfile/ruby-rails.dockerfile`:
+
+```dockerfile
+FROM ruby:{{RUBY_VERSION}}
+
+# Install dependencies
+RUN apt-get update && apt-get install -y \
+    nodejs \
+    yarn \
+    libpq-dev
+
+WORKDIR /app
+
+COPY Gemfile Gemfile.lock ./
+RUN bundle install
+
+COPY . .
+
+EXPOSE 3000
+CMD ["rails", "server", "-b", "0.0.0.0"]
+```
+
+### 3. Docker Compose Template
+
+Create `assets/templates/docker-compose/ruby-rails.yml`:
+
+```yaml
+version: '3.8'
+
+services:
+  app:
+    build: .
+    ports:
+      - "${APP_PORT:-3000}:3000"
+    volumes:
+      - ./:/app
+    depends_on:
+      - db
+    environment:
+      DATABASE_URL: postgres://...
+
+  db:
+    image: postgres:16-alpine
+    # ...
+```
+
+### 4. Nginx Template (if needed)
+
+Create `assets/templates/nginx/rails.conf`:
+
+```nginx
+upstream rails {
+    server app:3000;
+}
+
+server {
+    listen 80;
+    # ...
+}
+```
+
+### 5. Update Documentation
+
+Add your stack to `assets/templates/docs/SUPPORTED-STACKS.md`:
+
+```markdown
+### Ruby on Rails (Full Support)
+
+| Feature | Supported |
+|---------|-----------|
+| Ruby 3.1/3.2/3.3 | Yes |
+| PostgreSQL | Yes |
+| Redis | Yes |
+| Sidekiq | Yes |
+```
+
+## Testing Your Changes
+
+1. Create a test project with your stack
+2. Run the detection script:
+   ```bash
+   ./scripts/detect-stack.sh /path/to/test/project
+   ```
+3. Verify the generated Docker files work:
+   ```bash
+   docker compose config
+   docker compose up -d
+   ./scripts/health-check.sh
+   ```
+
+## Pull Request Guidelines
+
+1. Test with a real project
+2. Include detection patterns
+3. Include all necessary templates
+4. Update documentation
+5. Follow existing code style
+
+## Questions?
+
+Open an issue on GitHub with your questions or suggestions.
