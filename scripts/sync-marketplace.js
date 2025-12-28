@@ -7,7 +7,6 @@ import { parse as parseYaml } from 'yaml';
 const SKILLS_DIR = 'skills';
 const MARKETPLACE_FILE = '.claude-plugin/marketplace.json';
 const README_FILE = 'README.md';
-const PLUGINS_DIR = 'plugins';
 const PLUGIN_GROUPS_FILE = 'plugin-groups.json';
 const PLUGIN_SUFFIX = '-skills';
 
@@ -182,11 +181,11 @@ function updateMarketplace(skills, pluginGroups) {
   );
 
   // Build one plugin per domain group
-  // Each plugin has source: "./plugins/<plugin>" and skills array with matching skill paths
+  // Each plugin has source: "./" and skills array with matching skill paths
   marketplace.plugins = pluginGroups.map(plugin => ({
     name: plugin.name,
     description: plugin.description,
-    source: `./${PLUGINS_DIR}/${plugin.name}`,
+    source: './',
     strict: false,
     skills: plugin.skills.map(skillName => `./skills/${skillName}`)
   }));
@@ -203,43 +202,6 @@ function updateMarketplace(skills, pluginGroups) {
   );
 
   return { added, removed };
-}
-
-/**
- * Sync each skill into its own plugin directory
- */
-function syncPluginDirectories(skills, pluginGroups) {
-  const expectedPluginDirs = new Set(pluginGroups.map(plugin => plugin.name));
-
-  if (!fs.existsSync(PLUGINS_DIR)) {
-    fs.mkdirSync(PLUGINS_DIR, { recursive: true });
-  } else {
-    const existingDirs = fs.readdirSync(PLUGINS_DIR, { withFileTypes: true })
-      .filter(dirent => dirent.isDirectory())
-      .map(dirent => dirent.name);
-
-    for (const dirName of existingDirs) {
-      if (!expectedPluginDirs.has(dirName)) {
-        fs.rmSync(path.join(PLUGINS_DIR, dirName), { recursive: true, force: true });
-      }
-    }
-  }
-
-  for (const plugin of pluginGroups) {
-    const pluginRoot = path.join(PLUGINS_DIR, plugin.name);
-    if (fs.existsSync(pluginRoot)) {
-      fs.rmSync(pluginRoot, { recursive: true, force: true });
-    }
-
-    const pluginSkillsRoot = path.join(pluginRoot, 'skills');
-    fs.mkdirSync(pluginSkillsRoot, { recursive: true });
-
-    for (const skillName of plugin.skills) {
-      const sourceSkillPath = path.join(SKILLS_DIR, skillName);
-      const pluginSkillPath = path.join(pluginSkillsRoot, skillName);
-      fs.cpSync(sourceSkillPath, pluginSkillPath, { recursive: true });
-    }
-  }
 }
 
 /**
@@ -298,11 +260,6 @@ function main() {
 
   // Load plugin groups
   const pluginGroups = loadPluginGroups(skills);
-
-  // Sync plugin directories so each plugin ships only its skill
-  log('📦 Syncing plugin directories...');
-  syncPluginDirectories(skills, pluginGroups);
-  log('');
 
   // Update marketplace.json
   log('🧩 Updating marketplace.json...');

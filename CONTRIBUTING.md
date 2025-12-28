@@ -94,8 +94,10 @@ This checks:
 - Each skill folder has a `SKILL.md` file
 - `SKILL.md` has valid YAML frontmatter with `name` and `description`
 - All skills are listed in a plugin's `skills` array in `marketplace.json`
-- Each plugin has `source: "./plugins/<plugin-name>"` and a valid `skills` array
+- Each plugin has `source: "./"` and a valid `skills` array
 - Each plugin name ends with `-skills`
+
+Note: Claude Code indexes skills from the repo root, so we keep `source: "./"` and scope installs via the `skills` list.
 
 ### Expected Output
 
@@ -137,7 +139,6 @@ npm run sync
 This will:
 - Scan all skills in `skills/` folder
 - Update `marketplace.json` based on `plugin-groups.json`
-- Sync per-plugin bundles under `plugins/`
 - Update the skills table in `README.md`
 
 **Note:** The sync happens automatically on merge via GitHub Actions, so this step is optional.
