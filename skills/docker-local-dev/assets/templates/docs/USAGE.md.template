@@ -37,6 +37,24 @@ docker compose restart app
 | Redis | localhost:{{REDIS_PORT}} | - |
 | Mail UI | http://localhost:{{MAIL_UI_PORT}} | - |
 
+## Container Networking (Important)
+
+When your app runs inside Docker, `localhost` points to the **app container**, not your database container.
+Use the **service name** from `docker-compose.yml` instead.
+
+Common defaults:
+- Database host from app container: `db`
+- Redis host from app container: `redis`
+- Mail host from app container: `mailpit`
+
+Laravel example (`.env` inside the container):
+```
+DB_HOST=db
+DB_PORT=3306
+REDIS_HOST=redis
+MAIL_HOST=mailpit
+```
+
 ## Stack-Specific Commands
 
 ### {{FRAMEWORK}} Commands
