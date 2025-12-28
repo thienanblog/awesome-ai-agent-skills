@@ -54,7 +54,57 @@ Use the `port-check.sh` script:
 
 ## Port Exposure Options
 
-### Minimal Exposure (Recommended)
+### Reverse Proxy Detection
+
+Before deciding on port exposure, run the network detection script:
+
+```bash
+./scripts/detect-network.sh
+```
+
+This script detects:
+- Running reverse proxy containers (Nginx Proxy Manager, Traefik, Caddy)
+- Available Docker networks
+- Suggested network to join
+
+**If reverse proxy detected:**
+- Recommend internal-only ports (no host exposure)
+- Suggest connecting to the proxy's network
+- Only expose database port for SQL tools (optional)
+
+### Internal Only (For Reverse Proxy Users)
+
+When using Nginx Proxy Manager, Traefik, or other reverse proxies:
+
+```yaml
+services:
+  nginx:
+    # No ports exposed - proxy handles routing
+    networks:
+      - default
+      - proxy_network  # Shared with reverse proxy
+
+  db:
+    # Optionally expose for SQL tools
+    ports:
+      - "${DB_PORT:-3306}:3306"
+
+  app:
+    # No ports exposed
+
+  redis:
+    # No ports exposed
+
+  mailpit:
+    # No ports exposed - access via proxy or internal network
+```
+
+**Benefits:**
+- No port conflicts
+- Clean architecture
+- Proxy handles SSL, domains, routing
+
+### Minimal Exposure (Recommended for Standalone)
 
 Only expose ports needed for:
 1. Web browser access (Nginx)
@@ -204,7 +254,7 @@ For managing multiple Docker projects with custom domains.
 
 **docker-compose.yml for NPM:**
 ```yaml
-version: '3.8'
+# Note: No 'version' field needed - deprecated in Docker Compose v2
 
 services:
   npm:

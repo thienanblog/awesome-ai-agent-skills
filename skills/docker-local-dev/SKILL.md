@@ -171,9 +171,59 @@ Joomla Development Options:
 2. Install Joomla CLI tools?
 ```
 
-### Phase 4: Service Configuration
+### Phase 3.5: Existing Docker Images Scan
 
-**Database Selection:**
+**Before suggesting service versions**, check locally available images to save disk space:
+
+```bash
+# The skill will run this automatically
+./scripts/detect-images.sh
+```
+
+**Present results to user:**
+```
+I found these images already on your machine:
+
+Databases:
+- mysql:8.0.35 (2.3 GB)
+- mariadb:11.2 (1.1 GB)
+
+Using existing images saves disk space and download time.
+
+Which database would you like to use?
+1. mysql:8.0.35 (already downloaded - saves 2.3 GB)
+2. mariadb:11.2 (already downloaded - saves 1.1 GB)
+3. Different version (will download new image)
+   → What version do you need for production compatibility?
+```
+
+**If no existing images found:**
+```
+No database images found locally.
+
+Which database would you like to use?
+1. MySQL 8.0 (recommended for Laravel/WordPress)
+2. MariaDB 11 (MySQL-compatible, smaller)
+3. PostgreSQL 16 (if your app requires it)
+```
+
+**Same approach for other services:**
+- Check for existing Redis, PHP, Node, Nginx, Mailpit/MailHog images
+- Suggest matching versions when available
+- Always offer "different version" option for production compatibility
+
+### Phase 4: Service Configuration (Smart Recommendations)
+
+**IMPORTANT: Check actual usage before recommending services.**
+
+Before suggesting any optional service, verify if it's actually being used in the project:
+
+```bash
+# Check .env for actual service usage
+grep -E '^(CACHE_DRIVER|CACHE_STORE|SESSION_DRIVER|QUEUE_CONNECTION|MAIL_MAILER)=' .env
+```
+
+**Database Selection** (always needed, use images from Phase 3.5):
 ```
 Which database would you like to use?
 
@@ -182,7 +232,27 @@ Which database would you like to use?
 3. PostgreSQL 16 (required for some apps)
 ```
 
-**Redis Configuration:**
+**Redis Configuration** (check actual usage first):
+
+First, check if Redis is actually used:
+```bash
+grep -E '^(CACHE_DRIVER|SESSION_DRIVER|QUEUE_CONNECTION)=' .env
+```
+
+**If Redis is NOT in use** (CACHE_DRIVER=file, SESSION_DRIVER=file, QUEUE_CONNECTION=sync):
+```
+I noticed your .env configuration:
+- CACHE_DRIVER=file (not using Redis for cache)
+- SESSION_DRIVER=file (not using Redis for sessions)
+- QUEUE_CONNECTION=sync (not using Redis for queues)
+
+Redis is not currently used in your project.
+Do you want to add Redis anyway?
+1. No, skip Redis (recommended based on your config)
+2. Yes, I plan to switch to Redis later
+```
+
+**If Redis IS in use** (any of the above = redis):
 ```
 Do you need Redis?
 
@@ -192,7 +262,22 @@ Do you need Redis?
 4. No, I don't need Redis
 ```
 
-**Email Testing:**
+**Email Testing** (check actual usage first):
+
+First, check MAIL_MAILER setting:
+```bash
+grep -E '^MAIL_MAILER=' .env
+```
+
+**If using log or array mailer:**
+```
+Your MAIL_MAILER is set to 'log' (emails logged, not sent).
+Do you want to add email testing service anyway?
+1. No, skip email testing (recommended based on your config)
+2. Yes, add Mailpit for testing
+```
+
+**If using smtp or other mailer:**
 ```
 Which email testing service would you prefer?
 
@@ -207,9 +292,23 @@ Which email testing service would you prefer?
 3. None (I'll configure email separately)
 ```
 
-**Background Task Processing:**
+**Background Task Processing** (check actual usage first):
 
-For Laravel:
+For Laravel, check if queues are actually used:
+```bash
+grep -E '^QUEUE_CONNECTION=' .env
+# Also check if jobs table exists or queue jobs are defined
+```
+
+**If QUEUE_CONNECTION=sync:**
+```
+Your QUEUE_CONNECTION is set to 'sync' (no background processing).
+Do you need background task processing anyway?
+1. No, skip queue workers (recommended based on your config)
+2. Yes, I plan to switch to async queues later
+```
+
+**If QUEUE_CONNECTION=database/redis:**
 ```
 Do you need background task processing?
 
@@ -240,7 +339,31 @@ Background task processing options:
 
 ### Phase 5: Port Exposure & Configuration
 
-**Port Strategy:**
+**IMPORTANT: Ask about reverse proxy first before exposing ports.**
+
+**Reverse Proxy Check:**
+```
+Are you using a reverse proxy (Nginx Proxy Manager, Traefik, Caddy)?
+
+1. Yes, I'm using a reverse proxy
+   → Ports will remain internal only
+   → Services communicate via Docker network
+   → You'll configure the proxy to route to containers
+
+2. No, I want to expose ports directly
+   → I'll help you choose which ports to expose
+```
+
+**If using reverse proxy (Option 1):**
+```
+Since you're using a reverse proxy, ports will be internal only.
+
+Do you still want to expose the database port for external tools (DBeaver/DataGrip)?
+1. Yes, expose database port (3306/5432) for SQL tools
+2. No, keep everything internal
+```
+
+**If NOT using reverse proxy (Option 2), then ask port strategy:**
 ```
 How do you want to expose ports?
 
@@ -284,7 +407,44 @@ Where do you want to store configuration?
 
 ### Phase 6: Network Configuration
 
-**Multiple Projects:**
+**First, scan for existing Docker networks and reverse proxies:**
+
+```bash
+# The skill will run this automatically
+./scripts/detect-network.sh
+```
+
+**If reverse proxy container detected (Nginx Proxy Manager, Traefik, Caddy):**
+```
+I scanned your Docker environment:
+
+Reverse proxy found:
+- Container: 'nginx-proxy-manager' on network: 'npm_default'
+
+Do you want to connect this project to 'npm_default'?
+1. Yes, use 'npm_default' for reverse proxy routing (recommended)
+   → No port exposure needed
+   → Configure routing in your proxy dashboard
+
+2. No, use isolated network
+   → I'll ask about port exposure
+```
+
+**If NO reverse proxy detected:**
+```
+No reverse proxy containers detected (Nginx Proxy Manager, Traefik, Caddy).
+
+Available Docker networks:
+- myapp_default
+- shared_services
+
+Do you want to:
+1. Create isolated network for this project (recommended)
+2. Use existing network: [select from list]
+3. Create shared network for multiple projects
+```
+
+**Multiple Projects (if no proxy detected):**
 ```
 Are you running multiple Docker projects on this machine?
 
@@ -333,11 +493,16 @@ but the instant sync is worth it for development.
 
 ### Phase 8: Generation & Verification
 
+**Docker Compose Version Note:**
+- Do NOT include `version:` at the top of docker-compose.yml
+- Docker Compose v2 deprecated this field
+- Modern compose files don't need it
+
 **File generation order:**
 1. Create backup of existing files (if any)
 2. Generate `.env.docker` or update `.env`
 3. Generate `Dockerfile`
-4. Generate `docker-compose.yml`
+4. Generate `docker-compose.yml` (without version field)
 5. Generate Nginx configuration
 6. Generate Supervisor/PM2 configuration (if needed)
 7. Create helper scripts
