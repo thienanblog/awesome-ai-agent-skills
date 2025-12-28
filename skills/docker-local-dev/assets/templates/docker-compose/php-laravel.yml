@@ -1,7 +1,6 @@
 # Laravel Docker Compose Template
 # Template markers: {{PROJECT_NAME}}, {{PHP_VERSION}}, {{DB_IMAGE}}, {{APP_PORT}}, {{DB_PORT}}
-
-version: '3.8'
+# Note: No 'version' field needed - deprecated in Docker Compose v2
 
 services:
   app:
