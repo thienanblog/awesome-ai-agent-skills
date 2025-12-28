@@ -50,9 +50,10 @@ For each `SKILL.md`, extract the `name` and `description` from the YAML frontmat
 Update `.claude-plugin/marketplace.json`:
 - Keep the existing `name`, `owner`, and `metadata` sections
 - Update the `plugins` array based on `plugin-groups.json` so each plugin can contain multiple related skills
-- Each plugin requires: `name` (ending with `-skills`), `description`, `source: "./plugins/<plugin-name>"`, `strict: false`, and a `skills` array
+- Each plugin requires: `name` (ending with `-skills`), `description`, `source: "./"`, `strict: false`, and a `skills` array
 - The `skills` array lists the skill paths for that plugin
-- Sync `plugins/<plugin-name>/skills/<skill>` so each plugin bundles only its own skill set
+
+Note: Claude Code currently indexes skills from the repo root, so keep `source: "./"` and rely on the explicit `skills` list to scope installs.
 
 ### 4. Update README.md
 Update the "Available Skills" table in `README.md` to match the current skills.
@@ -82,7 +83,7 @@ If a new skill `api-testing` is added to `skills/api-testing/SKILL.md`, update `
     {
       "name": "documentation-skills",
       "description": "Skills for authoring AI agent instructions and backend documentation.",
-      "source": "./plugins/documentation-skills",
+      "source": "./",
       "strict": false,
       "skills": [
         "./skills/agents-md-generator",
@@ -92,7 +93,7 @@ If a new skill `api-testing` is added to `skills/api-testing/SKILL.md`, update `
     {
       "name": "laravel-app-skills",
       "description": "Guidelines for building Laravel 11/12 apps across common stacks and tooling.",
-      "source": "./plugins/laravel-app-skills",
+      "source": "./",
       "strict": false,
       "skills": [
         "./skills/laravel-11-12-app-guidelines"
@@ -127,7 +128,7 @@ This repository uses GitHub Actions for automated validation and syncing:
 ### On Merge to Main (sync-marketplace.yml)
 - Automatically runs `npm run sync` to:
   - Scan all skills in `skills/` folder
-  - Update `marketplace.json` with one plugin per skill
+  - Update `marketplace.json` based on `plugin-groups.json`
   - Update the skills table in `README.md`
   - Commit and push changes if any
 
@@ -167,3 +168,8 @@ After completing any task that modifies skills, plugins, or documentation:
    ```bash
    npm run sync
    ```
+
+## Commit and PR Conventions
+
+- When asked to commit, use one of these prefixes: `feat`, `bug`, `chore`, or `refactor`.
+- When asked to open a pull request, create it (prefer `gh` if available) and follow the repo's PR template or guidance.
