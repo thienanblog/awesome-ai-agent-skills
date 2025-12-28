@@ -1,7 +1,6 @@
 # Base Docker Compose Template
 # Template markers: {{PROJECT_NAME}}, {{NETWORK_NAME}}
-
-version: '3.8'
+# Note: No 'version' field needed - deprecated in Docker Compose v2
 
 services:
   # Services will be added based on detected stack

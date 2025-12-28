@@ -148,3 +148,22 @@ When reviewing or creating skills:
 4. **Consistent Naming**: Use kebab-case for folder and skill names
 5. **Complete Metadata**: Always include `name` and `description` in YAML frontmatter
 6. **Universal Compatibility**: Write instructions that work across different AI tools, avoid tool-specific syntax when possible
+
+## Post-Task Workflow
+
+After completing any task that modifies skills, plugins, or documentation:
+
+1. **Re-read context files** to ensure documentation is synchronized:
+   - `CLAUDE.md` - Check if instructions need updating
+   - `README.md` - Verify skills table and plugin groups are current
+   - Any skill-specific documentation that was modified
+
+2. **Run validation** to catch any issues:
+   ```bash
+   npm run validate
+   ```
+
+3. **Sync marketplace** if skills were added/modified:
+   ```bash
+   npm run sync
+   ```

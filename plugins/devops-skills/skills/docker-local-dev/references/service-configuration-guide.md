@@ -2,6 +2,51 @@
 
 Comprehensive configuration options for all Docker services.
 
+## Image Management Strategy
+
+### Scan Existing Images
+
+Before pulling new images, scan what's already available locally to save disk space:
+
+```bash
+./scripts/detect-images.sh
+```
+
+This script outputs JSON with:
+- Database images (MySQL, MariaDB, PostgreSQL)
+- PHP images with versions
+- Node.js images with versions
+- Redis images
+- Mail testing images (Mailpit, MailHog)
+- Nginx images
+
+### Image Selection Priority
+
+1. **Use existing images when possible** - saves disk space and download time
+2. **Match production versions** - if user needs specific version for compatibility
+3. **Prefer Alpine variants** - smaller image size (e.g., `redis:7-alpine` vs `redis:7`)
+
+### Example Decision Flow
+
+```
+Detected: mysql:8.0.35 (2.3 GB already downloaded)
+
+Options:
+1. mysql:8.0.35 (already downloaded - recommended)
+2. mysql:8.4 (will download ~500 MB)
+3. mariadb:11 (will download ~400 MB)
+
+→ If production uses MySQL 8.0.x, recommend option 1
+→ If production uses MySQL 8.4, recommend option 2
+→ Always ask user for production compatibility
+```
+
+### Docker Compose Version
+
+**Important:** Do not include `version:` field in docker-compose.yml files.
+- Docker Compose v2 deprecated this field
+- Modern compose files don't need it
+
 ## Nginx Configuration
 
 ### PHP-FPM (Laravel/WordPress)
