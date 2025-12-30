@@ -263,6 +263,7 @@ You are expected to read and adhere to these single sources of truth:
 - `docs/`, `documentation/`
 - `README.md`, `CONTRIBUTING.md`
 - `docs/api/`, `docs/architecture/`
+- **Important**: Do not list `CLAUDE.md` or `AGENTS.md` in this section. These files are already loaded by AI tools, and self-references waste context.
 
 #### Section 4: Project Structure & Architecture
 
@@ -462,12 +463,14 @@ If monorepo detected:
 
 **For updates (merge mode):**
 1. Parse existing file into sections (split by `## ` headers)
-2. For each section:
+2. Compare auto-detected findings against existing guidance; if they conflict, ask the user whether to keep existing content, replace it, or merge.
+3. For each section:
    - If exists in both: Show diff and ask user preference
    - If only in existing: Preserve (user customization)
    - If only in new: Add with note
-3. Generate merged file
-4. Show summary of changes
+4. Generate merged file
+5. Show summary of changes
+6. Ensure the generated content does not instruct the agent to read `CLAUDE.md` or `AGENTS.md`, since those files are already loaded by AI tools.
 
 ## Tech Stack Detection Reference
 
