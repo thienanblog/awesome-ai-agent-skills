@@ -38,10 +38,6 @@ Skills are self-contained instruction sets that teach AI agents specific workflo
 /plugin marketplace update
 ```
 
-**Why plugins use `source: "./"`**
-
-Claude Code currently indexes skills from the repository root, and `/skills` can show all marketplace skills even when you install only one plugin. This appears to be a Claude Code limitation. We follow the official Claude Skills marketplace example and keep `source: "./"` with explicit `skills` lists so the intended plugin contents are clear and other tools can scope installs properly. If `/skills` looks larger than expected, use the plugin's `skills` list and the tables below as the source of truth.
-
 ### OpenAI Codex / Other AI Tools
 
 Clone or reference this repository and point your AI tool to the `skills/` directory. Each skill follows a standard format with `SKILL.md` containing the instructions.
@@ -114,7 +110,7 @@ This skill format is designed to be universal and works with:
 
 ## Known Limitations
 
-- Claude Code currently indexes skills from the repository root, so `/skills` can list all marketplace skills even if you installed only one plugin. Use the plugin `skills` list and the tables above as the source of truth for what each plugin installs.
+- Claude Code currently indexes skills from the repository root, so `/skills` can list all marketplace skills even if you installed only one plugin. This is a Claude Code limitation. We follow the official Claude Skills marketplace example and keep `source: "./"` with explicit `skills` lists so plugin boundaries remain clear and other tools can scope installs properly. If `/skills` looks larger than expected, use the plugin `skills` list and the tables above as the source of truth.
 
 ## License
 
