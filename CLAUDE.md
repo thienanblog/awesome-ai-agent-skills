@@ -33,8 +33,11 @@ Every skill must have a `SKILL.md` with YAML frontmatter:
 ---
 name: skill-name
 description: Brief description of what the skill does and when to use it.
+author: Your Name or Team (optional but recommended)
 ---
 ```
+
+When adding a new skill, always ask for the author name if not provided. The author field is displayed in the README skills table.
 
 ## Scanning and Updating Marketplace
 
