@@ -137,7 +137,8 @@ function getSkills() {
     skills.push({
       folderName: skillName,
       name: frontmatter.name,
-      description: frontmatter.description
+      description: frontmatter.description,
+      author: frontmatter.author || null
     });
   }
 
@@ -216,9 +217,9 @@ function updateReadme(skills) {
   let content = fs.readFileSync(README_FILE, 'utf-8');
 
   // Build skills table
-  const tableHeader = '| Skill | Description |\n|-------|-------------|';
+  const tableHeader = '| Skill | Author | Description |\n|-------|--------|-------------|';
   const tableRows = skills.map(skill =>
-    `| [${skill.name}](./skills/${skill.folderName}) | ${skill.description} |`
+    `| [${skill.name}](./skills/${skill.folderName}) | ${skill.author || '—'} | ${skill.description} |`
   ).join('\n');
   const newTable = `<!-- SKILLS_TABLE_START -->\n${tableHeader}\n${tableRows}\n<!-- SKILLS_TABLE_END -->`;
 

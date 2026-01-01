@@ -21,6 +21,13 @@
       "skills": [
         "docker-local-dev"
       ]
+    },
+    {
+      "name": "workflow-skills",
+      "description": "Skills for AI agent workflow and requirements clarification processes.",
+      "skills": [
+        "ask-questions-if-underspecified"
+      ]
     }
   ]
 }
