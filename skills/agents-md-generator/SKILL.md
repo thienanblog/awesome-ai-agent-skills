@@ -1,7 +1,7 @@
 ---
 name: agents-md-generator
 description: Generate or update CLAUDE.md/AGENTS.md files for AI coding agents through auto-scanning project files combined with interactive Q&A. Supports multiple tech stacks, development environments, and preserves customizations when updating.
-author: Community
+author: Official
 ---
 
 # AGENTS.md / CLAUDE.md Generator
@@ -24,6 +24,16 @@ To generate a new CLAUDE.md file:
 3. Answer the interactive questions about your project
 4. Review and customize the generated file
 
+### Answering Questions (Convenient Formats)
+
+When this skill asks numbered questions with lettered options, users can answer in any style:
+
+- Short form (fast): `1a 2b 3c`
+- Mixed form: `1a 2b 3c 4b (also scan packages/*) 5d`
+- Full sentences: “Use medium scan depth and Docker Compose; service name is app.”
+
+Short form is never required; it is only provided for convenience.
+
 ### Generation Modes
 
 **Interactive Mode (Default):**
@@ -45,9 +55,10 @@ To generate a new CLAUDE.md file:
 **Check for existing files:**
 1. Look for `CLAUDE.md` or `AGENTS.md` in the project root
 2. If found, ask user: "I found an existing [filename]. Would you like to:"
-   - Update it (merge new content while preserving customizations)
-   - Replace it (generate fresh, backup existing)
-   - Cancel
+   1. Update it (merge new content while preserving customizations)
+   2. Replace it (generate fresh, backup existing)
+   3. Cancel
+   - Reply examples (optional): `1` or `update`; `2` or `replace`; `3` or `cancel`
 
 **Determine primary file:**
 - Default: `CLAUDE.md` as primary, `AGENTS.md` as symlink
@@ -73,6 +84,10 @@ What scan depth should I use to analyze your project?
    Scans: Entire project tree including tests/, docs/, scripts/, all
           subdirectories, hidden configs, and build artifacts
    Best for: Complex projects, monorepos, or unfamiliar codebases
+
+Reply examples:
+- Short: `2` (or `1` / `3`)
+- With extra notes: `2 (also scan packages/*)`
 ```
 
 **Scan actions per depth:**
@@ -106,6 +121,10 @@ What development environment does this project use?
 
 5. Other (please describe)
    - Specify your custom environment setup
+
+Reply examples:
+- Short: `1` (or `2` / `3` / `4` / `5`)
+- Detailed: `1; main service is app; node runs in node service`
 ```
 
 **Follow-up questions based on selection:**
@@ -213,6 +232,11 @@ Would you like to include any of these optional sections?
    - Package management and dependencies
 
 Select the sections you need (comma-separated numbers, or 'none' to skip):
+
+Reply examples:
+- Short: `none`
+- Multiple: `1,3,4`
+- With extra notes: `2,3 (also include branch naming rules)`
 ```
 
 **Note:** In Quick Mode, these optional sections are skipped unless auto-detected with high confidence.
@@ -484,6 +508,28 @@ See `references/section-templates.md` for complete section templates per stack.
 ## Update/Merge Strategy Reference
 
 See `references/merge-strategy.md` for detailed merge logic.
+
+## Roadmap & Progress (Maintainers)
+
+When discussing or implementing new ideas/features for this skill, keep these two files in sync:
+
+- `ROADMAP.md` — future plan (uses checklists so items can be marked done)
+- `PROGRESS.md` — current work + recent completions
+
+Archiving rule: keep each file ~200–300 lines max; if it exceeds, archive oldest entries to `docs/archives/ROADMAP-YYYY-MM.md` and `docs/archives/PROGRESS-YYYY-MM.md`.
+
+Helper scripts (optional):
+- Launcher (best-effort auto-detect): `skills/agents-md-generator/scripts/archive-roadmap-progress`
+- Bash (implementation): `skills/agents-md-generator/scripts/archive-roadmap-progress.sh` (macOS/Linux + Git Bash/WSL)
+- PowerShell (implementation): `skills/agents-md-generator/scripts/archive-roadmap-progress.ps1` (stock Windows/macOS/Linux)
+- Windows cmd wrapper: `skills/agents-md-generator/scripts/archive-roadmap-progress.cmd`
+
+Recommended maintainer workflow (so line limits stay enforced automatically):
+1. After editing `ROADMAP.md` or `PROGRESS.md`, run a check:
+   - bash/zsh: `bash skills/agents-md-generator/scripts/archive-roadmap-progress --check`
+   - Windows cmd: `skills\\agents-md-generator\\scripts\\archive-roadmap-progress.cmd --check`
+2. If either file exceeds the limit, run `--fix` to archive the oldest Completed/Done entries.
+3. Record the change in both `ROADMAP.md` and `PROGRESS.md`.
 
 ## Output File Naming
 
