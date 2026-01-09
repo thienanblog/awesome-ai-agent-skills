@@ -9,6 +9,8 @@ const MARKETPLACE_FILE = '.claude-plugin/marketplace.json';
 const README_FILE = 'README.md';
 const PLUGIN_GROUPS_FILE = 'plugin-groups.json';
 const PLUGIN_SUFFIX = '-skills';
+const PLUGINS_TABLE_START = '<!-- PLUGINS_TABLE_START -->';
+const PLUGINS_TABLE_END = '<!-- PLUGINS_TABLE_END -->';
 
 function log(message) {
   console.log(message);
@@ -171,6 +173,7 @@ function updateMarketplace(skills, pluginGroups) {
       marketplace.name = existing.name || marketplace.name;
       marketplace.owner = existing.owner || marketplace.owner;
       marketplace.metadata = existing.metadata || marketplace.metadata;
+      marketplace.plugins = Array.isArray(existing.plugins) ? existing.plugins : marketplace.plugins;
     } catch (e) {
       log(`⚠️  Could not read existing marketplace.json: ${e.message}`);
     }
@@ -246,6 +249,39 @@ function updateReadme(skills) {
 }
 
 /**
+ * Update README.md plugin groups table
+ */
+function updateReadmePluginGroups(content, pluginGroups) {
+  const tableHeader = '| Plugin | Description | Skills |\n|--------|-------------|--------|';
+
+  const tableRows = pluginGroups.map(plugin => {
+    const skillsHtml = plugin.skills
+      .map(skillName => `[${skillName}](./skills/${skillName})`)
+      .join('<br>');
+
+    return `| [${plugin.name}](./plugin-groups.json) | ${plugin.description} | ${skillsHtml} |`;
+  }).join('\n');
+
+  const newTable = `${PLUGINS_TABLE_START}\n${tableHeader}\n${tableRows}\n${PLUGINS_TABLE_END}`;
+
+  if (content.includes(PLUGINS_TABLE_START) && content.includes(PLUGINS_TABLE_END)) {
+    return content.replace(
+      /<!-- PLUGINS_TABLE_START -->[\s\S]*?<!-- PLUGINS_TABLE_END -->/,
+      newTable
+    );
+  }
+
+  // Fallback: try to find existing table under "## Plugin Groups"
+  const tableRegex = /(## Plugin Groups\s*\n+[\s\S]*?\n)\|[^\n]+\|\n\|[-|]+\|\n(\|[^\n]+\|\n?)*/;
+  if (tableRegex.test(content)) {
+    return content.replace(tableRegex, `$1${newTable}\n`);
+  }
+
+  log(`⚠️  Could not find plugin groups table in README.md. Add markers manually.`);
+  return content;
+}
+
+/**
  * Main sync function
  */
 function main() {
@@ -280,8 +316,14 @@ function main() {
   // Update README.md
   log('📝 Updating README.md...');
   const readmeUpdated = updateReadme(skills);
-  if (readmeUpdated) {
-    success('README.md skills table updated');
+  if (readmeUpdated) success('README.md skills table updated');
+
+  // Update README.md plugin groups table (best-effort)
+  let readmeContent = fs.readFileSync(README_FILE, 'utf-8');
+  const nextReadmeContent = updateReadmePluginGroups(readmeContent, pluginGroups);
+  if (nextReadmeContent !== readmeContent) {
+    fs.writeFileSync(README_FILE, nextReadmeContent);
+    success('README.md plugin groups table updated');
   }
   log('');
 
