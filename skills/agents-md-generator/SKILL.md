@@ -16,6 +16,10 @@ This skill helps you generate comprehensive instruction files (CLAUDE.md or AGEN
 - Standardizing AI agent behavior across team members
 - Migrating from one AI tool to another
 
+## Key Principle
+
+**Do not duplicate specialized skills.** If a request falls into a specialized domain (e.g., Design System), delegate to the specialized skill when available.
+
 ## Quick Start
 
 To generate a new CLAUDE.md file:
@@ -496,6 +500,64 @@ If monorepo detected:
 4. Generate merged file
 5. Show summary of changes
 6. Ensure the generated content does not instruct the agent to read `CLAUDE.md` or `AGENTS.md`, since those files are already loaded by AI tools.
+
+## Design System Delegation (Skill Reuse Policy)
+
+This skill is intentionally **not** a full Design System engine. When the user requests any of the following:
+- "design system", "UI consistency", "style guide"
+- "colors/typography/tokens"
+- "component library rules"
+- "generate DESIGN_SYSTEM.md"
+
+Then this skill must:
+
+### If `design-system-generator` skill is available:
+1. **Delegate** generation of `DESIGN_SYSTEM.md` to `design-system-generator`
+2. Then update `AGENTS.md`/`CLAUDE.md` to reference `DESIGN_SYSTEM.md` with this block:
+
+```markdown
+## Design System
+All UI components and pages must follow `DESIGN_SYSTEM.md`:
+- Use design tokens (no hardcoded colors/sizes).
+- Implement component states (hover/focus/disabled/loading/error).
+- Meet accessibility and performance requirements.
+```
+
+### If `design-system-generator` is NOT available:
+1. **Suggest installing** `design-system-generator` from:
+   - https://github.com/thienanblog/awesome-ai-agent-skills (documentation-skills plugin)
+2. Produce only:
+   - `AGENTS.md`/`CLAUDE.md` patch referencing `DESIGN_SYSTEM.md`
+   - Optional **minimal scaffold** `DESIGN_SYSTEM.md` (no deep recommendations)
+
+### Minimal Scaffold for DESIGN_SYSTEM.md (only if design-system-generator unavailable)
+
+If the user still wants a file now, generate ONLY this scaffold:
+
+```markdown
+# DESIGN_SYSTEM.md (Scaffold)
+
+## Scope
+Defines UI consistency rules for this project.
+
+## Tokens (TBD)
+- Colors: CSS variables
+- Typography: scale + line-height
+- Spacing: spacing scale
+- Radius/Shadows: scales
+
+## Components
+Define component patterns and required states:
+- hover, focus, disabled, loading, error
+
+## Production assets
+Use hashed filenames + a manifest mapping to avoid cache issues.
+Minify CSS/JS and optimize images/fonts.
+```
+
+Do not pick Tailwind/MUI/shadcn/etc. in the scaffold unless the project already uses it.
+
+**Never** implement the full Design System logic inside `agents-md-generator`.
 
 ## Tech Stack Detection Reference
 
