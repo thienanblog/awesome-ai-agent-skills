@@ -2,10 +2,11 @@
   "plugins": [
     {
       "name": "documentation-skills",
-      "description": "Skills for authoring AI agent instructions and backend documentation.",
+      "description": "Skills for authoring AI agent instructions, backend documentation, and design systems.",
       "skills": [
         "agents-md-generator",
-        "documentation-guidelines"
+        "documentation-guidelines",
+        "design-system-generator"
       ]
     },
     {
