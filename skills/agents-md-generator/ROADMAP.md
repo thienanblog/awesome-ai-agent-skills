@@ -35,6 +35,10 @@ Rules:
 
 ## Completed
 
+- [x] Add scripted detection for AI tool prompts, MCP servers, and prompt-alignment notes (2026-01-22)
+- [x] Add skill duplicate scan script with symlink guidance (2026-01-22)
+- [x] Add optional System Prompt Alignment, MCP Servers, and Project Memory sections (2026-01-22)
+- [x] Document AI agent tooling detection paths in references (2026-01-22)
 - [x] Add `ROADMAP.md` + `PROGRESS.md` workflow and archiving rules (2026-01-09)
 - [x] Add helper scripts to archive roadmap/progress (bash + PowerShell) (2026-01-09)
 - [x] Add terminal-aware launcher and Windows cmd wrapper for archiving scripts (2026-01-09)
