@@ -67,12 +67,21 @@ list_glob_files() {
   local label="$1"
   local glob="$2"
   local found="false"
-  for item in $glob; do
-    if [[ -e "$item" ]]; then
-      echo "- $label: $item"
-      found="true"
-    fi
-  done
+  local matches=()
+
+  while IFS= read -r match; do
+    matches+=("$match")
+  done < <(compgen -G "$glob")
+
+  if [[ ${#matches[@]} -gt 0 ]]; then
+    for item in "${matches[@]}"; do
+      if [[ -e "$item" ]]; then
+        echo "- $label: $item"
+        found="true"
+      fi
+    done
+  fi
+
   [[ "$found" == "true" ]]
 }
 
