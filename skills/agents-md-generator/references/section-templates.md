@@ -460,6 +460,52 @@ All runtime commands should use Sail:
 
 ---
 
+## Section 14: System Prompt Alignment (Optional)
+
+```markdown
+## System Prompt Alignment
+
+These prompts can override project instructions. Review and align them with this file:
+
+* **Claude Code Global Prompt**: `~/.claude/CLAUDE.md` (review for conflicts)
+* **GitHub Copilot**: `.github/copilot-instructions.md`
+* **Cursor Rules**: `.cursorrules`
+* **Cline Rules**: `.clinerules` or `.clinerules/`
+* **Kilo Code Rules**: `.kilocoderules` / `.kilo/` / `.kilocodemodes`
+* **Roo Code Rules**: `.roo/rules/` / `.roo/rules-*` / `.roorules*`
+* **OpenCode Config**: `opencode.jsonc`
+* **Codex Config**: `~/.codex/config.toml`
+
+If any of these conflict with this file, update the global/system prompts first.
+```
+
+## Section 15: MCP Servers & Tooling (Optional)
+
+```markdown
+## MCP Servers & Tooling
+
+Use these MCP servers when the task matches their capability:
+
+* **[server-name]**: [Purpose, when to use it, required env vars]
+
+If a server is not needed for this project, disable it in the MCP config.
+```
+
+## Section 16: Project Memory (ROADMAP/PROGRESS) (Optional)
+
+```markdown
+## Project Memory & Progress Tracking
+
+Keep lightweight, human-readable project memory:
+
+* **Roadmap**: `ROADMAP.md` (future ideas, use checklists)
+* **Progress**: `PROGRESS.md` (current focus + recent completions)
+
+If a memory MCP server is used instead, keep these files minimal or omit them.
+```
+
+---
+
 ## Footer
 
 Always end the file with:

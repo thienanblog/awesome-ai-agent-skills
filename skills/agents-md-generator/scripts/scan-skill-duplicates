@@ -1,0 +1,48 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+script_dir="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
+
+detect_shell() {
+  local uname_s term_program
+  uname_s="$(uname -s 2>/dev/null || echo unknown)"
+  term_program="${TERM_PROGRAM:-}"
+
+  if [[ -n "${WSL_DISTRO_NAME:-}" ]] || grep -qi microsoft /proc/version 2>/dev/null; then
+    echo "wsl"
+    return 0
+  fi
+
+  case "$uname_s" in
+    MINGW*|MSYS*|CYGWIN*) echo "git-bash"; return 0 ;;
+    Darwin*)
+      case "$term_program" in
+        iTerm.app) echo "macos-iterm"; return 0 ;;
+        Apple_Terminal) echo "macos-terminal"; return 0 ;;
+        *) echo "macos"; return 0 ;;
+      esac
+      ;;
+    Linux*) echo "linux"; return 0 ;;
+    *) echo "unknown"; return 0 ;;
+  esac
+}
+
+detected="$(detect_shell)"
+case "$detected" in
+  macos-iterm) echo "Detected shell: iTerm (macOS)" ;;
+  macos-terminal) echo "Detected shell: Terminal.app (macOS)" ;;
+  macos) echo "Detected shell: macOS (unknown terminal)" ;;
+  linux) echo "Detected shell: Linux" ;;
+  wsl) echo "Detected shell: WSL" ;;
+  git-bash) echo "Detected shell: Git Bash / MSYS" ;;
+  *) echo "Detected shell: unknown" ;;
+esac
+
+# Prefer PowerShell (pwsh) on Windows-ish environments when available.
+if [[ "$detected" == "git-bash" ]] && command -v pwsh >/dev/null 2>&1; then
+  echo "Using: PowerShell (pwsh) implementation"
+  exec pwsh -NoProfile -ExecutionPolicy Bypass -File "$script_dir/scan-skill-duplicates.ps1" "$@"
+fi
+
+echo "Using: bash implementation"
+exec bash "$script_dir/scan-skill-duplicates.sh" "$@"

@@ -68,6 +68,56 @@ Short form is never required; it is only provided for convenience.
 - Default: `CLAUDE.md` as primary, `AGENTS.md` as symlink
 - For Windows or if user prefers: Both files with sync header
 
+### Phase 1b: Agent Tooling & System Prompt Alignment (Scripted)
+
+**Goal:** Detect AI tool instruction files, global system prompts, and MCP configs using scripts (not AI scanning) to save tokens and avoid missing overrides.
+
+**Run the detection script (best effort):**
+- bash/zsh: `bash skills/agents-md-generator/scripts/detect-agent-context --root .`
+- Windows cmd: `skills\agents-md-generator\scripts\detect-agent-context.cmd --root .`
+
+The script should report:
+- Project instruction files for AI tools (Copilot, Cursor, Cline, Kilo Code, Roo Code, OpenCode, Codex, Claude Code)
+- Global instruction files (e.g., `~/.claude/CLAUDE.md`, `~/.codex/config.toml`, `~/.roo/rules/`, `~/.kilocode/rules/`)
+- MCP config files and server names (from `.mcp.json`, `.roo/mcp.json`, `mcp_settings.json`, plus any `--mcp-path` entries)
+
+**If script is unavailable:**
+- Do a minimal manual check using the paths listed in `references/tech-stack-detection.md` under **AI Agent Tooling Detection**.
+
+**Warn the user about overrides:**
+- If `~/.claude/CLAUDE.md` or other global instruction files exist, explicitly warn that they can override project prompts.
+- Ask the user to review or adjust those system prompts to avoid conflicts with this repo.
+
+**Ask the user to confirm tool usage:**
+```
+I detected these AI tool instruction sources:
+- .github/copilot-instructions.md (GitHub Copilot)
+- .cursorrules (Cursor)
+- .clinerules or .clinerules/ (Cline)
+- .kilocoderules / .kilo/ / .kilocodemodes (Kilo Code)
+- .roo/rules/ / .roo/rules-* / .roorules* (Roo Code)
+- opencode.jsonc (OpenCode)
+- ~/.codex/config.toml (Codex)
+- .claude/CLAUDE.md or ~/.claude/CLAUDE.md (Claude Code)
+
+Which of these do you actively use for this project, and should we align or ignore any of them?
+```
+
+**If MCP servers are detected:**
+- Ask whether they should be used in this project.
+- Capture a short purpose/usage note for each server.
+
+### Phase 1c: Skill Library Duplicate Scan (Scripted)
+
+If a `skills/` folder exists, run the duplicate scan script to avoid copy-pasted skills:
+- bash/zsh: `bash skills/agents-md-generator/scripts/scan-skill-duplicates --skills-dir skills`
+- Windows cmd: `skills\agents-md-generator\scripts\scan-skill-duplicates.cmd --skills-dir skills`
+
+If duplicates are detected:
+- Recommend consolidating with symlinks so there is one source of truth.
+- Example (macOS/Linux): `ln -s ./skills/skill-a ./skills/skill-b`
+- On Windows, recommend a copy with a clear header if symlinks are not supported.
+
 ### Phase 2: Scan Depth Selection
 
 **Ask the user:**
@@ -178,6 +228,16 @@ Reply examples:
    - SQLite (database/*.sqlite)
    - MongoDB (mongoose in package.json)
 
+7. **AI Agent Tooling (scripted detection):**
+   - GitHub Copilot (`.github/copilot-instructions.md`)
+   - Cursor (`.cursorrules`)
+   - Cline (`.clinerules` or `.clinerules/`)
+   - Kilo Code (`.kilocoderules`, `.kilo/`, `.kilocodemodes`, `.kilocode/config.json`)
+   - Roo Code (`.roo/rules/`, `.roo/rules-*`, `.roorules*`, `.roo/mcp.json`, `mcp_settings.json`)
+   - OpenCode (`opencode.jsonc`, `OPENCODE_CONFIG`)
+   - Codex (`~/.codex/config.toml`)
+   - Claude Code (`.claude/CLAUDE.md`, `~/.claude/CLAUDE.md`, `.mcp.json`)
+
 **Present findings to user:**
 ```
 I detected the following tech stack:
@@ -235,12 +295,24 @@ Would you like to include any of these optional sections?
    - Nx / Turborepo / Lerna workspace patterns
    - Package management and dependencies
 
+7. System Prompt Alignment (if detected)
+   - Document global or editor-level prompts that can override project rules
+   - Remind contributors to review and align prompts
+
+8. MCP Servers & Tooling (if detected)
+   - List MCP servers and when to use them
+   - Include required environment variables or access notes
+
+9. Project Memory (ROADMAP/PROGRESS)
+   - Ask if the team wants `ROADMAP.md` and `PROGRESS.md`
+   - Useful when not relying on MCP memory servers
+
 Select the sections you need (comma-separated numbers, or 'none' to skip):
 
 Reply examples:
 - Short: `none`
 - Multiple: `1,3,4`
-- With extra notes: `2,3 (also include branch naming rules)`
+- With extra notes: `2,3,7 (also include branch naming rules)`
 ```
 
 **Note:** In Quick Mode, these optional sections are skipped unless auto-detected with high confidence.
@@ -477,6 +549,53 @@ If monorepo detected:
 * Test affected: `[command]`
 ```
 
+#### Section 14: System Prompt Alignment (Optional)
+
+If global or editor-level prompts were detected or the user requests it:
+```markdown
+## System Prompt Alignment
+
+These prompts can override project instructions. Review and align them with this file:
+
+* **Claude Code Global Prompt**: `~/.claude/CLAUDE.md` (review for conflicts)
+* **GitHub Copilot**: `.github/copilot-instructions.md` (project scope)
+* **Cursor Rules**: `.cursorrules`
+* **Cline Rules**: `.clinerules` or `.clinerules/`
+* **Kilo Code Rules**: `.kilocoderules` / `.kilo/` / `.kilocodemodes`
+* **Roo Code Rules**: `.roo/rules/` / `.roo/rules-*` / `.roorules*`
+* **OpenCode Config**: `opencode.jsonc`
+* **Codex Config**: `~/.codex/config.toml`
+
+If any of these conflict with this file, update the global/system prompts first.
+```
+
+#### Section 15: MCP Servers & Tooling (Optional)
+
+If MCP servers are detected and user opts in:
+```markdown
+## MCP Servers & Tooling
+
+Use these MCP servers when the task matches their capability:
+
+* **[server-name]**: [Purpose, when to use it, required env vars]
+
+If a server is not needed for this project, disable it in the MCP config.
+```
+
+#### Section 16: Project Memory (ROADMAP/PROGRESS) (Optional)
+
+If the user wants project memory tracking:
+```markdown
+## Project Memory & Progress Tracking
+
+Keep lightweight, human-readable project memory:
+
+* **Roadmap**: `ROADMAP.md` (future ideas, use checklists)
+* **Progress**: `PROGRESS.md` (current focus + recent completions)
+
+If a memory MCP server is used instead, keep these files minimal or omit them.
+```
+
 ### Phase 6: File Creation/Update
 
 **For new files:**
@@ -585,6 +704,8 @@ Helper scripts (optional):
 - Bash (implementation): `skills/agents-md-generator/scripts/archive-roadmap-progress.sh` (macOS/Linux + Git Bash/WSL)
 - PowerShell (implementation): `skills/agents-md-generator/scripts/archive-roadmap-progress.ps1` (stock Windows/macOS/Linux)
 - Windows cmd wrapper: `skills/agents-md-generator/scripts/archive-roadmap-progress.cmd`
+- Agent tooling detection: `skills/agents-md-generator/scripts/detect-agent-context`
+- Skill duplicate scan: `skills/agents-md-generator/scripts/scan-skill-duplicates`
 
 Recommended maintainer workflow (so line limits stay enforced automatically):
 1. After editing `ROADMAP.md` or `PROGRESS.md`, run a check:
