@@ -13,6 +13,7 @@ Rules:
 
 ## Done (Most Recent First)
 
+- 2026-01-22 — Added scripted detection of AI tool prompts, MCP servers, and optional prompt-alignment/memory sections; added skill duplicate scan and reference updates.
 - 2026-01-09 — Standardized multi-choice prompts to include explicit reply examples (while still allowing full-sentence answers).
 - 2026-01-09 — Improved question prompts with optional compact reply examples (e.g., `1a 2b 3c`) and documented a maintainer workflow that runs the archive helper scripts.
 - 2026-01-09 — Added terminal-aware launcher + Windows `.cmd` wrapper to pick the best archiving tool (PowerShell vs bash).

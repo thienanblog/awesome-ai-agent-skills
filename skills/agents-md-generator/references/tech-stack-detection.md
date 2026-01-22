@@ -436,6 +436,43 @@ jobs:
 
 ---
 
+## AI Agent Tooling Detection
+
+### Project Instruction Files
+
+| Tool | Detection Pattern | Confidence |
+|------|-------------------|------------|
+| GitHub Copilot | `.github/copilot-instructions.md` | HIGH |
+| Cursor | `.cursorrules` | HIGH |
+| Cline | `.clinerules` or `.clinerules/` | HIGH |
+| Kilo Code | `.kilocoderules`, `.kilo/`, `.kilocodemodes`, `.kilocode/config.json` | HIGH |
+| Roo Code | `.roo/rules/`, `.roo/rules-*`, `.roorules*`, `.roo/mcp.json` | HIGH |
+| OpenCode | `opencode.jsonc` or `OPENCODE_CONFIG` env | MEDIUM |
+| Codex | `AGENTS.md` (project) | MEDIUM |
+| Claude Code | `.claude/CLAUDE.md`, `.mcp.json` | MEDIUM |
+
+### Global Instruction Files
+
+| Tool | Detection Pattern | Confidence |
+|------|-------------------|------------|
+| Claude Code | `~/.claude/CLAUDE.md` | MEDIUM |
+| Codex | `~/.codex/config.toml` | MEDIUM |
+| Roo Code | `~/.roo/rules/` | MEDIUM |
+| Kilo Code | `~/.kilocode/rules/` | MEDIUM |
+
+### MCP Config Detection
+
+| Tool | Detection Pattern | Confidence |
+|------|-------------------|------------|
+| Claude Code (plugin) | `.mcp.json` | MEDIUM |
+| Roo Code (project) | `.roo/mcp.json` | HIGH |
+| Roo Code (global) | `~/.roo/mcp_settings.json` | MEDIUM |
+| Cline | `cline_mcp_settings.json` (location varies) | LOW |
+
+If the MCP config location is unknown, ask the user for the path and add it to detection scripts via `--mcp-path`.
+
+---
+
 ## Python Detection (Additional)
 
 ### Django
