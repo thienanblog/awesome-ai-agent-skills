@@ -2,6 +2,7 @@
 name: laravel-11-12-app-guidelines
 description: Guidelines and workflow for working on Laravel 11 or Laravel 12 applications across common stacks (API-only or full-stack), including optional Docker Compose/Sail, Inertia + React, Livewire, Vue, Blade, Tailwind v4, Fortify, Wayfinder, PHPUnit, Pint, and Laravel Boost MCP tools. Use when implementing features, fixing bugs, or making UI/backend changes while following project-specific instructions (AGENTS.md, docs/).
 author: Official
+context: fork
 ---
 
 # Laravel 11/12 App Guidelines

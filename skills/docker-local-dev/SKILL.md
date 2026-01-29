@@ -2,6 +2,7 @@
 name: docker-local-dev
 description: Generate Docker Compose and Dockerfile configurations for local development through interactive Q&A. Supports PHP/Laravel, WordPress, Drupal, Joomla, Node.js, and Python stacks with Nginx, Supervisor/PM2, databases, Redis, and email testing. Always asks clarifying questions before generating configurations.
 author: Official
+context: fork
 ---
 
 # Docker Local Development Environment Generator
