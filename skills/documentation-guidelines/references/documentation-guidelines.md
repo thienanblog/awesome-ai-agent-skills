@@ -13,7 +13,7 @@
     - **Zone-based repos:** If the project uses zones, follow the repo convention (e.g., `docs/features/office/<module-name>.md`, `docs/features/production/<module-name>.md`).
     - **Zone-agnostic repos:** Default to `docs/features/<module-name>.md` unless the repo specifies a different location.
 - **Naming:** Descriptive kebab-case (e.g., `production-order-operations.md`).
-- **Document header:** Each feature doc should start with a small metadata block (`Version`, `Last Updated`, `Maintained By`) like the order module. Bump the version and update the date whenever you change the doc content.
+- **Frontmatter metadata:** Each feature doc must start with a YAML frontmatter block. Use it instead of a free-form header so metadata is machine-readable and consistent. Required keys: `name`, `description`, `version`, `last_updated`, `maintained_by`. Bump the version and update the date whenever you change the doc content.
 
 ## 3. Audience & Tone
 - **Backend Devs:** Focus on internal architecture, services, database integrity, and background jobs.
@@ -21,6 +21,9 @@
 - **Tone:** Declarative, Technical, Concise.
 
 ## 4. Standard Structure (Strict Order)
+
+### 0) Frontmatter (Required)
+Start the file with YAML frontmatter metadata.
 
 ### 1) Title + Purpose
 One-liner: What is this module and what problem does it solve?
@@ -105,6 +108,17 @@ Who consumes this? (Mobile App, Admin Panel, External Webhook, etc.).
 - **Mermaid Safety:** Keep node labels short and simple (letters/numbers/basic punctuation). Avoid `->`, `::`, `(`, `)`, commas, or quotes inside labels; use separate nodes and arrows for relationships instead. Prefer labels like `CustomerService` or `Customer stats` over sentences. If you must include special characters, wrap the label with `"` and keep it concise to prevent parse errors.
 
 ## 6. Fast-Start Templates
+
+**Frontmatter:**
+```yaml
+---
+name: production-order-operations
+description: Backend API contract and business rules for production orders.
+version: 1.3.0
+last_updated: 2026-01-29
+maintained_by: Backend Team
+---
+```
 
 **Endpoint Table:**
 | Method | Path | Scope | Purpose |
