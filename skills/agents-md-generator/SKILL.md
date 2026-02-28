@@ -304,9 +304,9 @@ Would you like to include any of these optional sections?
    - List MCP servers and when to use them
    - Include required environment variables or access notes
 
-9. Project Memory (ROADMAP/PROGRESS)
-   - Ask if the team wants `ROADMAP.md` and `PROGRESS.md`
-   - Useful when not relying on MCP memory servers
+9. Project Progress Memory (PROGRESS.md)
+   - Ask if the team wants `PROGRESS.md` for continuity across tasks
+   - Require an `Original Prompt` section so future runs can compare intent vs current status
 
 Select the sections you need (comma-separated numbers, or 'none' to skip):
 
@@ -366,6 +366,7 @@ You are expected to read and adhere to these single sources of truth:
 - `README.md`, `CONTRIBUTING.md`
 - `docs/api/`, `docs/architecture/`
 - **Important**: Do not list `CLAUDE.md` or `AGENTS.md` in this section. These files are already loaded by AI tools, and self-references waste context.
+- For new docs, prefer YAML frontmatter + Markdown body (headings, tables, examples) so metadata and content stay consistent.
 
 #### Section 4: Project Structure & Architecture
 
@@ -568,6 +569,12 @@ These prompts can override project instructions. Review and align them with this
 * **Codex Config**: `~/.codex/config.toml`
 
 If any of these conflict with this file, update the global/system prompts first.
+
+### Local AI Tool Folders & Git Hygiene
+Remind contributors to keep local AI tool data out of Git:
+
+* Add local folders like `.codex/` and `.claude/` to `.gitignore` because they may contain sensitive prompts, logs, or secrets.
+* Put shareable skill packs in `.agents/skills/` so teams can version and share them safely.
 ```
 
 #### Section 15: MCP Servers & Tooling (Optional)
@@ -583,18 +590,20 @@ Use these MCP servers when the task matches their capability:
 If a server is not needed for this project, disable it in the MCP config.
 ```
 
-#### Section 16: Project Memory (ROADMAP/PROGRESS) (Optional)
+#### Section 16: Project Progress Memory (PROGRESS.md) (Optional)
 
-If the user wants project memory tracking:
+If the user wants project progress tracking:
 ```markdown
-## Project Memory & Progress Tracking
+## Project Progress Tracking
 
-Keep lightweight, human-readable project memory:
+Use one lightweight progress file that all agents can continue from:
 
-* **Roadmap**: `ROADMAP.md` (future ideas, use checklists)
 * **Progress**: `PROGRESS.md` (current focus + recent completions)
+* **Required field**: `Original Prompt` (copy exact user request that started the task)
 
-If a memory MCP server is used instead, keep these files minimal or omit them.
+At the start of every task, read `PROGRESS.md` first, compare with the active request, and continue unfinished work before starting unrelated changes.
+
+If a memory MCP server is used instead, keep `PROGRESS.md` minimal or omit it.
 ```
 
 ### Phase 6: File Creation/Update
@@ -691,29 +700,22 @@ See `references/section-templates.md` for complete section templates per stack.
 
 See `references/merge-strategy.md` for detailed merge logic.
 
-## Roadmap & Progress (Maintainers)
+## Progress Tracking (Maintainers)
 
-When discussing or implementing new ideas/features for this skill, keep these two files in sync:
+When discussing or implementing new ideas/features for this skill, use `PROGRESS.md` as the single continuity file.
 
-- `ROADMAP.md` — future plan (uses checklists so items can be marked done)
-- `PROGRESS.md` — current work + recent completions
+Required `PROGRESS.md` sections:
+- `Original Prompt` (verbatim user request that initiated the task)
+- `Current Status` (what is done, in progress, blocked)
+- `Next Steps` (clear continuation checklist)
 
-Archiving rule: keep each file ~200–300 lines max; if it exceeds, archive oldest entries to `docs/archives/ROADMAP-YYYY-MM.md` and `docs/archives/PROGRESS-YYYY-MM.md`.
+Maintainer workflow:
+1. Read `PROGRESS.md` before starting any task.
+2. Compare `Original Prompt` and `Current Status` against the new request.
+3. Continue unfinished work first when it matches the same objective.
+4. Update `Current Status` and `Next Steps` before ending the task.
 
-Helper scripts (optional):
-- Launcher (best-effort auto-detect): `skills/agents-md-generator/scripts/archive-roadmap-progress`
-- Bash (implementation): `skills/agents-md-generator/scripts/archive-roadmap-progress.sh` (macOS/Linux + Git Bash/WSL)
-- PowerShell (implementation): `skills/agents-md-generator/scripts/archive-roadmap-progress.ps1` (stock Windows/macOS/Linux)
-- Windows cmd wrapper: `skills/agents-md-generator/scripts/archive-roadmap-progress.cmd`
-- Agent tooling detection: `skills/agents-md-generator/scripts/detect-agent-context`
-- Skill duplicate scan: `skills/agents-md-generator/scripts/scan-skill-duplicates`
-
-Recommended maintainer workflow (so line limits stay enforced automatically):
-1. After editing `ROADMAP.md` or `PROGRESS.md`, run a check:
-   - bash/zsh: `bash skills/agents-md-generator/scripts/archive-roadmap-progress --check`
-   - Windows cmd: `skills\\agents-md-generator\\scripts\\archive-roadmap-progress.cmd --check`
-2. If either file exceeds the limit, run `--fix` to archive the oldest Completed/Done entries.
-3. Record the change in both `ROADMAP.md` and `PROGRESS.md`.
+Archiving rule: keep `PROGRESS.md` readable (about 200-300 lines max). Move old completed entries to `docs/archives/PROGRESS-YYYY-MM.md` when needed.
 
 ## Output File Naming
 
