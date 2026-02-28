@@ -46,6 +46,15 @@
       "skills": [
         "./skills/ask-questions-if-underspecified"
       ]
+    },
+    {
+      "name": "media-skills",
+      "description": "Skills for searching, downloading, and processing video and media content.",
+      "source": "./",
+      "strict": false,
+      "skills": [
+        "./skills/find-scene"
+      ]
     }
   ]
 }
