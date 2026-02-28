@@ -63,6 +63,7 @@ You can also copy individual skill instructions directly into your AI agent's co
 | [design-system-generator](./skills/design-system-generator) | Official | Generate a project-specific DESIGN_SYSTEM.md that enforces consistent UI/UX across SPAs, traditional server-rendered sites, and hybrid systems. Includes tokens, component rules, accessibility gates, and production asset/manifest guidance. |
 | [docker-local-dev](./skills/docker-local-dev) | Official | Generate Docker Compose and Dockerfile configurations for local development through interactive Q&A. Supports PHP/Laravel, WordPress, Drupal, Joomla, Node.js, and Python stacks with Nginx, Supervisor/PM2, databases, Redis, and email testing. Always asks clarifying questions before generating configurations. |
 | [documentation-guidelines](./skills/documentation-guidelines) | Official | Write or update backend feature documentation that follows a repo's DOCUMENTATION_GUIDELINES.md (or equivalent) across any project. Use when asked to create/update module docs, API contracts, or backend documentation that must include architecture, endpoints, payloads, Mermaid diagrams, and seeding instructions. |
+| [find-scene](./skills/find-scene) | — | Search movie and TV show scenes by dialog, time, or visual description. Download video clips, extract frames, find quotes, identify movies from quotes, and query IMDB data. Use when the user wants to find a specific scene, download a clip, search for a quote in a movie/show, extract a frame, or get movie information via the find-scene API. |
 | [laravel-11-12-app-guidelines](./skills/laravel-11-12-app-guidelines) | Official | Guidelines and workflow for working on Laravel 11 or Laravel 12 applications across common stacks (API-only or full-stack), including optional Docker Compose/Sail, Inertia + React, Livewire, Vue, Blade, Tailwind v4, Fortify, Wayfinder, PHPUnit, Pint, and Laravel Boost MCP tools. Use when implementing features, fixing bugs, or making UI/backend changes while following project-specific instructions (AGENTS.md, docs/). |
 <!-- SKILLS_TABLE_END -->
 
@@ -77,6 +78,7 @@ Plugins bundle related skills so you can install by domain. The source of truth 
 | [laravel-app-skills](./plugin-groups.json) | Guidelines for building Laravel 11/12 apps across common stacks and tooling. | [laravel-11-12-app-guidelines](./skills/laravel-11-12-app-guidelines) |
 | [devops-skills](./plugin-groups.json) | Skills for Docker, CI/CD, and local development environment configuration. | [docker-local-dev](./skills/docker-local-dev) |
 | [workflow-skills](./plugin-groups.json) | Skills for AI agent workflow and requirements clarification processes. | [ask-questions-if-underspecified](./skills/ask-questions-if-underspecified) |
+| [media-skills](./plugin-groups.json) | Skills for searching, downloading, and processing video and media content. | [find-scene](./skills/find-scene) |
 <!-- PLUGINS_TABLE_END -->
 
 ## Contributing
