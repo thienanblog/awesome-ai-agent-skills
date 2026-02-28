@@ -2,6 +2,7 @@
 name: documentation-guidelines
 description: Write or update backend feature documentation that follows a repo's DOCUMENTATION_GUIDELINES.md (or equivalent) across any project. Use when asked to create/update module docs, API contracts, or backend documentation that must include architecture, endpoints, payloads, Mermaid diagrams, and seeding instructions.
 author: Official
+context: fork
 ---
 
 # Documentation Guidelines
@@ -16,7 +17,7 @@ Produce a single, canonical module doc that matches the repository's documentati
 4. Follow the required section order from the guidelines and keep the doc in English.
 
 ## Required Content Checklist
-- Add the metadata header (Version, Last Updated, Maintained By).
+- Start every doc with YAML frontmatter metadata (`name`, `description`, `version`, `last_updated`, `maintained_by`), then write the rest as standard Markdown sections.
 - Include Mermaid ERD and Mermaid flowchart.
 - Document controllers/routes, requests, resources, models, services, jobs, and providers.
 - Provide endpoint table, headers, payloads, response examples, and error dictionary.
@@ -24,6 +25,7 @@ Produce a single, canonical module doc that matches the repository's documentati
 - Add local development + seeding commands and troubleshooting/log hints.
 
 ## Style Rules
+- Use frontmatter + Markdown consistently (no plain-text-only docs).
 - Describe contracts and behavior, not UI.
 - Use tables for endpoints and business rules.
 - Keep Mermaid labels short and safe; wrap special characters in quotes if needed.

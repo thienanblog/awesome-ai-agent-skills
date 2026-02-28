@@ -2,6 +2,7 @@
 name: ask-questions-if-underspecified
 description: Clarify requirements before implementing. Do not use automatically, only when invoked explicitly.
 author: Tibo (Codex Team)
+context: fork
 ---
 
 # Ask Questions If Underspecified

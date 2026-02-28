@@ -2,6 +2,7 @@
 name: design-system-generator
 description: Generate a project-specific DESIGN_SYSTEM.md that enforces consistent UI/UX across SPAs, traditional server-rendered sites, and hybrid systems. Includes tokens, component rules, accessibility gates, and production asset/manifest guidance.
 author: Official
+context: fork
 ---
 
 # Design System Generator
