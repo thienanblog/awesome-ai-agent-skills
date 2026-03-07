@@ -6,6 +6,7 @@ import { parse as parseYaml } from 'yaml';
 
 const SKILLS_DIR = 'skills';
 const MARKETPLACE_FILE = '.claude-plugin/marketplace.json';
+const PLUGIN_GROUPS_FILE = 'plugin-groups.json';
 const PLUGIN_SUFFIX = '-skills';
 const PLUGIN_SOURCE = './';
 
@@ -32,6 +33,16 @@ function success(message) {
 
 function hasPluginSuffix(value) {
   return value.endsWith(PLUGIN_SUFFIX);
+}
+
+function buildExpectedMarketplacePlugins(pluginGroups) {
+  return pluginGroups.map(plugin => ({
+    name: plugin.name,
+    description: plugin.description,
+    source: PLUGIN_SOURCE,
+    strict: false,
+    skills: plugin.skills.map(skillName => `./skills/${skillName}`)
+  }));
 }
 
 /**
@@ -102,9 +113,78 @@ function validateSkill(skillName) {
 }
 
 /**
+ * Validate plugin-groups.json
+ */
+function validatePluginGroups(skillsInFolder) {
+  if (!fs.existsSync(PLUGIN_GROUPS_FILE)) {
+    error(`Missing ${PLUGIN_GROUPS_FILE}`);
+    return null;
+  }
+
+  let config;
+  try {
+    const content = fs.readFileSync(PLUGIN_GROUPS_FILE, 'utf-8');
+    config = JSON.parse(content);
+  } catch (e) {
+    error(`${PLUGIN_GROUPS_FILE}: Invalid JSON - ${e.message}`);
+    return null;
+  }
+
+  if (!config || !Array.isArray(config.plugins)) {
+    error(`${PLUGIN_GROUPS_FILE}: Missing or invalid "plugins" array`);
+    return null;
+  }
+
+  const assignedSkills = new Set();
+  const pluginNames = new Set();
+
+  for (const plugin of config.plugins) {
+    if (!plugin.name) {
+      error(`${PLUGIN_GROUPS_FILE}: Plugin missing "name"`);
+      continue;
+    }
+    if (pluginNames.has(plugin.name)) {
+      error(`${PLUGIN_GROUPS_FILE}: Duplicate plugin "${plugin.name}"`);
+    }
+    pluginNames.add(plugin.name);
+
+    if (!hasPluginSuffix(plugin.name)) {
+      error(`${PLUGIN_GROUPS_FILE}: Plugin "${plugin.name}" must end with "${PLUGIN_SUFFIX}"`);
+    }
+    if (!plugin.description) {
+      error(`${PLUGIN_GROUPS_FILE}: Plugin "${plugin.name}" missing "description"`);
+    }
+    if (!Array.isArray(plugin.skills) || plugin.skills.length === 0) {
+      error(`${PLUGIN_GROUPS_FILE}: Plugin "${plugin.name}" missing "skills" array`);
+      continue;
+    }
+
+    for (const skillName of plugin.skills) {
+      if (!skillsInFolder.includes(skillName)) {
+        error(`${PLUGIN_GROUPS_FILE}: Plugin "${plugin.name}" references unknown skill "${skillName}"`);
+        continue;
+      }
+      if (assignedSkills.has(skillName)) {
+        error(`${PLUGIN_GROUPS_FILE}: Skill "${skillName}" listed in multiple plugins`);
+        continue;
+      }
+      assignedSkills.add(skillName);
+    }
+  }
+
+  for (const skillName of skillsInFolder) {
+    if (!assignedSkills.has(skillName)) {
+      error(`${PLUGIN_GROUPS_FILE}: Skill "${skillName}" not assigned to any plugin`);
+    }
+  }
+
+  return config.plugins;
+}
+
+/**
  * Validate marketplace.json
  */
-function validateMarketplace(skillsInFolder) {
+function validateMarketplace(skillsInFolder, pluginGroups) {
   // Check file exists
   if (!fs.existsSync(MARKETPLACE_FILE)) {
     error(`Missing ${MARKETPLACE_FILE}`);
@@ -137,6 +217,7 @@ function validateMarketplace(skillsInFolder) {
     return marketplace;
   }
 
+  const pluginNames = new Set();
   // Get skills listed in marketplace from the skills arrays
   const skillsInMarketplace = new Set();
   for (const plugin of marketplace.plugins) {
@@ -144,8 +225,15 @@ function validateMarketplace(skillsInFolder) {
       error(`${MARKETPLACE_FILE}: Plugin missing "name" field`);
       continue;
     }
+    if (pluginNames.has(plugin.name)) {
+      error(`${MARKETPLACE_FILE}: Duplicate plugin "${plugin.name}"`);
+    }
+    pluginNames.add(plugin.name);
     if (!hasPluginSuffix(plugin.name)) {
       error(`${MARKETPLACE_FILE}: Plugin "${plugin.name}" must end with "${PLUGIN_SUFFIX}"`);
+    }
+    if (!plugin.description) {
+      error(`${MARKETPLACE_FILE}: Plugin "${plugin.name}" missing "description" field`);
     }
     if (!plugin.source) {
       error(`${MARKETPLACE_FILE}: Plugin "${plugin.name}" missing "source" field`);
@@ -166,6 +254,9 @@ function validateMarketplace(skillsInFolder) {
     if (!Array.isArray(plugin.skills)) {
       error(`${MARKETPLACE_FILE}: Plugin "${plugin.name}" missing "skills" array`);
       continue;
+    }
+    if (plugin.strict !== false) {
+      error(`${MARKETPLACE_FILE}: Plugin "${plugin.name}" must set "strict" to false`);
     }
 
     // Extract skill names from skills array
@@ -193,6 +284,39 @@ function validateMarketplace(skillsInFolder) {
   for (const skill of skillsInMarketplace) {
     if (!skillsInFolder.includes(skill)) {
       error(`Skill "${skill}" in marketplace.json but not found in skills folder`);
+    }
+  }
+
+  if (pluginGroups) {
+    const expectedPlugins = buildExpectedMarketplacePlugins(pluginGroups);
+    const actualByName = new Map(marketplace.plugins.map(plugin => [plugin.name, plugin]));
+    const expectedByName = new Map(expectedPlugins.map(plugin => [plugin.name, plugin]));
+
+    for (const expectedPlugin of expectedPlugins) {
+      const actualPlugin = actualByName.get(expectedPlugin.name);
+      if (!actualPlugin) {
+        error(`${MARKETPLACE_FILE}: Missing plugin "${expectedPlugin.name}" from ${PLUGIN_GROUPS_FILE}`);
+        continue;
+      }
+
+      if (actualPlugin.description !== expectedPlugin.description) {
+        error(`${MARKETPLACE_FILE}: Plugin "${expectedPlugin.name}" description is out of sync with ${PLUGIN_GROUPS_FILE}`);
+      }
+      if (actualPlugin.source !== expectedPlugin.source) {
+        error(`${MARKETPLACE_FILE}: Plugin "${expectedPlugin.name}" source is out of sync with ${PLUGIN_GROUPS_FILE}`);
+      }
+      if (actualPlugin.strict !== expectedPlugin.strict) {
+        error(`${MARKETPLACE_FILE}: Plugin "${expectedPlugin.name}" strict flag is out of sync with ${PLUGIN_GROUPS_FILE}`);
+      }
+      if (JSON.stringify(actualPlugin.skills) !== JSON.stringify(expectedPlugin.skills)) {
+        error(`${MARKETPLACE_FILE}: Plugin "${expectedPlugin.name}" skills are out of sync with ${PLUGIN_GROUPS_FILE}`);
+      }
+    }
+
+    for (const pluginName of actualByName.keys()) {
+      if (!expectedByName.has(pluginName)) {
+        error(`${MARKETPLACE_FILE}: Unexpected plugin "${pluginName}" not defined in ${PLUGIN_GROUPS_FILE}`);
+      }
     }
   }
 
@@ -224,9 +348,13 @@ function main() {
   }
   log('');
 
+  log('🧩 Validating plugin-groups.json...');
+  const pluginGroups = validatePluginGroups(skillDirs);
+  log('');
+
   // Validate marketplace.json
   log('📦 Validating marketplace.json...');
-  validateMarketplace(skillDirs);
+  validateMarketplace(skillDirs, pluginGroups);
   log('');
 
   // Summary

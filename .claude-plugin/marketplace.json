@@ -55,6 +55,15 @@
       "skills": [
         "./skills/find-scene"
       ]
+    },
+    {
+      "name": "office-web-ui-skills",
+      "description": "Skills for designing and refactoring admin, internal, and back-office web interfaces.",
+      "source": "./",
+      "strict": false,
+      "skills": [
+        "./skills/office-web-ui-system"
+      ]
     }
   ]
 }
