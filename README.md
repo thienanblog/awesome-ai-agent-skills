@@ -33,6 +33,9 @@ Skills are self-contained instruction sets that teach AI agents specific workflo
 
 # Install workflow/clarification skill
 /plugin install workflow-skills@awesome-ai-agent-skills
+
+# Install office web UI skill
+/plugin install office-web-ui-skills@awesome-ai-agent-skills
 ```
 
 **Updating the marketplace**
@@ -65,6 +68,7 @@ You can also copy individual skill instructions directly into your AI agent's co
 | [documentation-guidelines](./skills/documentation-guidelines) | Official | Write or update backend feature documentation that follows a repo's DOCUMENTATION_GUIDELINES.md (or equivalent) across any project. Use when asked to create/update module docs, API contracts, or backend documentation that must include architecture, endpoints, payloads, Mermaid diagrams, and seeding instructions. |
 | [find-scene](./skills/find-scene) | — | Search movie and TV show scenes by dialog, time, or visual description. Download video clips, extract frames, find quotes, identify movies from quotes, and query IMDB data. Use when the user wants to find a specific scene, download a clip, search for a quote in a movie/show, extract a frame, or get movie information via the find-scene API. |
 | [laravel-11-12-app-guidelines](./skills/laravel-11-12-app-guidelines) | Official | Guidelines and workflow for working on Laravel 11 or Laravel 12 applications across common stacks (API-only or full-stack), including optional Docker Compose/Sail, Inertia + React, Livewire, Vue, Blade, Tailwind v4, Fortify, Wayfinder, PHPUnit, Pint, and Laravel Boost MCP tools. Use when implementing features, fixing bugs, or making UI/backend changes while following project-specific instructions (AGENTS.md, docs/). |
+| [office-web-ui-system](./skills/office-web-ui-system) | Official | Design and refactor office-style web app interfaces for admin, internal, and back-office products. Use when an AI agent needs to build or improve navigation shells, flyout menus, side panels, docks, table-heavy workspaces, semantic locator classes, or reusable UI structure that stays portable across Vue, React, Laravel, and other web stacks with or without PrimeVue. |
 <!-- SKILLS_TABLE_END -->
 
 ## Plugin Groups
@@ -79,6 +83,7 @@ Plugins bundle related skills so you can install by domain. The source of truth 
 | [devops-skills](./plugin-groups.json) | Skills for Docker, CI/CD, and local development environment configuration. | [docker-local-dev](./skills/docker-local-dev) |
 | [workflow-skills](./plugin-groups.json) | Skills for AI agent workflow and requirements clarification processes. | [ask-questions-if-underspecified](./skills/ask-questions-if-underspecified) |
 | [media-skills](./plugin-groups.json) | Skills for searching, downloading, and processing video and media content. | [find-scene](./skills/find-scene) |
+| [office-web-ui-skills](./plugin-groups.json) | Skills for designing and refactoring admin, internal, and back-office web interfaces. | [office-web-ui-system](./skills/office-web-ui-system) |
 <!-- PLUGINS_TABLE_END -->
 
 ## Contributing
@@ -94,14 +99,23 @@ We welcome contributions! Here's a quick start:
    description: What the skill does and when to use it.
    ---
    ```
-4. **Validate locally before pushing:**
+4. Add the skill to `plugin-groups.json` so it belongs to exactly one plugin.
+5. **Sync and validate locally before pushing:**
    ```bash
    npm install
+   npm run sync
    npm run validate
    ```
-5. Submit a pull request
+6. Submit a pull request
 
 See **[CONTRIBUTING.md](./CONTRIBUTING.md)** for detailed guidelines, validation instructions, and troubleshooting.
+
+## Validation Workflow
+
+- `plugin-groups.json` is the source of truth for plugin membership.
+- `npm run sync` regenerates `.claude-plugin/marketplace.json` and the generated tables in `README.md`.
+- `npm run validate` checks skill metadata, plugin assignments, and marketplace/plugin consistency.
+- Pull request CI reruns `npm run sync` and fails if generated files are out of date.
 
 ## For AI Agents
 
