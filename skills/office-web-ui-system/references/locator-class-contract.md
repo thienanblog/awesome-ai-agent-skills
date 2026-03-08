@@ -44,6 +44,12 @@ Do not rely on raw utility strings alone for:
 
 - `layout-sidebar-flyout`
 - `layout-topbar-status-pill`
+- `sales-dashboard-page`
+- `sales-dashboard-page__hero`
+- `sales-dashboard-page__stats-grid`
+- `sales-dashboard-page__filter-bar`
+- `sales-dashboard-page__table-wrap`
+- `inventory-report-page__summary-strip`
 - `quote-create-page__side-panel-stack`
 - `quote-workspace-dock__section-actions`
 - `technical-orders-page__filter-bar`
@@ -63,6 +69,8 @@ Do not rely on raw utility strings alone for:
   - list items
   - table rows
   - cards in a repeated collection
+  - stat cards inside one named stats grid
+  - mobile record cards inside one named record list
   - repeated controls inside one component family
 - If a major-region class appears across unrelated files, rename it to be feature-specific.
 
@@ -80,6 +88,7 @@ When editing a major UI region:
 - Prefer `layout-` prefix for global shell components.
 - Prefer `*-page__*` for page-specific regions.
 - Prefer `*-panel`, `*-dock`, `*-toolbar`, `*-filter-bar`, `*-table-wrap` for high-signal regions.
+- Prefer `*-page__hero`, `*-page__stats-grid`, `*-page__summary-strip`, `*-page__action-bar` for repeated dashboard and report structures.
 
 ## Scanner usage
 
