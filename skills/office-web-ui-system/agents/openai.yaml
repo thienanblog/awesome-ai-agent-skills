@@ -1,4 +1,4 @@
 interface:
   display_name: "Office Web UI System"
-  short_description: "Office-style UI rules and locators"
-  default_prompt: "Use $office-web-ui-system to design or refactor an internal web app UI with semantic locator classes and office-style shell patterns."
+  short_description: "Office web app playbook for dashboards, pages, components, and locators"
+  default_prompt: "Use $office-web-ui-system to design or refactor an internal web app UI with office-style shell patterns, polished dashboard and page composition, reusable component regions, and semantic locator classes."
