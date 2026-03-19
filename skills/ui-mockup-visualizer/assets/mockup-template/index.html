@@ -4,11 +4,31 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>UI Mockup Visualizer</title>
-    <link rel="stylesheet" href="./styles.css" />
+    <script>
+      tailwind = {
+        config: {
+          theme: {
+            extend: {
+              colors: {
+                accent: {
+                  50: "#fff7ed",
+                  100: "#ffedd5",
+                  500: "#f97316",
+                  700: "#c2410c"
+                }
+              }
+            }
+          }
+        }
+      };
+    </script>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="./runtime/styles.css" />
   </head>
-  <body>
+  <body class="bg-stone-100 text-stone-950">
     <div id="app"></div>
     <script src="./mockup-data.js"></script>
-    <script src="./app.js"></script>
+    <script src="/__mockup_reload.js"></script>
+    <script type="module" src="./runtime/viewer.mjs"></script>
   </body>
 </html>
