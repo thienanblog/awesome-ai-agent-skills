@@ -9,6 +9,7 @@ from pathlib import Path
 
 SKILL_DIR = Path(__file__).resolve().parent.parent
 TEMPLATE_DIR = SKILL_DIR / "assets" / "mockup-template"
+RUNTIME_DIR = SKILL_DIR / "assets" / "mockup-runtime"
 
 
 def template_dir_for(platform: str) -> Path:
@@ -211,8 +212,24 @@ def write_mockup_data(path: Path, title: str, platform: str) -> None:
     payload = {
         "question": title,
         "platform": platform,
+        "uiText": {
+            "visualReview": "Visual Review",
+            "reviewSubtitle": "Use the options to confirm the structure quickly. The mockup stays fixed-canvas on purpose so the layout remains exact.",
+            "workingNotes": "Working Notes",
+            "recommended": "Recommended",
+            "selected": "Selected",
+            "rationale": "Rationale",
+            "benchmarks": "Benchmarks",
+            "canvas": "Canvas",
+            "replyShortcuts": "Reply shortcuts",
+            "replyOne": "Option A",
+            "replyMany": "Option A + C",
+            "replyNone": "None, I want ...",
+            "captureLabel": "Approved mockup checkpoint",
+        },
         "notes": [
             "Replace this starter data with the real layout idea.",
+            "Translate uiText, notes, labels, and summaries to the user's language before sharing.",
             "Keep Option A, Option B, and Option C labels stable for user review.",
         ],
         "options": sample_options(platform),
@@ -258,13 +275,19 @@ def main() -> int:
         else:
             shutil.copy2(source, destination)
 
+    runtime_destination = target_dir / "runtime"
+    if runtime_destination.exists() and args.overwrite:
+        shutil.rmtree(runtime_destination)
+    shutil.copytree(RUNTIME_DIR, runtime_destination, dirs_exist_ok=args.overwrite)
+
     title = args.title.strip() or "UI mockup question"
     write_mockup_data(target_dir / "mockup-data.js", title, args.platform)
 
     print(f"Mockup workspace ready: {target_dir}")
     print(f"Suggested slug: {slugify(title)}")
     print(f"Template: {template_dir.name}")
-    print("Edit mockup-data.js first, then start the preview server.")
+    print("Edit mockup-data.js first, localize uiText and labels, then start the preview server.")
+    print("Stop the preview server when the user finishes reviewing the mockup.")
     return 0
 
 

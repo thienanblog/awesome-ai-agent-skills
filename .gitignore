@@ -3,6 +3,7 @@ __pycache__/
 .idea/
 .vscode/
 node_modules/
+docs/awesome-ai-agent-skills/visuals/
 
 # Claude Code local settings (may contain sensitive data)
 .claude/settings.local.json
