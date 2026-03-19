@@ -43,6 +43,13 @@
       "skills": [
         "office-web-ui-system"
       ]
+    },
+    {
+      "name": "ui-design-skills",
+      "description": "Skills for visualizing UI ideas as reviewable mockups and wireframes across web, mobile, and desktop apps.",
+      "skills": [
+        "ui-mockup-visualizer"
+      ]
     }
   ]
 }
