@@ -36,6 +36,9 @@ Skills are self-contained instruction sets that teach AI agents specific workflo
 
 # Install office web UI skill
 /plugin install office-web-ui-skills@awesome-ai-agent-skills
+
+# Install UI mockup and wireframe skill
+/plugin install ui-design-skills@awesome-ai-agent-skills
 ```
 
 **Updating the marketplace**
@@ -70,6 +73,7 @@ You can also copy individual skill instructions directly into your AI agent's co
 | [laravel-11-12-app-guidelines](./skills/laravel-11-12-app-guidelines) | Official | Guidelines and workflow for working on Laravel 11 or Laravel 12 applications across common stacks (API-only or full-stack), including optional Docker Compose/Sail, Inertia + React, Livewire, Vue, Blade, Tailwind v4, Fortify, Wayfinder, PHPUnit, Pint, and Laravel Boost MCP tools. Use when implementing features, fixing bugs, or making UI/backend changes while following project-specific instructions (AGENTS.md, docs/). |
 | [noizai-voice-workflow](./skills/noizai-voice-workflow) | — | Build human-like TTS voice workflows with style controls, local/cloud backends, and delivery-ready output. Use when the user needs expressive text-to-speech generation, voice broadcast assets, or app-ready voice messages. |
 | [office-web-ui-system](./skills/office-web-ui-system) | Official | Design and refactor polished office-style web app interfaces for admin, internal, and back-office products. Use when an AI agent needs to build or improve dashboards, stat cards, page heroes, filter/search bars, data tables, shells, side panels, semantic locator classes, or reusable page composition that stays portable across Vue, React, Laravel, and other web stacks with or without PrimeVue. |
+| [ui-mockup-visualizer](./skills/ui-mockup-visualizer) | Official | Create fixed-canvas HTML wireframes and visual mockups that help an AI agent verify and explain its understanding of UI/UX requests for websites, mobile apps, and desktop apps. Use when a user asks for UI ideas, visual confirmation, layout exploration, wireframes, HTML mockups, design critique, or says things like "show me the layout", "make a mockup", "wireframe this", "give me 3 UI options", "visualize what you mean", "show the screen idea", "show the sidebar idea", or "turn this into HTML so I can review it". This skill always proposes Option A, Option B, and Option C, marks one AI-recommended option, supports multi-select or "none", uses stable web/mobile/desktop templates, starts a local preview server, and can capture review screenshots into docs/awesome-ai-agent-skills/visuals/. |
 <!-- SKILLS_TABLE_END -->
 
 ## Plugin Groups
@@ -85,6 +89,7 @@ Plugins bundle related skills so you can install by domain. The source of truth 
 | [workflow-skills](./plugin-groups.json) | Skills for AI agent workflow and requirements clarification processes. | [ask-questions-if-underspecified](./skills/ask-questions-if-underspecified) |
 | [media-skills](./plugin-groups.json) | Skills for searching, downloading, and processing video and media content. | [find-scene](./skills/find-scene)<br>[noizai-voice-workflow](./skills/noizai-voice-workflow) |
 | [office-web-ui-skills](./plugin-groups.json) | Skills for designing and refactoring admin, internal, and back-office web interfaces. | [office-web-ui-system](./skills/office-web-ui-system) |
+| [ui-design-skills](./plugin-groups.json) | Skills for visualizing UI ideas as reviewable mockups and wireframes across web, mobile, and desktop apps. | [ui-mockup-visualizer](./skills/ui-mockup-visualizer) |
 <!-- PLUGINS_TABLE_END -->
 
 ## Contributing
@@ -98,6 +103,7 @@ We welcome contributions! Here's a quick start:
    ---
    name: your-skill-name
    description: What the skill does and when to use it.
+   author: Your Name or Team
    ---
    ```
 4. Add the skill to `plugin-groups.json` so it belongs to exactly one plugin.

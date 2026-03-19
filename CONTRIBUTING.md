@@ -35,12 +35,13 @@ mkdir -p skills/your-skill-name
 
 ### Step 2: Create SKILL.md
 
-Create a `SKILL.md` file with the required YAML frontmatter:
+Create a `SKILL.md` file with YAML frontmatter. `name` and `description` are required. `author` is strongly recommended:
 
 ```markdown
 ---
 name: your-skill-name
 description: Brief description of what the skill does and when to use it.
+author: Your Name or Team
 ---
 
 # Your Skill Name
@@ -201,6 +202,7 @@ git push origin main
 |-------|-------------|
 | `name` | Skill identifier (should match folder name, kebab-case) |
 | `description` | Clear description of what the skill does and when to use it |
+| `author` | Recommended display name for the README skills table |
 
 ### Example
 
@@ -208,6 +210,7 @@ git push origin main
 ---
 name: api-documentation
 description: Generate comprehensive API documentation from code. Use when documenting REST APIs, GraphQL endpoints, or RPC services.
+author: Official
 ---
 ```
 

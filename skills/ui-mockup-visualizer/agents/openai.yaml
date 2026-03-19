@@ -1,0 +1,4 @@
+interface:
+  display_name: "UI Mockup Visualizer"
+  short_description: "Show 3 UI directions as HTML wireframes"
+  default_prompt: "Use $ui-mockup-visualizer to turn this UI/UX request into Option A, Option B, and Option C HTML wireframes with one recommended direction."

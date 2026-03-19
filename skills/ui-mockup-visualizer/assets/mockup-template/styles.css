@@ -1,0 +1,326 @@
+:root {
+  --bg: #f4f1eb;
+  --surface: rgba(255, 255, 255, 0.84);
+  --surface-strong: #ffffff;
+  --ink: #111111;
+  --muted: #6f675f;
+  --line: rgba(38, 28, 20, 0.14);
+  --line-strong: rgba(38, 28, 20, 0.24);
+  --accent: #d06c47;
+  --accent-soft: rgba(208, 108, 71, 0.14);
+  --focus-fill: #f7eadf;
+  --radius-lg: 26px;
+  --radius-md: 18px;
+  --radius-sm: 12px;
+  --shadow: 0 20px 60px rgba(56, 34, 22, 0.12);
+  --font: "SF Pro Display", "Segoe UI", sans-serif;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  margin: 0;
+  min-height: 100%;
+  font-family: var(--font);
+  color: var(--ink);
+  background:
+    radial-gradient(circle at top left, rgba(208, 108, 71, 0.16), transparent 32%),
+    radial-gradient(circle at bottom right, rgba(44, 120, 153, 0.12), transparent 28%),
+    var(--bg);
+}
+
+body {
+  min-width: 1240px;
+}
+
+.page {
+  display: grid;
+  grid-template-columns: 320px minmax(0, 1fr);
+  min-height: 100vh;
+  gap: 24px;
+  padding: 24px;
+}
+
+.rail,
+.stage-shell {
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-lg);
+  backdrop-filter: blur(18px);
+  box-shadow: var(--shadow);
+}
+
+.rail {
+  padding: 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+.eyebrow {
+  margin: 0 0 6px;
+  font-size: 12px;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+.title {
+  margin: 0;
+  font-size: 28px;
+  line-height: 1.15;
+}
+
+.subtitle {
+  margin: 8px 0 0;
+  color: var(--muted);
+  font-size: 14px;
+  line-height: 1.55;
+}
+
+.note-list,
+.rationale-list,
+.benchmark-list {
+  margin: 0;
+  padding-left: 18px;
+  color: var(--muted);
+  font-size: 14px;
+  line-height: 1.55;
+}
+
+.options {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.option-card {
+  border: 1px solid var(--line);
+  border-radius: var(--radius-md);
+  background: rgba(255, 255, 255, 0.6);
+  padding: 16px;
+  cursor: pointer;
+  transition: transform 120ms ease, border-color 120ms ease, background 120ms ease;
+}
+
+.option-card:hover {
+  transform: translateY(-1px);
+  border-color: var(--line-strong);
+}
+
+.option-card.active {
+  border-color: rgba(208, 108, 71, 0.5);
+  background: rgba(255, 255, 255, 0.92);
+}
+
+.option-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.option-name {
+  font-size: 16px;
+  font-weight: 700;
+}
+
+.badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 999px;
+  padding: 6px 10px;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.badge-recommended {
+  background: var(--accent-soft);
+  color: var(--accent);
+}
+
+.option-summary {
+  margin: 10px 0 0;
+  color: var(--muted);
+  font-size: 14px;
+  line-height: 1.5;
+}
+
+.stage-shell {
+  display: grid;
+  grid-template-rows: auto minmax(0, 1fr);
+  min-height: calc(100vh - 48px);
+  overflow: hidden;
+}
+
+.stage-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 24px;
+  padding: 24px 28px 20px;
+  border-bottom: 1px solid var(--line);
+}
+
+.stage-meta {
+  display: grid;
+  gap: 14px;
+}
+
+.stage-title {
+  margin: 0;
+  font-size: 24px;
+  line-height: 1.15;
+}
+
+.stage-copy {
+  margin: 0;
+  color: var(--muted);
+  font-size: 15px;
+  line-height: 1.6;
+  max-width: 760px;
+}
+
+.stage-tags {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.tag {
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.8);
+  padding: 7px 11px;
+  font-size: 12px;
+  color: var(--muted);
+}
+
+.stage-body {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 320px;
+  min-height: 0;
+}
+
+.canvas-pane {
+  padding: 28px;
+  overflow: auto;
+  border-right: 1px solid var(--line);
+}
+
+.canvas-shell {
+  display: inline-block;
+  border-radius: 28px;
+  padding: 18px;
+  border: 1px solid rgba(38, 28, 20, 0.08);
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.9), rgba(247, 243, 238, 0.9));
+}
+
+.canvas-shell[data-device="mobile-app"] {
+  border-radius: 38px;
+}
+
+.canvas-shell[data-device="desktop-app"] {
+  border-radius: 22px;
+}
+
+.canvas {
+  position: relative;
+  overflow: hidden;
+  background:
+    linear-gradient(0deg, rgba(17, 17, 17, 0.02) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(17, 17, 17, 0.02) 1px, transparent 1px),
+    #fbfaf8;
+  background-size: 24px 24px;
+  border-radius: 20px;
+  border: 1px solid rgba(38, 28, 20, 0.08);
+}
+
+.canvas[data-device="mobile-app"] {
+  border-radius: 28px;
+}
+
+.block {
+  position: absolute;
+  display: flex;
+  align-items: flex-start;
+  justify-content: flex-start;
+  padding: 12px;
+  border-radius: 14px;
+  border: 1px solid rgba(38, 28, 20, 0.14);
+  background: rgba(255, 255, 255, 0.8);
+  color: #3f3832;
+}
+
+.block.tone-muted {
+  background: rgba(236, 232, 226, 0.7);
+  color: rgba(63, 56, 50, 0.78);
+}
+
+.block.tone-accent {
+  background: var(--focus-fill);
+  border-color: rgba(208, 108, 71, 0.42);
+  box-shadow: inset 0 0 0 1px rgba(208, 108, 71, 0.08);
+}
+
+.block.tone-strong {
+  background: rgba(208, 108, 71, 0.9);
+  border-color: rgba(208, 108, 71, 1);
+  color: white;
+}
+
+.block-kind {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  font-size: 10px;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: rgba(63, 56, 50, 0.5);
+}
+
+.block-label {
+  font-size: 14px;
+  font-weight: 600;
+  line-height: 1.35;
+  max-width: 84%;
+}
+
+.detail-pane {
+  padding: 24px;
+  overflow: auto;
+  display: grid;
+  gap: 20px;
+  align-content: start;
+}
+
+.detail-card {
+  padding: 18px;
+  border-radius: var(--radius-md);
+  background: rgba(255, 255, 255, 0.66);
+  border: 1px solid var(--line);
+}
+
+.detail-title {
+  margin: 0 0 10px;
+  font-size: 14px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+.reply-box {
+  border-radius: var(--radius-md);
+  border: 1px dashed rgba(208, 108, 71, 0.4);
+  padding: 16px;
+  background: rgba(208, 108, 71, 0.08);
+  color: #71412b;
+  font-size: 14px;
+  line-height: 1.55;
+}
