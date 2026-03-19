@@ -1,0 +1,67 @@
+:root {
+  color-scheme: light;
+}
+
+html,
+body {
+  margin: 0;
+  min-height: 100%;
+}
+
+body {
+  font-family:
+    "Segoe UI",
+    "Helvetica Neue",
+    "Arial Nova",
+    Arial,
+    sans-serif;
+}
+
+#app {
+  min-height: 100vh;
+}
+
+.canvas-viewport {
+  background:
+    radial-gradient(circle at top left, rgba(251, 191, 36, 0.1), transparent 28%),
+    linear-gradient(180deg, rgba(245, 245, 244, 0.88), rgba(231, 229, 228, 0.56));
+}
+
+.mockup-grid {
+  background-image:
+    linear-gradient(0deg, rgba(28, 25, 23, 0.05) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(28, 25, 23, 0.05) 1px, transparent 1px);
+  background-size: 24px 24px;
+}
+
+.mockup-canvas {
+  border-radius: 22px;
+}
+
+.block-inner {
+  backdrop-filter: blur(4px);
+}
+
+[data-device-frame="mobile-app"] .mockup-canvas {
+  border-radius: 34px;
+}
+
+[data-device-frame="desktop-app"] .mockup-canvas {
+  border-radius: 18px;
+}
+
+body.capture-mode {
+  background: transparent;
+}
+
+body.capture-mode #app {
+  min-height: auto;
+}
+
+.capture-stage {
+  overflow: hidden;
+}
+
+.capture-frame {
+  display: inline-flex;
+}
