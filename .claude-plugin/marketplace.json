@@ -74,6 +74,15 @@
       "skills": [
         "./skills/ui-mockup-visualizer"
       ]
+    },
+    {
+      "name": "math-and-reasoning-skills",
+      "description": "Skills for solving complex math, logic, and tensor optimization problems precisely.",
+      "source": "./",
+      "strict": false,
+      "skills": [
+        "./skills/symcli-skill"
+      ]
     }
   ]
 }
