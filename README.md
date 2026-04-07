@@ -141,6 +141,9 @@ This skill format is designed to be universal and works with:
 - Windsurf
 - Any AI coding assistant that supports custom instructions or skills
 
+## Related Projects
+
+- [RemoteOpenClaw](https://remoteopenclaw.com) - Open marketplace for AI skills and personas built on OpenClaw
 ## Known Limitations
 
 - Claude Code currently indexes skills from the repository root, so `/skills` can list all marketplace skills even if you installed only one plugin. This is a Claude Code limitation. We follow the official Claude Skills marketplace example and keep `source: "./"` with explicit `skills` lists so plugin boundaries remain clear and other tools can scope installs properly. If `/skills` looks larger than expected, use the plugin `skills` list and the tables above as the source of truth.
