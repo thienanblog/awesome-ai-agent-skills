@@ -94,6 +94,8 @@ Plugins bundle related skills so you can install by domain. The source of truth 
 | [math-and-reasoning-skills](./plugin-groups.json) | Skills for solving complex math, logic, and tensor optimization problems precisely. | [symcli-skill](./skills/symcli-skill) |
 <!-- PLUGINS_TABLE_END -->
 
+${ASB}
+- [Omni Skills Forge](https://github.com/theihtisham/omni-skills-forge) - 50,000+ curated AI agent skills for Claude Code, Cursor, Copilot, Windsurf, Cline. Visual dashboard, one-click install, skill doctor, auto-update.
 ## Contributing
 
 We welcome contributions! Here's a quick start:
