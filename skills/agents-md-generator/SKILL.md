@@ -1,32 +1,21 @@
 ---
 name: agents-md-generator
-description: Generate or update CLAUDE.md/AGENTS.md files for AI coding agents through auto-scanning project files combined with interactive Q&A. Supports multiple tech stacks, development environments, and preserves customizations when updating.
+description: “Generate or update CLAUDE.md/AGENTS.md files for AI coding agents by auto-scanning project files and running interactive Q&A. Use when setting up a new project for AI-assisted development, updating existing instruction files after project changes, standardizing AI agent behavior across team members, or migrating between AI tools. Supports multiple tech stacks, development environments, and preserves customizations when updating.”
 author: Official
 context: fork
 ---
 
 # AGENTS.md / CLAUDE.md Generator
 
-## Overview
+Generate comprehensive instruction files (CLAUDE.md or AGENTS.md) that teach AI coding agents how to work effectively in a project. Combines automatic project scanning with interactive questions to create tailored guidelines.
 
-This skill helps you generate comprehensive instruction files (CLAUDE.md or AGENTS.md) that teach AI coding agents how to work effectively in your project. It combines automatic project scanning with interactive questions to create tailored guidelines.
-
-**When to use this skill:**
-- Setting up a new project for AI-assisted development
-- Updating existing instruction files after project changes
-- Standardizing AI agent behavior across team members
-- Migrating from one AI tool to another
-
-## Key Principle
-
-**Do not duplicate specialized skills.** If a request falls into a specialized domain (e.g., Design System), delegate to the specialized skill when available.
+**Key principle:** Do not duplicate specialized skills. If a request falls into a specialized domain (e.g., Design System), delegate to the specialized skill when available.
 
 ## Quick Start
 
-To generate a new CLAUDE.md file:
-1. Navigate to your project root
-2. Tell the AI agent: "Use the agents-md-generator skill to create a CLAUDE.md file"
-3. Answer the interactive questions about your project
+1. Navigate to the project root
+2. Invoke this skill: “Use the agents-md-generator skill to create a CLAUDE.md file”
+3. Answer the interactive questions about the project
 4. Review and customize the generated file
 
 ### Answering Questions (Convenient Formats)
@@ -37,21 +26,12 @@ When this skill asks numbered questions with lettered options, users can answer 
 - Mixed form: `1a 2b 3c 4b (also scan packages/*) 5d`
 - Full sentences: “Use medium scan depth and Docker Compose; service name is app.”
 
-Short form is never required; it is only provided for convenience.
-
 ### Generation Modes
 
-**Interactive Mode (Default):**
-- Guides you through each phase with questions
-- Best for first-time setup or complex projects
-- Maximum customization
-
-**Quick Mode:**
-- Tell the AI: "Generate CLAUDE.md in quick mode"
-- Skips all questions, uses auto-detection only
-- Best for experienced users or simple projects
-- Uses Medium scan depth by default
-- Generates all standard sections based on detection
+| Mode | Description | Best for |
+|------|-------------|----------|
+| **Interactive** (default) | Guides through each phase with questions | First-time setup, complex projects |
+| **Quick** | Skips questions, uses auto-detection only | Experienced users, simple projects |
 
 ## Interactive Workflow
 

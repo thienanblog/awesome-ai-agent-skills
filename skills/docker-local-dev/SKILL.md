@@ -1,34 +1,15 @@
 ---
 name: docker-local-dev
-description: Generate Docker Compose and Dockerfile configurations for local development through interactive Q&A. Supports PHP/Laravel, WordPress, Drupal, Joomla, Node.js, and Python stacks with Nginx, Supervisor/PM2, databases, Redis, and email testing. Always asks clarifying questions before generating configurations.
+description: "Generate Docker Compose and Dockerfile configurations for local development through interactive Q&A. Use when setting up a new Docker development environment, dockerizing an existing project, adding services (database, Redis, email testing) to a Docker setup, or updating existing Docker configurations. Supports PHP/Laravel, WordPress, Drupal, Joomla, Node.js, and Python stacks with Nginx, Supervisor/PM2, databases, Redis, and email testing."
 author: Official
 context: fork
 ---
 
 # Docker Local Development Environment Generator
 
-## Overview
+Generate optimized Docker development environments through an interactive, question-driven workflow. Produces `docker-compose.yml`, `Dockerfile`, and related configurations tailored to the project's tech stack.
 
-This skill helps you create optimized Docker development environments for your projects. It generates `docker-compose.yml`, `Dockerfile`, and related configurations through an interactive, question-driven workflow.
-
-**When to use this skill:**
-- Setting up a new Docker development environment
-- Dockerizing an existing project for local development
-- Adding services (database, Redis, email testing) to your Docker setup
-- Updating or merging with existing Docker configurations
-
-**Key Principle:** This skill ALWAYS asks questions before making decisions. You will be notified about each configuration choice and can adjust settings to match your exact needs.
-
-## Important Notice
-
-This skill uses an **interactive approach**. Before generating any files, I will:
-
-1. Run auto-detection scripts to identify your tech stack (saves AI tokens)
-2. Present the detection results for your confirmation
-3. Ask 10-15 clarifying questions about your preferences
-4. Show you a preview before creating or modifying files
-
-**Why this approach?** Docker configurations are project-specific. Asking questions ensures the setup matches YOUR requirements, not generic defaults. This prevents issues and saves debugging time later.
+**Key principle:** Always ask clarifying questions before generating configurations. Docker setups are project-specific — questions ensure the setup matches the project's requirements rather than generic defaults.
 
 ## Quick Start
 
