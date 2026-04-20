@@ -35,7 +35,8 @@
       "source": "./",
       "strict": false,
       "skills": [
-        "./skills/docker-local-dev"
+        "./skills/docker-local-dev",
+        "./skills/vps-docker-traefik-deploy"
       ]
     },
     {

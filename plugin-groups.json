@@ -20,7 +20,8 @@
       "name": "devops-skills",
       "description": "Skills for Docker, CI/CD, and local development environment configuration.",
       "skills": [
-        "docker-local-dev"
+        "docker-local-dev",
+        "vps-docker-traefik-deploy"
       ]
     },
     {
