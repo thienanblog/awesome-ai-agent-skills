@@ -113,6 +113,40 @@ See: CONTRIBUTING.md
 - Timestamped backups: `docker-compose.yml.backup.2024-01-15-143022`
 - Never overwrite without backup
 
+### Phase 1.5: Naming Strategy
+
+**IMPORTANT: Ask about Docker naming before generating Compose files.**
+
+Container UIs such as OrbStack and Docker Desktop do not only show the container name. They also group containers by the Docker Compose project name and list child rows by service name. In monorepos or on machines with many stacks, generic names like `web`, `app`, or `websocket` become hard to scan.
+
+Always ask:
+
+```
+How would you like this stack named in Docker UIs?
+
+1. Project-prefixed names (recommended)
+   - Compose project/group: `inventory-office-web`
+   - Container name: `inventory-office-web`
+   - Service names: explicit when helpful, otherwise role-based inside the project
+
+2. Minimal names
+   - Compose project/group: folder name
+   - Container name: default Compose-generated name
+   - Service names: short generic names like `web`, `app`, `db`
+```
+
+**Recommended defaults for monorepos or multi-project machines:**
+- Set the top-level Compose `name:` field to an explicit project slug such as `inventory-api`, `inventory-office-web`, or `inventory-websocket`
+- Set `container_name:` to the same explicit prefix pattern, for example `inventory-api-app`, `inventory-office-web`, `inventory-websocket`
+- Prefer explicit single-service names when the whole stack is one app/service, for example `office-web:` or `websocket:`
+- For multi-service stacks, role-based service names are acceptable under a clear project/group name, for example `app`, `web`, `db`, `redis` inside `inventory-api`
+
+**Rules:**
+- Never rely on the folder name alone for Compose grouping in monorepos
+- Prefer kebab-case names
+- Keep the same prefix across project name, image tags, and container names when possible
+- If an existing stack already has a stable naming convention, preserve it unless the user asks to rename it
+
 ### Phase 2: Tech Stack Confirmation
 
 **If auto-detection succeeded:**
@@ -500,11 +534,16 @@ but the instant sync is worth it for development.
 - Docker Compose v2 deprecated this field
 - Modern compose files don't need it
 
+**Compose naming note:**
+- Prefer setting top-level `name:` explicitly so Docker UIs show a stable, searchable group name
+- Do not leave Compose project naming to the working directory when generating configs for monorepos
+- If `container_name:` is used, keep it aligned with the project/group naming convention chosen in Phase 1.5
+
 **File generation order:**
 1. Create backup of existing files (if any)
 2. Generate `.env.docker` or update `.env`
 3. Generate `Dockerfile`
-4. Generate `docker-compose.yml` (without version field)
+4. Generate `docker-compose.yml` (without version field, with explicit top-level `name:` when requested or when working in a monorepo)
 5. Generate Nginx configuration
 6. Generate Supervisor/PM2 configuration (if needed)
 7. Create helper scripts
@@ -604,6 +643,7 @@ When merging with existing Docker files:
    - Volume mounts
    - Network configurations
    - Port mappings
+   - Existing Compose project naming (`name:`), service naming, and container naming unless the user explicitly asks to normalize them
 
 2. **Add new services:**
    - Only add services that don't exist
