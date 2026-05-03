@@ -45,54 +45,45 @@ Claude Code marketplace entries use `source: "./"`, `strict: false`, and explici
 
 ### OpenAI Codex
 
+Add this repository as a Codex marketplace:
+
+```bash
+codex plugin marketplace add thienanblog/awesome-ai-agent-skills
+```
+
+Then install the plugin you want:
+
+```text
+codex
+/plugins
+```
+
+In the plugin browser:
+
+1. Choose the **Awesome AI Agent Skills** marketplace.
+2. Open one of these plugins:
+   - `project-development-skills`
+   - `laravel-app-skills`
+   - `devops-skills`
+   - `office-web-ui-skills`
+3. Select **Install plugin**.
+4. Start a new thread and ask Codex normally, or type `@` to choose the plugin or one of its bundled skills explicitly.
+
+To refresh after this repository updates:
+
+```bash
+codex plugin marketplace upgrade awesome-ai-agent-skills
+```
+
+Codex also supports installing from a local checkout while developing this repository:
+
 ```bash
 git clone https://github.com/thienanblog/awesome-ai-agent-skills.git
 cd awesome-ai-agent-skills
 codex plugin marketplace add .
 ```
 
-This repository includes a Codex-compatible marketplace at `.agents/plugins/marketplace.json` and plugin packages under `plugins/`. Each plugin has the required `.codex-plugin/plugin.json` manifest and bundles its skills under `plugins/<plugin-name>/skills/`.
-
-Available Codex plugins match the groups below:
-
-- `project-development-skills`
-- `laravel-app-skills`
-- `devops-skills`
-- `office-web-ui-skills`
-
-The Codex marketplace follows OpenAI's plugin layout: marketplace entries point at `./plugins/<plugin-name>`, plugin manifests live in `.codex-plugin/plugin.json`, and bundled skills live inside the plugin root. See OpenAI's [Build plugins](https://developers.openai.com/codex/plugins/build) docs.
-
-For local development after changing skills or plugin groups:
-
-```bash
-npm run sync
-codex plugin marketplace upgrade awesome-ai-agent-skills
-```
-
-The generated Codex marketplace shape is:
-
-```json
-{
-  "name": "awesome-ai-agent-skills",
-  "interface": {
-    "displayName": "Awesome AI Agent Skills"
-  },
-  "plugins": [
-    {
-      "name": "project-development-skills",
-      "source": {
-        "source": "local",
-        "path": "./plugins/project-development-skills"
-      },
-      "policy": {
-        "installation": "AVAILABLE",
-        "authentication": "ON_INSTALL"
-      },
-      "category": "Productivity"
-    }
-  ]
-}
-```
+This repository includes a Codex-compatible marketplace at `.agents/plugins/marketplace.json` and plugin packages under `plugins/`. The layout follows OpenAI's docs: marketplace entries point at `./plugins/<plugin-name>`, plugin manifests live in `.codex-plugin/plugin.json`, and bundled skills live inside the plugin root. See OpenAI's [Plugins](https://developers.openai.com/codex/plugins) and [Build plugins](https://developers.openai.com/codex/plugins/build) docs.
 
 ### Skills CLI
 
