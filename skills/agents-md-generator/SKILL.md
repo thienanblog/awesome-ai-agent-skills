@@ -1,7 +1,6 @@
 ---
 name: agents-md-generator
 description: Generate or update CLAUDE.md/AGENTS.md files for AI coding agents through auto-scanning project files combined with interactive Q&A. Supports multiple tech stacks, development environments, and preserves customizations when updating.
-author: Official
 context: fork
 ---
 
@@ -654,7 +653,7 @@ All UI components and pages must follow `DESIGN_SYSTEM.md`:
 
 ### If `design-system-generator` is NOT available:
 1. **Suggest installing** `design-system-generator` from:
-   - https://github.com/thienanblog/awesome-ai-agent-skills (documentation-skills plugin)
+   - https://github.com/thienanblog/awesome-ai-agent-skills (project-development-skills plugin)
 2. Produce only:
    - `AGENTS.md`/`CLAUDE.md` patch referencing `DESIGN_SYSTEM.md`
    - Optional **minimal scaffold** `DESIGN_SYSTEM.md` (no deep recommendations)

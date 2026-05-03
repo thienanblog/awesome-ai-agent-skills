@@ -49,7 +49,7 @@ function buildExpectedMarketplacePlugins(pluginGroups) {
  * Parse YAML frontmatter from a markdown file
  */
 function parseFrontmatter(content) {
-  const match = content.match(/^---\n([\s\S]*?)\n---/);
+  const match = content.match(/^---\r?\n([\s\S]*?)\r?\n---/);
   if (!match) {
     return null;
   }
@@ -102,6 +102,10 @@ function validateSkill(skillName) {
 
   if (!frontmatter.description) {
     error(`Skill "${skillName}": Missing "description" in frontmatter`);
+  }
+
+  if (Object.prototype.hasOwnProperty.call(frontmatter, 'author')) {
+    error(`Skill "${skillName}": Remove "author" from frontmatter; this repository no longer tracks skill authors`);
   }
 
   // Warn if name doesn't match folder name
