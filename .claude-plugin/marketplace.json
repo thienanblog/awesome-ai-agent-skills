@@ -41,11 +41,12 @@
     },
     {
       "name": "workflow-skills",
-      "description": "Skills for AI agent workflow and requirements clarification processes.",
+      "description": "Skills for AI agent workflow, project development mindset, and requirements clarification processes.",
       "source": "./",
       "strict": false,
       "skills": [
-        "./skills/ask-questions-if-underspecified"
+        "./skills/ask-questions-if-underspecified",
+        "./skills/project-development-mindset"
       ]
     },
     {
