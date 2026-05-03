@@ -10,14 +10,16 @@
   },
   "plugins": [
     {
-      "name": "documentation-skills",
-      "description": "Skills for authoring AI agent instructions, backend documentation, and design systems.",
+      "name": "project-development-skills",
+      "description": "A cohesive workflow bundle for project setup, documentation, design systems, and production deployment planning.",
       "source": "./",
       "strict": false,
       "skills": [
+        "./skills/project-development-mindset",
         "./skills/agents-md-generator",
         "./skills/documentation-guidelines",
-        "./skills/design-system-generator"
+        "./skills/design-system-generator",
+        "./skills/vps-docker-traefik-deploy"
       ]
     },
     {
@@ -31,32 +33,11 @@
     },
     {
       "name": "devops-skills",
-      "description": "Skills for Docker, CI/CD, and local development environment configuration.",
+      "description": "Skills for Docker-based local development environment configuration.",
       "source": "./",
       "strict": false,
       "skills": [
-        "./skills/docker-local-dev",
-        "./skills/vps-docker-traefik-deploy"
-      ]
-    },
-    {
-      "name": "workflow-skills",
-      "description": "Skills for AI agent workflow, project development mindset, and requirements clarification processes.",
-      "source": "./",
-      "strict": false,
-      "skills": [
-        "./skills/ask-questions-if-underspecified",
-        "./skills/project-development-mindset"
-      ]
-    },
-    {
-      "name": "media-skills",
-      "description": "Skills for searching, downloading, and processing video and media content.",
-      "source": "./",
-      "strict": false,
-      "skills": [
-        "./skills/find-scene",
-        "./skills/noizai-voice-workflow"
+        "./skills/docker-local-dev"
       ]
     },
     {
@@ -66,24 +47,6 @@
       "strict": false,
       "skills": [
         "./skills/office-web-ui-system"
-      ]
-    },
-    {
-      "name": "ui-design-skills",
-      "description": "Skills for visualizing UI ideas as reviewable mockups and wireframes across web, mobile, and desktop apps.",
-      "source": "./",
-      "strict": false,
-      "skills": [
-        "./skills/ui-mockup-visualizer"
-      ]
-    },
-    {
-      "name": "math-and-reasoning-skills",
-      "description": "Skills for solving complex math, logic, and tensor optimization problems precisely.",
-      "source": "./",
-      "strict": false,
-      "skills": [
-        "./skills/symcli-skill"
       ]
     }
   ]

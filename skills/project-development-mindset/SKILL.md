@@ -1,7 +1,6 @@
 ---
 name: project-development-mindset
 description: Universal developer mindset and project workflow guide for programming projects. Use when creating a new project, choosing or reviewing a tech stack, modifying an existing codebase, implementing features, fixing bugs, writing or updating documentation, designing architecture or folder structure, improving UI/UX consistency, adding tests, debugging errors, improving performance, preparing deployment, or working across multiple repositories. Useful for experienced developers, beginners, non-developers, founders, and anyone who needs AI assistance to build, maintain, document, test, debug, or deploy software safely.
-author: "Ân Vũ"
 ---
 
 # Project Development Mindset

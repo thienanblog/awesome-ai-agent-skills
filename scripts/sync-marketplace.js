@@ -139,8 +139,7 @@ function getSkills() {
     skills.push({
       folderName: skillName,
       name: frontmatter.name,
-      description: frontmatter.description,
-      author: frontmatter.author || null
+      description: frontmatter.description
     });
   }
 
@@ -149,7 +148,7 @@ function getSkills() {
 
 /**
  * Update marketplace.json with skills
- * Each skill becomes its own plugin so users can install them individually
+ * Each plugin group defines the skills users can install as a bundle.
  */
 function updateMarketplace(skills, pluginGroups) {
   let marketplace = {
@@ -220,9 +219,9 @@ function updateReadme(skills) {
   let content = fs.readFileSync(README_FILE, 'utf-8');
 
   // Build skills table
-  const tableHeader = '| Skill | Author | Description |\n|-------|--------|-------------|';
+  const tableHeader = '| Skill | Description |\n|-------|-------------|';
   const tableRows = skills.map(skill =>
-    `| [${skill.name}](./skills/${skill.folderName}) | ${skill.author || '—'} | ${skill.description} |`
+    `| [${skill.name}](./skills/${skill.folderName}) | ${skill.description} |`
   ).join('\n');
   const newTable = `<!-- SKILLS_TABLE_START -->\n${tableHeader}\n${tableRows}\n<!-- SKILLS_TABLE_END -->`;
 

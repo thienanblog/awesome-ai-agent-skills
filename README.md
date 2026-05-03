@@ -23,7 +23,7 @@ Skills are self-contained instruction sets that teach AI agents specific workflo
 
 ```
 # Install a plugin (can bundle multiple skills)
-/plugin install documentation-skills@awesome-ai-agent-skills
+/plugin install project-development-skills@awesome-ai-agent-skills
 
 # Install Laravel guidelines
 /plugin install laravel-app-skills@awesome-ai-agent-skills
@@ -31,14 +31,8 @@ Skills are self-contained instruction sets that teach AI agents specific workflo
 # Install Docker local development skill
 /plugin install devops-skills@awesome-ai-agent-skills
 
-# Install workflow/clarification skill
-/plugin install workflow-skills@awesome-ai-agent-skills
-
 # Install office web UI skill
 /plugin install office-web-ui-skills@awesome-ai-agent-skills
-
-# Install UI mockup and wireframe skill
-/plugin install ui-design-skills@awesome-ai-agent-skills
 ```
 
 **Updating the marketplace**
@@ -47,36 +41,93 @@ Skills are self-contained instruction sets that teach AI agents specific workflo
 /plugin marketplace update
 ```
 
-### OpenAI Codex / Other AI Tools
+Claude Code marketplace entries use `source: "./"`, `strict: false`, and explicit `skills` arrays so this repository can curate multiple related skill folders into one installable plugin. See the official Claude Code docs for [plugin marketplaces](https://code.claude.com/docs/en/plugin-marketplaces) and [plugin structure](https://code.claude.com/docs/en/plugins).
 
-Clone or reference this repository and point your AI tool to the `skills/` directory. Each skill follows a standard format with `SKILL.md` containing the instructions.
+### OpenAI Codex
 
 ```bash
 git clone https://github.com/thienanblog/awesome-ai-agent-skills.git
 ```
 
-### Manual Usage
+Codex can use the skills directly from the cloned `skills/` directory, or you can package a Codex-native plugin using the `plugin-creator` skill. This repository intentionally does not commit Codex plugin files; create them in your own workspace when you want a local Codex marketplace.
+
+Recommended Codex plugin setup:
+
+1. Use `plugin-creator` to scaffold a plugin folder with `.codex-plugin/plugin.json`.
+2. Copy or symlink the curated skills you want into that plugin's `skills/` directory.
+3. Add the plugin to `.agents/plugins/marketplace.json` with this marketplace shape:
+
+Minimal plugin manifest:
+
+```json
+{
+  "name": "project-development-skills",
+  "version": "1.0.0",
+  "description": "Project development workflow skills for Codex.",
+  "skills": "./skills/"
+}
+```
+
+Marketplace entry:
+
+```json
+{
+  "name": "awesome-ai-agent-skills",
+  "interface": {
+    "displayName": "Awesome AI Agent Skills"
+  },
+  "plugins": [
+    {
+      "name": "project-development-skills",
+      "source": {
+        "source": "local",
+        "path": "./plugins/project-development-skills"
+      },
+      "policy": {
+        "installation": "AVAILABLE",
+        "authentication": "ON_INSTALL"
+      },
+      "category": "Productivity"
+    }
+  ]
+}
+```
+
+### Skills CLI
+
+The open `skills` CLI works with Codex, Claude Code, Cursor, and many other agents.
+
+On macOS:
+
+```bash
+brew install skills
+skills add thienanblog/awesome-ai-agent-skills --list
+skills add thienanblog/awesome-ai-agent-skills --skill project-development-mindset
+```
+
+Without installing globally:
+
+```bash
+npx skills add thienanblog/awesome-ai-agent-skills --list
+npx skills add thienanblog/awesome-ai-agent-skills --skill project-development-mindset
+npx skills init my-skill
+```
 
 You can also copy individual skill instructions directly into your AI agent's context or system prompt.
 
 ## Available Skills
 
 <!-- SKILLS_TABLE_START -->
-| Skill | Author | Description |
-|-------|--------|-------------|
-| [agents-md-generator](./skills/agents-md-generator) | Official | Generate or update CLAUDE.md/AGENTS.md files for AI coding agents through auto-scanning project files combined with interactive Q&A. Supports multiple tech stacks, development environments, and preserves customizations when updating. |
-| [ask-questions-if-underspecified](./skills/ask-questions-if-underspecified) | Tibo (Codex Team) | Clarify requirements before implementing. Do not use automatically, only when invoked explicitly. |
-| [design-system-generator](./skills/design-system-generator) | Official | Generate a project-specific DESIGN_SYSTEM.md that enforces consistent UI/UX across SPAs, traditional server-rendered sites, and hybrid systems. Includes tokens, component rules, accessibility gates, and production asset/manifest guidance. |
-| [docker-local-dev](./skills/docker-local-dev) | Official | Generate Docker Compose and Dockerfile configurations for local development through interactive Q&A. Supports PHP/Laravel, WordPress, Drupal, Joomla, Node.js, and Python stacks with Nginx, Supervisor/PM2, databases, Redis, and email testing. Always asks clarifying questions before generating configurations. |
-| [documentation-guidelines](./skills/documentation-guidelines) | Official | Write or update backend feature documentation that follows a repo's DOCUMENTATION_GUIDELINES.md (or equivalent) across any project. Use when asked to create/update module docs, API contracts, or backend documentation that must include architecture, endpoints, payloads, Mermaid diagrams, and seeding instructions. |
-| [find-scene](./skills/find-scene) | — | Search movie and TV show scenes by dialog, time, or visual description. Download video clips, extract frames, find quotes, identify movies from quotes, and query IMDB data. Use when the user wants to find a specific scene, download a clip, search for a quote in a movie/show, extract a frame, or get movie information via the find-scene API. |
-| [laravel-11-12-app-guidelines](./skills/laravel-11-12-app-guidelines) | Official | Guidelines and workflow for working on Laravel 11 or Laravel 12 applications across common stacks (API-only or full-stack), including optional Docker Compose/Sail, Inertia + React, Livewire, Vue, Blade, Tailwind v4, Fortify, Wayfinder, PHPUnit, Pint, and Laravel Boost MCP tools. Use when implementing features, fixing bugs, or making UI/backend changes while following project-specific instructions (AGENTS.md, docs/). |
-| [noizai-voice-workflow](./skills/noizai-voice-workflow) | — | Build human-like TTS voice workflows with style controls, local/cloud backends, and delivery-ready output. Use when the user needs expressive text-to-speech generation, voice broadcast assets, or app-ready voice messages. |
-| [office-web-ui-system](./skills/office-web-ui-system) | Official | Design and refactor polished office-style web app interfaces for admin, internal, and back-office products. Use when an AI agent needs to build or improve dashboards, stat cards, page heroes, filter/search bars, data tables, shells, side panels, semantic locator classes, or reusable page composition that stays portable across Vue, React, Laravel, and other web stacks with or without PrimeVue. |
-| [project-development-mindset](./skills/project-development-mindset) | Ân Vũ | Universal developer mindset and project workflow guide for programming projects. Use when creating a new project, choosing or reviewing a tech stack, modifying an existing codebase, implementing features, fixing bugs, writing or updating documentation, designing architecture or folder structure, improving UI/UX consistency, adding tests, debugging errors, improving performance, preparing deployment, or working across multiple repositories. Useful for experienced developers, beginners, non-developers, founders, and anyone who needs AI assistance to build, maintain, document, test, debug, or deploy software safely. |
-| [symcli-skill](./skills/symcli-skill) | Wowo51 | Execute SymCLI to solve math equations, optimize tensor graphs, or analyze C# code for vulnerabilities. Turn your coding agent into an AI mathematician, SymbolicComputation.com |
-| [ui-mockup-visualizer](./skills/ui-mockup-visualizer) | Official | Create fixed-canvas HTML mockups for websites, mobile apps, and desktop apps so an AI agent can verify UI direction before implementation. Use when a user asks for layout ideas, wireframes, visual comparison, HTML previews, mockups, or wants to see what a sidebar, navbar, modal, dashboard section, mobile screen, or desktop panel could look like. This skill always proposes Option A, Option B, and Option C with one recommended option, mirrors the user's language in the review, uses Svelte CDN plus TailwindCSS CDN templates, starts a local preview server, captures screenshot checkpoints of the mockup region only, and turns an approved option into an implementation-ready plan. |
-| [vps-docker-traefik-deploy](./skills/vps-docker-traefik-deploy) | Official | Plan and implement secure production deployments of Docker Compose applications on self-hosted VPS or cloud servers using Docker Engine, Docker Compose, Traefik, private registries, SSH tunnels, least-privilege users, persistent volumes, backups, DNS, and storage growth planning. Use when an AI agent needs to design, review, document, or execute a real deploy for websites, APIs, websockets, workers, databases, and object storage integrations on Ubuntu or Debian style Linux hosts. |
+| Skill | Description |
+|-------|-------------|
+| [agents-md-generator](./skills/agents-md-generator) | Generate or update CLAUDE.md/AGENTS.md files for AI coding agents through auto-scanning project files combined with interactive Q&A. Supports multiple tech stacks, development environments, and preserves customizations when updating. |
+| [design-system-generator](./skills/design-system-generator) | Generate a project-specific DESIGN_SYSTEM.md that enforces consistent UI/UX across SPAs, traditional server-rendered sites, and hybrid systems. Includes tokens, component rules, accessibility gates, and production asset/manifest guidance. |
+| [docker-local-dev](./skills/docker-local-dev) | Generate Docker Compose and Dockerfile configurations for local development through interactive Q&A. Supports PHP/Laravel, WordPress, Drupal, Joomla, Node.js, and Python stacks with Nginx, Supervisor/PM2, databases, Redis, and email testing. Always asks clarifying questions before generating configurations. |
+| [documentation-guidelines](./skills/documentation-guidelines) | Write or update backend feature documentation that follows a repo's DOCUMENTATION_GUIDELINES.md (or equivalent) across any project. Use when asked to create/update module docs, API contracts, or backend documentation that must include architecture, endpoints, payloads, Mermaid diagrams, and seeding instructions. |
+| [laravel-11-12-app-guidelines](./skills/laravel-11-12-app-guidelines) | Guidelines and workflow for working on Laravel 11 or Laravel 12 applications across common stacks (API-only or full-stack), including optional Docker Compose/Sail, Inertia + React, Livewire, Vue, Blade, Tailwind v4, Fortify, Wayfinder, PHPUnit, Pint, and Laravel Boost MCP tools. Use when implementing features, fixing bugs, or making UI/backend changes while following project-specific instructions (AGENTS.md, docs/). |
+| [office-web-ui-system](./skills/office-web-ui-system) | Design and refactor polished office-style web app interfaces for admin, internal, and back-office products. Use when an AI agent needs to build or improve dashboards, stat cards, page heroes, filter/search bars, data tables, shells, side panels, semantic locator classes, or reusable page composition that stays portable across Vue, React, Laravel, and other web stacks with or without PrimeVue. |
+| [project-development-mindset](./skills/project-development-mindset) | Universal developer mindset and project workflow guide for programming projects. Use when creating a new project, choosing or reviewing a tech stack, modifying an existing codebase, implementing features, fixing bugs, writing or updating documentation, designing architecture or folder structure, improving UI/UX consistency, adding tests, debugging errors, improving performance, preparing deployment, or working across multiple repositories. Useful for experienced developers, beginners, non-developers, founders, and anyone who needs AI assistance to build, maintain, document, test, debug, or deploy software safely. |
+| [vps-docker-traefik-deploy](./skills/vps-docker-traefik-deploy) | Plan and implement secure production deployments of Docker Compose applications on self-hosted VPS or cloud servers using Docker Engine, Docker Compose, Traefik, private registries, SSH tunnels, least-privilege users, persistent volumes, backups, DNS, and storage growth planning. Use when an AI agent needs to design, review, document, or execute a real deploy for websites, APIs, websockets, workers, databases, and object storage integrations on Ubuntu or Debian style Linux hosts. |
 <!-- SKILLS_TABLE_END -->
 
 ## Plugin Groups
@@ -86,15 +137,15 @@ Plugins bundle related skills so you can install by domain. The source of truth 
 <!-- PLUGINS_TABLE_START -->
 | Plugin | Description | Skills |
 |--------|-------------|--------|
-| [documentation-skills](./plugin-groups.json) | Skills for authoring AI agent instructions, backend documentation, and design systems. | [agents-md-generator](./skills/agents-md-generator)<br>[documentation-guidelines](./skills/documentation-guidelines)<br>[design-system-generator](./skills/design-system-generator) |
+| [project-development-skills](./plugin-groups.json) | A cohesive workflow bundle for project setup, documentation, design systems, and production deployment planning. | [project-development-mindset](./skills/project-development-mindset)<br>[agents-md-generator](./skills/agents-md-generator)<br>[documentation-guidelines](./skills/documentation-guidelines)<br>[design-system-generator](./skills/design-system-generator)<br>[vps-docker-traefik-deploy](./skills/vps-docker-traefik-deploy) |
 | [laravel-app-skills](./plugin-groups.json) | Guidelines for building Laravel 11/12 apps across common stacks and tooling. | [laravel-11-12-app-guidelines](./skills/laravel-11-12-app-guidelines) |
-| [devops-skills](./plugin-groups.json) | Skills for Docker, CI/CD, and local development environment configuration. | [docker-local-dev](./skills/docker-local-dev)<br>[vps-docker-traefik-deploy](./skills/vps-docker-traefik-deploy) |
-| [workflow-skills](./plugin-groups.json) | Skills for AI agent workflow, project development mindset, and requirements clarification processes. | [ask-questions-if-underspecified](./skills/ask-questions-if-underspecified)<br>[project-development-mindset](./skills/project-development-mindset) |
-| [media-skills](./plugin-groups.json) | Skills for searching, downloading, and processing video and media content. | [find-scene](./skills/find-scene)<br>[noizai-voice-workflow](./skills/noizai-voice-workflow) |
+| [devops-skills](./plugin-groups.json) | Skills for Docker-based local development environment configuration. | [docker-local-dev](./skills/docker-local-dev) |
 | [office-web-ui-skills](./plugin-groups.json) | Skills for designing and refactoring admin, internal, and back-office web interfaces. | [office-web-ui-system](./skills/office-web-ui-system) |
-| [ui-design-skills](./plugin-groups.json) | Skills for visualizing UI ideas as reviewable mockups and wireframes across web, mobile, and desktop apps. | [ui-mockup-visualizer](./skills/ui-mockup-visualizer) |
-| [math-and-reasoning-skills](./plugin-groups.json) | Skills for solving complex math, logic, and tensor optimization problems precisely. | [symcli-skill](./skills/symcli-skill) |
 <!-- PLUGINS_TABLE_END -->
+
+## Repository Cleanup
+
+This repository has been narrowed to a smaller, cohesive set of skills that are intended to work together. Apologies to contributors whose community skills were removed during this cleanup; the goal is to keep this repository focused on quality-controlled project development workflows instead of hosting unrelated skill experiments.
 
 ## Contributing
 
@@ -107,7 +158,6 @@ We welcome contributions! Here's a quick start:
    ---
    name: your-skill-name
    description: What the skill does and when to use it.
-   author: Your Name or Team
    ---
    ```
 4. Add the skill to `plugin-groups.json` so it belongs to exactly one plugin.
@@ -130,7 +180,7 @@ See **[CONTRIBUTING.md](./CONTRIBUTING.md)** for detailed guidelines, validation
 
 ## For AI Agents
 
-See [CLAUDE.md](./CLAUDE.md) (or [AGENTS.md](./AGENTS.md)) for instructions on how to work with this repository, including how to group skills into plugins and update the marketplace when new skills are added.
+See [CLAUDE.md](./CLAUDE.md) for instructions on how to work with this repository, including how to group skills into plugins and update the marketplace when new skills are added.
 
 ## Compatibility
 
@@ -142,10 +192,6 @@ This skill format is designed to be universal and works with:
 - GitHub Copilot
 - Windsurf
 - Any AI coding assistant that supports custom instructions or skills
-
-## Known Limitations
-
-- Claude Code currently indexes skills from the repository root, so `/skills` can list all marketplace skills even if you installed only one plugin. This is a Claude Code limitation. We follow the official Claude Skills marketplace example and keep `source: "./"` with explicit `skills` lists so plugin boundaries remain clear and other tools can scope installs properly. If `/skills` looks larger than expected, use the plugin `skills` list and the tables above as the source of truth.
 
 ## License
 

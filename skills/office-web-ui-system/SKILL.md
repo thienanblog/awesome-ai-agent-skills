@@ -1,7 +1,6 @@
 ---
 name: office-web-ui-system
 description: Design and refactor polished office-style web app interfaces for admin, internal, and back-office products. Use when an AI agent needs to build or improve dashboards, stat cards, page heroes, filter/search bars, data tables, shells, side panels, semantic locator classes, or reusable page composition that stays portable across Vue, React, Laravel, and other web stacks with or without PrimeVue.
-author: Official
 ---
 
 # Office Web UI System

@@ -9,6 +9,10 @@ on:
       - '.claude-plugin/marketplace.json'
       - 'README.md'
       - 'scripts/**'
+      - 'package.json'
+      - 'package-lock.json'
+      - '.github/workflows/validate-pr.yml'
+      - '.github/workflows/sync-marketplace.yml'
 
 jobs:
   validate:
@@ -45,5 +49,5 @@ jobs:
               issue_number: context.issue.number,
               owner: context.repo.owner,
               repo: context.repo.repo,
-              body: '❌ **Skill validation failed!**\n\nPlease check the workflow logs for details and fix the issues before merging.\n\nCommon issues:\n- Missing `SKILL.md` file in skill folder\n- Missing `name` or `description` in SKILL.md frontmatter\n- Skill not assigned in `plugin-groups.json`\n- `.claude-plugin/marketplace.json` or `README.md` is out of sync (run `npm run sync` locally)\n- Plugin missing `skills` array or has wrong `source` (should be `"./"`)'
+              body: '❌ **Skill validation failed!**\n\nPlease check the workflow logs for details and fix the issues before merging.\n\nCommon issues:\n- Missing `SKILL.md` file in a skill folder\n- Missing `name` or `description` in SKILL.md frontmatter\n- `author` is still present in SKILL.md frontmatter\n- Skill not assigned in `plugin-groups.json`\n- `.claude-plugin/marketplace.json` or `README.md` is out of sync (run `npm run sync` locally)\n- Plugin missing `skills` array, `strict: false`, or `source: "./"`'
             })

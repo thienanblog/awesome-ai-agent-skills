@@ -33,11 +33,10 @@ Every skill must have a `SKILL.md` with YAML frontmatter:
 ---
 name: skill-name
 description: Brief description of what the skill does and when to use it.
-author: Your Name or Team (optional but recommended)
 ---
 ```
 
-When adding a new skill, always ask for the author name if not provided. The author field is displayed in the README skills table.
+Do not add `author` to skill frontmatter. This repository only tracks the required `name` and `description` fields for skills.
 
 ## Scanning and Updating Marketplace
 
@@ -56,7 +55,7 @@ Update `.claude-plugin/marketplace.json`:
 - Each plugin requires: `name` (ending with `-skills`), `description`, `source: "./"`, `strict: false`, and a `skills` array
 - The `skills` array lists the skill paths for that plugin
 
-Note: Claude Code currently indexes skills from the repo root, so keep `source: "./"` and rely on the explicit `skills` list to scope installs.
+This repository uses `strict: false` with explicit `skills` lists so the marketplace entry defines each installable skill bundle.
 
 ### 4. Update README.md
 Update the "Available Skills" table in `README.md` to match the current skills.
@@ -84,13 +83,16 @@ If a new skill `api-testing` is added to `skills/api-testing/SKILL.md`, update `
   },
   "plugins": [
     {
-      "name": "documentation-skills",
-      "description": "Skills for authoring AI agent instructions and backend documentation.",
+      "name": "project-development-skills",
+      "description": "A cohesive workflow bundle for project setup, documentation, design systems, and production deployment planning.",
       "source": "./",
       "strict": false,
       "skills": [
+        "./skills/project-development-mindset",
         "./skills/agents-md-generator",
-        "./skills/documentation-guidelines"
+        "./skills/documentation-guidelines",
+        "./skills/design-system-generator",
+        "./skills/vps-docker-traefik-deploy"
       ]
     },
     {
@@ -113,8 +115,13 @@ If a new skill `api-testing` is added to `skills/api-testing/SKILL.md`, update `
 | Skill                        | Path                                   | Description                                                        |
 |------------------------------|----------------------------------------|--------------------------------------------------------------------|
 | agents-md-generator          | `./skills/agents-md-generator`         | Generate or update CLAUDE.md/AGENTS.md files for AI coding agents |
+| design-system-generator      | `./skills/design-system-generator`     | Generate project-specific DESIGN_SYSTEM.md files                   |
+| docker-local-dev             | `./skills/docker-local-dev`            | Generate Docker local development environments                     |
 | documentation-guidelines     | `./skills/documentation-guidelines`    | Backend feature documentation following DOCUMENTATION_GUIDELINES.md |
 | laravel-11-12-app-guidelines | `./skills/laravel-11-12-app-guidelines`| Laravel 11/12 application development guidelines                   |
+| office-web-ui-system         | `./skills/office-web-ui-system`        | Design and refactor office-style admin web interfaces              |
+| project-development-mindset  | `./skills/project-development-mindset` | Universal developer mindset and project workflow guide             |
+| vps-docker-traefik-deploy    | `./skills/vps-docker-traefik-deploy`   | Plan and implement secure Docker/Traefik VPS deployments           |
 
 ## GitHub CI Validation
 
@@ -124,6 +131,7 @@ This repository uses GitHub Actions for automated validation and syncing:
 - Runs `npm run validate` to check:
   - Each skill folder has a valid `SKILL.md`
   - YAML frontmatter contains required `name` and `description` fields
+  - YAML frontmatter does not contain `author`
   - All skills in `skills/` are listed in a plugin's `skills` array
   - Each plugin has `source: "./"` and a valid `skills` array
 - If validation fails, a comment is added to the PR with common issues
@@ -138,8 +146,8 @@ This repository uses GitHub Actions for automated validation and syncing:
 ### Local Validation Commands
 Before pushing changes, always run:
 ```bash
-npm run validate   # Check skill structure and marketplace.json
 npm run sync       # Update marketplace.json and README.md (optional, auto-runs on merge)
+npm run validate   # Check skill structure and marketplace.json
 ```
 
 ## Quality Guidelines for New Skills
@@ -150,7 +158,7 @@ When reviewing or creating skills:
 2. **Actionable Instructions**: Include step-by-step workflows, not just descriptions
 3. **Reference Documentation**: Provide detailed references for complex topics
 4. **Consistent Naming**: Use kebab-case for folder and skill names
-5. **Complete Metadata**: Always include `name` and `description` in YAML frontmatter
+5. **Complete Metadata**: Always include `name` and `description` in YAML frontmatter, and do not include `author`
 6. **Universal Compatibility**: Write instructions that work across different AI tools, avoid tool-specific syntax when possible
 
 ## Post-Task Workflow
@@ -162,14 +170,14 @@ After completing any task that modifies skills, plugins, or documentation:
    - `README.md` - Verify skills table and plugin groups are current
    - Any skill-specific documentation that was modified
 
-2. **Run validation** to catch any issues:
-   ```bash
-   npm run validate
-   ```
-
-3. **Sync marketplace** if skills were added/modified:
+2. **Sync marketplace** if skills were added, removed, modified, or regrouped:
    ```bash
    npm run sync
+   ```
+
+3. **Run validation** to catch any issues:
+   ```bash
+   npm run validate
    ```
 
 ## Commit and PR Conventions
