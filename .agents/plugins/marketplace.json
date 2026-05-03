@@ -1,0 +1,56 @@
+{
+  "name": "awesome-ai-agent-skills",
+  "interface": {
+    "displayName": "Awesome AI Agent Skills"
+  },
+  "plugins": [
+    {
+      "name": "project-development-skills",
+      "source": {
+        "source": "local",
+        "path": "./plugins/project-development-skills"
+      },
+      "policy": {
+        "installation": "AVAILABLE",
+        "authentication": "ON_INSTALL"
+      },
+      "category": "Productivity"
+    },
+    {
+      "name": "laravel-app-skills",
+      "source": {
+        "source": "local",
+        "path": "./plugins/laravel-app-skills"
+      },
+      "policy": {
+        "installation": "AVAILABLE",
+        "authentication": "ON_INSTALL"
+      },
+      "category": "Productivity"
+    },
+    {
+      "name": "devops-skills",
+      "source": {
+        "source": "local",
+        "path": "./plugins/devops-skills"
+      },
+      "policy": {
+        "installation": "AVAILABLE",
+        "authentication": "ON_INSTALL"
+      },
+      "category": "Productivity"
+    },
+    {
+      "name": "office-web-ui-skills",
+      "source": {
+        "source": "local",
+        "path": "./plugins/office-web-ui-skills"
+      },
+      "policy": {
+        "installation": "AVAILABLE",
+        "authentication": "ON_INSTALL"
+      },
+      "category": "Productivity"
+    }
+  ]
+}

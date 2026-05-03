@@ -6,11 +6,14 @@ import { parse as parseYaml } from 'yaml';
 
 const SKILLS_DIR = 'skills';
 const MARKETPLACE_FILE = '.claude-plugin/marketplace.json';
+const CODEX_MARKETPLACE_FILE = '.agents/plugins/marketplace.json';
+const CODEX_PLUGINS_DIR = 'plugins';
 const README_FILE = 'README.md';
 const PLUGIN_GROUPS_FILE = 'plugin-groups.json';
 const PLUGIN_SUFFIX = '-skills';
 const PLUGINS_TABLE_START = '<!-- PLUGINS_TABLE_START -->';
 const PLUGINS_TABLE_END = '<!-- PLUGINS_TABLE_END -->';
+const REPOSITORY_URL = 'https://github.com/thienanblog/awesome-ai-agent-skills';
 
 function log(message) {
   console.log(message);
@@ -18,6 +21,36 @@ function log(message) {
 
 function success(message) {
   console.log(`✅ ${message}`);
+}
+
+function readPackageVersion() {
+  try {
+    const packageJson = JSON.parse(fs.readFileSync('package.json', 'utf-8'));
+    return packageJson.version || '1.0.0';
+  } catch {
+    return '1.0.0';
+  }
+}
+
+function titleCasePluginName(pluginName) {
+  return pluginName
+    .split('-')
+    .map(part => part.charAt(0).toUpperCase() + part.slice(1))
+    .join(' ');
+}
+
+function buildCodexDefaultPrompts(pluginName, skillNames) {
+  const primarySkill = skillNames[0] || pluginName;
+  const prompts = [
+    `Use ${primarySkill} to guide this project task.`,
+    `Apply ${pluginName} to review this repository.`
+  ];
+
+  if (skillNames.length > 1) {
+    prompts.push(`Use ${pluginName} to plan docs and delivery.`);
+  }
+
+  return prompts;
 }
 
 function loadPluginGroups(skills) {
@@ -207,6 +240,119 @@ function updateMarketplace(skills, pluginGroups) {
   return { added, removed };
 }
 
+function buildCodexMarketplace(pluginGroups) {
+  return {
+    name: 'awesome-ai-agent-skills',
+    interface: {
+      displayName: 'Awesome AI Agent Skills'
+    },
+    plugins: pluginGroups.map(plugin => ({
+      name: plugin.name,
+      source: {
+        source: 'local',
+        path: `./plugins/${plugin.name}`
+      },
+      policy: {
+        installation: 'AVAILABLE',
+        authentication: 'ON_INSTALL'
+      },
+      category: 'Productivity'
+    }))
+  };
+}
+
+function buildCodexPluginManifest(plugin, version) {
+  const displayName = titleCasePluginName(plugin.name);
+
+  return {
+    name: plugin.name,
+    version,
+    description: plugin.description,
+    homepage: REPOSITORY_URL,
+    repository: REPOSITORY_URL,
+    license: 'MIT',
+    keywords: [
+      'codex',
+      'skills',
+      ...plugin.skills.slice(0, 4)
+    ],
+    skills: './skills/',
+    interface: {
+      displayName,
+      shortDescription: plugin.description,
+      longDescription: plugin.description,
+      developerName: 'Ân Vũ',
+      category: 'Productivity',
+      capabilities: ['Read', 'Write'],
+      websiteURL: REPOSITORY_URL,
+      defaultPrompt: buildCodexDefaultPrompts(plugin.name, plugin.skills),
+      brandColor: '#10A37F'
+    }
+  };
+}
+
+function copyPluginSkills(plugin) {
+  const pluginRoot = path.join(CODEX_PLUGINS_DIR, plugin.name);
+  const pluginSkillsDir = path.join(pluginRoot, 'skills');
+
+  fs.rmSync(pluginSkillsDir, { recursive: true, force: true });
+  fs.mkdirSync(pluginSkillsDir, { recursive: true });
+
+  for (const skillName of plugin.skills) {
+    const sourceDir = path.join(SKILLS_DIR, skillName);
+    const targetDir = path.join(pluginSkillsDir, skillName);
+    fs.cpSync(sourceDir, targetDir, {
+      recursive: true,
+      filter: source => path.basename(source) !== '.DS_Store'
+    });
+  }
+}
+
+function removeStaleCodexPlugins(pluginGroups) {
+  if (!fs.existsSync(CODEX_PLUGINS_DIR)) {
+    return;
+  }
+
+  const expectedPluginNames = new Set(pluginGroups.map(plugin => plugin.name));
+  const entries = fs.readdirSync(CODEX_PLUGINS_DIR, { withFileTypes: true });
+
+  for (const entry of entries) {
+    if (!entry.isDirectory() || expectedPluginNames.has(entry.name)) {
+      continue;
+    }
+
+    const manifestPath = path.join(CODEX_PLUGINS_DIR, entry.name, '.codex-plugin', 'plugin.json');
+    if (fs.existsSync(manifestPath)) {
+      fs.rmSync(path.join(CODEX_PLUGINS_DIR, entry.name), { recursive: true, force: true });
+    }
+  }
+}
+
+function updateCodexPlugins(pluginGroups) {
+  const version = readPackageVersion();
+
+  fs.mkdirSync(CODEX_PLUGINS_DIR, { recursive: true });
+  removeStaleCodexPlugins(pluginGroups);
+
+  for (const plugin of pluginGroups) {
+    const pluginRoot = path.join(CODEX_PLUGINS_DIR, plugin.name);
+    const manifestPath = path.join(pluginRoot, '.codex-plugin', 'plugin.json');
+
+    fs.mkdirSync(path.dirname(manifestPath), { recursive: true });
+    fs.writeFileSync(
+      manifestPath,
+      JSON.stringify(buildCodexPluginManifest(plugin, version), null, 2) + '\n'
+    );
+    copyPluginSkills(plugin);
+  }
+
+  fs.mkdirSync(path.dirname(CODEX_MARKETPLACE_FILE), { recursive: true });
+  fs.writeFileSync(
+    CODEX_MARKETPLACE_FILE,
+    JSON.stringify(buildCodexMarketplace(pluginGroups), null, 2) + '\n'
+  );
+}
+
 /**
  * Update README.md skills table
  */
@@ -324,6 +470,11 @@ function main() {
     fs.writeFileSync(README_FILE, nextReadmeContent);
     success('README.md plugin groups table updated');
   }
+  log('');
+
+  log('🔌 Updating Codex plugins...');
+  updateCodexPlugins(pluginGroups);
+  success('Codex marketplace and plugin packages updated');
   log('');
 
   // Summary

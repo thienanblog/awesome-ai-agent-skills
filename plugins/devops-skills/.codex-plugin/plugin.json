@@ -1,0 +1,31 @@
+{
+  "name": "devops-skills",
+  "version": "1.7.0",
+  "description": "Skills for Docker-based local development environment configuration.",
+  "homepage": "https://github.com/thienanblog/awesome-ai-agent-skills",
+  "repository": "https://github.com/thienanblog/awesome-ai-agent-skills",
+  "license": "MIT",
+  "keywords": [
+    "codex",
+    "skills",
+    "docker-local-dev"
+  ],
+  "skills": "./skills/",
+  "interface": {
+    "displayName": "Devops Skills",
+    "shortDescription": "Skills for Docker-based local development environment configuration.",
+    "longDescription": "Skills for Docker-based local development environment configuration.",
+    "developerName": "Ân Vũ",
+    "category": "Productivity",
+    "capabilities": [
+      "Read",
+      "Write"
+    ],
+    "websiteURL": "https://github.com/thienanblog/awesome-ai-agent-skills",
+    "defaultPrompt": [
+      "Use docker-local-dev to guide this project task.",
+      "Apply devops-skills to review this repository."
+    ],
+    "brandColor": "#10A37F"
+  }
+}

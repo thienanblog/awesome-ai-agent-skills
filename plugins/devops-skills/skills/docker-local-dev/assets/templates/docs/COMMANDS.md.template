@@ -1,0 +1,109 @@
+# Docker Commands Quick Reference
+
+## Container Management
+
+```bash
+# Start all containers
+docker compose up -d
+
+# Stop all containers
+docker compose down
+
+# Restart all containers
+docker compose restart
+
+# View running containers
+docker compose ps
+
+# View all containers (including stopped)
+docker compose ps -a
+```
+
+## Logs
+
+```bash
+# View all logs
+docker compose logs
+
+# Follow logs in real-time
+docker compose logs -f
+
+# View logs for specific service
+docker compose logs app
+docker compose logs -f nginx
+```
+
+## Executing Commands
+
+```bash
+# Enter container shell
+docker compose exec app bash
+docker compose exec app sh  # For Alpine
+
+# Run single command
+docker compose exec app php artisan migrate
+docker compose exec app npm run build
+docker compose exec app python manage.py migrate
+```
+
+## Database
+
+```bash
+# MySQL/MariaDB CLI
+docker compose exec db mysql -u root -p
+
+# PostgreSQL CLI
+docker compose exec db psql -U postgres
+
+# Import database
+docker compose exec -T db mysql -u root -p database < dump.sql
+
+# Export database
+docker compose exec db mysqldump -u root -p database > dump.sql
+```
+
+## Building
+
+```bash
+# Build/rebuild containers
+docker compose build
+
+# Build without cache
+docker compose build --no-cache
+
+# Pull latest images
+docker compose pull
+```
+
+## Cleanup
+
+```bash
+# Stop and remove containers
+docker compose down
+
+# Remove containers AND volumes (data loss!)
+docker compose down -v
+
+# Remove unused Docker resources
+docker system prune
+
+# Remove all unused images
+docker image prune -a
+```
+
+## Troubleshooting
+
+```bash
+# Check configuration
+docker compose config
+
+# Check container resource usage
+docker stats
+
+# Inspect container
+docker compose exec app cat /etc/hosts
+
+# Check network
+docker network ls
+docker network inspect <network_name>
+```
