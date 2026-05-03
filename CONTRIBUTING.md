@@ -94,8 +94,9 @@ This checks:
 - Each skill folder has a `SKILL.md` file
 - `SKILL.md` has valid YAML frontmatter with `name` and `description`
 - `SKILL.md` does not include `author` in frontmatter
-- All skills are listed in a plugin's `skills` array in `marketplace.json`
-- Each plugin has `source: "./"` and a valid `skills` array
+- All skills are listed in a plugin's `skills` array in `.claude-plugin/marketplace.json`
+- `.agents/plugins/marketplace.json` matches `plugin-groups.json`
+- Codex plugin packages exist under `plugins/` with `.codex-plugin/plugin.json` and bundled skills
 - Each plugin name ends with `-skills`
 
 ### Expected Output
@@ -109,6 +110,8 @@ Found X skill(s) in skills/
 📁 Validating skills...
 
 📦 Validating marketplace.json...
+
+🔌 Validating Codex marketplace and plugins...
 
 =========================================
 ✅ All validations passed! (X valid skills)
@@ -126,11 +129,11 @@ Fix the reported errors before pushing. Common issues:
 | Missing "description" in frontmatter | Add `description: ...` to frontmatter |
 | Author field is present | Remove `author` from frontmatter |
 | Skill not in any plugin's skills array | Run `npm run sync` to auto-add it |
-| Plugin missing "skills" array | Run `npm run sync` to fix marketplace.json |
+| Codex plugin package is out of sync | Run `npm run sync` to regenerate `.agents/plugins/marketplace.json` and `plugins/**` |
 
-### Sync Marketplace (Optional)
+### Sync Marketplaces (Optional)
 
-If you want to update `marketplace.json` locally:
+If you want to update generated marketplace and plugin files locally:
 
 ```bash
 npm run sync
@@ -138,7 +141,9 @@ npm run sync
 
 This will:
 - Scan all skills in `skills/` folder
-- Update `marketplace.json` based on `plugin-groups.json`
+- Update `.claude-plugin/marketplace.json` based on `plugin-groups.json`
+- Update `.agents/plugins/marketplace.json` based on `plugin-groups.json`
+- Regenerate Codex plugin packages under `plugins/`
 - Update the skills table in `README.md`
 
 **Note:** The sync happens automatically on merge via GitHub Actions, so this step is optional.

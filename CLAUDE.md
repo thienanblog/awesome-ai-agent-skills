@@ -48,7 +48,7 @@ Scan all directories in `skills/` that contain a `SKILL.md` file.
 ### 2. Parse Skill Metadata
 For each `SKILL.md`, extract the `name` and `description` from the YAML frontmatter.
 
-### 3. Update marketplace.json
+### 3. Update Claude marketplace.json
 Update `.claude-plugin/marketplace.json`:
 - Keep the existing `name`, `owner`, and `metadata` sections
 - Update the `plugins` array based on `plugin-groups.json` so each plugin can contain multiple related skills
@@ -57,10 +57,20 @@ Update `.claude-plugin/marketplace.json`:
 
 This repository uses `strict: false` with explicit `skills` lists so the marketplace entry defines each installable skill bundle.
 
-### 4. Update README.md
+### 4. Update Codex marketplace and plugins
+Update `.agents/plugins/marketplace.json` and `plugins/<plugin-name>/` from `plugin-groups.json`:
+- Each Codex plugin lives in `plugins/<plugin-name>/`
+- Each Codex plugin requires `.codex-plugin/plugin.json`
+- Each plugin manifest uses `skills: "./skills/"`
+- Each plugin bundles copies of its skill folders under `plugins/<plugin-name>/skills/`
+- Each marketplace entry points to `./plugins/<plugin-name>` and includes `policy.installation`, `policy.authentication`, and `category`
+
+Use `npm run sync` to regenerate these files instead of editing generated plugin packages manually.
+
+### 5. Update README.md
 Update the "Available Skills" table in `README.md` to match the current skills.
 
-### 5. Report Changes
+### 6. Report Changes
 Report to the user:
 - New skills added
 - Skills removed (if any were deleted)
@@ -134,20 +144,22 @@ This repository uses GitHub Actions for automated validation and syncing:
   - YAML frontmatter does not contain `author`
   - All skills in `skills/` are listed in a plugin's `skills` array
   - Each plugin has `source: "./"` and a valid `skills` array
+  - Codex plugin packages exist under `plugins/` and match `plugin-groups.json`
 - If validation fails, a comment is added to the PR with common issues
 
 ### On Merge to Main (sync-marketplace.yml)
 - Automatically runs `npm run sync` to:
   - Scan all skills in `skills/` folder
-  - Update `marketplace.json` based on `plugin-groups.json`
+  - Update Claude and Codex marketplace files based on `plugin-groups.json`
+  - Update Codex plugin packages under `plugins/`
   - Update the skills table in `README.md`
   - Commit and push changes if any
 
 ### Local Validation Commands
 Before pushing changes, always run:
 ```bash
-npm run sync       # Update marketplace.json and README.md (optional, auto-runs on merge)
-npm run validate   # Check skill structure and marketplace.json
+npm run sync       # Update marketplace files, Codex plugins, and README.md
+npm run validate   # Check skill structure, marketplace files, and Codex plugins
 ```
 
 ## Quality Guidelines for New Skills

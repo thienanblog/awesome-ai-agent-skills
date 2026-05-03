@@ -47,28 +47,29 @@ Claude Code marketplace entries use `source: "./"`, `strict: false`, and explici
 
 ```bash
 git clone https://github.com/thienanblog/awesome-ai-agent-skills.git
+cd awesome-ai-agent-skills
+codex plugin marketplace add .
 ```
 
-Codex can use the skills directly from the cloned `skills/` directory, or you can package a Codex-native plugin using the `plugin-creator` skill. This repository intentionally does not commit Codex plugin files; create them in your own workspace when you want a local Codex marketplace.
+This repository includes a Codex-compatible marketplace at `.agents/plugins/marketplace.json` and plugin packages under `plugins/`. Each plugin has the required `.codex-plugin/plugin.json` manifest and bundles its skills under `plugins/<plugin-name>/skills/`.
 
-Recommended Codex plugin setup:
+Available Codex plugins match the groups below:
 
-1. Use `plugin-creator` to scaffold a plugin folder with `.codex-plugin/plugin.json`.
-2. Copy or symlink the curated skills you want into that plugin's `skills/` directory.
-3. Add the plugin to `.agents/plugins/marketplace.json` with this marketplace shape:
+- `project-development-skills`
+- `laravel-app-skills`
+- `devops-skills`
+- `office-web-ui-skills`
 
-Minimal plugin manifest:
+The Codex marketplace follows OpenAI's plugin layout: marketplace entries point at `./plugins/<plugin-name>`, plugin manifests live in `.codex-plugin/plugin.json`, and bundled skills live inside the plugin root. See OpenAI's [Build plugins](https://developers.openai.com/codex/plugins/build) docs.
 
-```json
-{
-  "name": "project-development-skills",
-  "version": "1.0.0",
-  "description": "Project development workflow skills for Codex.",
-  "skills": "./skills/"
-}
+For local development after changing skills or plugin groups:
+
+```bash
+npm run sync
+codex plugin marketplace upgrade awesome-ai-agent-skills
 ```
 
-Marketplace entry:
+The generated Codex marketplace shape is:
 
 ```json
 {
@@ -174,8 +175,8 @@ See **[CONTRIBUTING.md](./CONTRIBUTING.md)** for detailed guidelines, validation
 ## Validation Workflow
 
 - `plugin-groups.json` is the source of truth for plugin membership.
-- `npm run sync` regenerates `.claude-plugin/marketplace.json` and the generated tables in `README.md`.
-- `npm run validate` checks skill metadata, plugin assignments, and marketplace/plugin consistency.
+- `npm run sync` regenerates `.claude-plugin/marketplace.json`, `.agents/plugins/marketplace.json`, `plugins/**`, and the generated tables in `README.md`.
+- `npm run validate` checks skill metadata, plugin assignments, Claude marketplace consistency, and Codex plugin package consistency.
 - Pull request CI reruns `npm run sync` and fails if generated files are out of date.
 
 ## For AI Agents

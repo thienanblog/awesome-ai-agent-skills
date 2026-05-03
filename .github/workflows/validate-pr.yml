@@ -5,8 +5,10 @@ on:
     branches: [main]
     paths:
       - 'skills/**'
+      - 'plugins/**'
       - 'plugin-groups.json'
       - '.claude-plugin/marketplace.json'
+      - '.agents/plugins/marketplace.json'
       - 'README.md'
       - 'scripts/**'
       - 'package.json'
@@ -38,7 +40,7 @@ jobs:
       - name: Check generated files are synced
         run: |
           npm run sync
-          git diff --exit-code -- .claude-plugin/marketplace.json README.md
+          git diff --exit-code -- .claude-plugin/marketplace.json .agents/plugins/marketplace.json plugins README.md
 
       - name: Comment on PR (on failure)
         if: failure()
@@ -49,5 +51,5 @@ jobs:
               issue_number: context.issue.number,
               owner: context.repo.owner,
               repo: context.repo.repo,
-              body: '❌ **Skill validation failed!**\n\nPlease check the workflow logs for details and fix the issues before merging.\n\nCommon issues:\n- Missing `SKILL.md` file in a skill folder\n- Missing `name` or `description` in SKILL.md frontmatter\n- `author` is still present in SKILL.md frontmatter\n- Skill not assigned in `plugin-groups.json`\n- `.claude-plugin/marketplace.json` or `README.md` is out of sync (run `npm run sync` locally)\n- Plugin missing `skills` array, `strict: false`, or `source: "./"`'
+              body: '❌ **Skill validation failed!**\n\nPlease check the workflow logs for details and fix the issues before merging.\n\nCommon issues:\n- Missing `SKILL.md` file in a skill folder\n- Missing `name` or `description` in SKILL.md frontmatter\n- `author` is still present in SKILL.md frontmatter\n- Skill not assigned in `plugin-groups.json`\n- Generated marketplace/plugin files are out of sync (run `npm run sync` locally)\n- Claude plugin missing `skills` array, `strict: false`, or `source: "./"`\n- Codex plugin missing `.codex-plugin/plugin.json` or bundled `skills/`'
             })
