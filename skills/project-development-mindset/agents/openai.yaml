@@ -1,0 +1,4 @@
+interface:
+  display_name: "Project Development Mindset"
+  short_description: "Universal workflow for programming projects"
+  default_prompt: "Use $project-development-mindset to guide a safe programming task from discovery through verification."
