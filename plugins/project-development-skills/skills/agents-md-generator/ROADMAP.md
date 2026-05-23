@@ -12,7 +12,7 @@ Rules:
 
 - [ ] Add contributor-friendly “how to update/merge” mini-guide (with examples) in `SKILL.md`
 - [ ] Add a short “what I detected” output template with confidence levels and override prompts
-- [ ] Add guidance for Windows symlink fallback (copy + header) in the Quick Start section
+- [ ] Add guidance for Claude Code compatibility file (`CLAUDE.md` with `@AGENTS.md`) in the Quick Start section
 - [ ] Add a “safe defaults” section: do/don’t for agents (no secrets, no destructive commands, ask-first rules)
 
 ## Detection Enhancements
@@ -36,7 +36,7 @@ Rules:
 ## Completed
 
 - [x] Add scripted detection for AI tool prompts, MCP servers, and prompt-alignment notes (2026-01-22)
-- [x] Add skill duplicate scan script with symlink guidance (2026-01-22)
+- [x] Add skill duplicate scan script with canonical-source guidance (2026-01-22)
 - [x] Add optional System Prompt Alignment, MCP Servers, and Project Memory sections (2026-01-22)
 - [x] Document AI agent tooling detection paths in references (2026-01-22)
 - [x] Add `ROADMAP.md` + `PROGRESS.md` workflow and archiving rules (2026-01-09)

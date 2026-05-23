@@ -78,12 +78,17 @@ function Get-McpServers {
 
 $Root = (Resolve-Path -LiteralPath $Root).Path
 $HomeDir = $HOME
+$CodexHome = $env:CODEX_HOME
+if (-not $CodexHome -and $HomeDir) {
+  $CodexHome = Join-Path $HomeDir ".codex"
+}
 
 Write-Header
 
 Write-Section "Project Instruction Files"
 
 Report-File "CLAUDE.md" (Join-Path $Root "CLAUDE.md") | Out-Null
+Report-File "AGENTS.override.md" (Join-Path $Root "AGENTS.override.md") | Out-Null
 Report-File "AGENTS.md" (Join-Path $Root "AGENTS.md") | Out-Null
 Report-File "GitHub Copilot" (Join-Path $Root ".github/copilot-instructions.md") | Out-Null
 Report-File "Cursor" (Join-Path $Root ".cursorrules") | Out-Null
@@ -110,10 +115,15 @@ Write-Section "Global Instruction Files"
 
 if ($HomeDir) {
   Report-File "Claude Code Global Prompt" (Join-Path $HomeDir ".claude/CLAUDE.md") | Out-Null
-  Report-File "Codex Config" (Join-Path $HomeDir ".codex/config.toml") | Out-Null
   Report-Dir "Roo Code Global Rules" (Join-Path $HomeDir ".roo/rules") | Out-Null
   Report-Glob "Roo Code Global Rules (modes)" (Join-Path $HomeDir ".roo/rules-*") | Out-Null
   Report-Dir "Kilo Code Global Rules" (Join-Path $HomeDir ".kilocode/rules") | Out-Null
+}
+
+if ($CodexHome) {
+  Report-File "Codex Global Override" (Join-Path $CodexHome "AGENTS.override.md") | Out-Null
+  Report-File "Codex Global Instructions" (Join-Path $CodexHome "AGENTS.md") | Out-Null
+  Report-File "Codex Config" (Join-Path $CodexHome "config.toml") | Out-Null
 }
 
 Write-Host ""
@@ -150,5 +160,5 @@ if (-not $foundAny) {
 
 Write-Host ""
 Write-Section "Notes"
-Write-Host "- Global system prompts can override project rules. Review them for conflicts."
+Write-Host "- Global instructions and override files can affect project rules. Review them for conflicts."
 Write-Host "- Use --mcp-path <path> to scan additional MCP config locations."

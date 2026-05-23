@@ -70,10 +70,8 @@ foreach ($entry in $hashToDirs.GetEnumerator()) {
       Write-Host "  - $dupDir"
     }
     $canonical = $dirs[0]
-    for ($i = 1; $i -lt $dirs.Count; $i++) {
-      $target = $dirs[$i]
-      Write-Host "  Suggest: ln -s `"$canonical`" `"$target`""
-    }
+    Write-Host "  Suggested canonical source: $canonical"
+    Write-Host "  Merge any unique content into the canonical folder, then remove or regroup duplicates."
     Write-Host ""
   }
 }
@@ -83,4 +81,5 @@ if (-not $duplicateFound) {
 }
 
 Write-Host "Notes:"
-Write-Host "- Symlinks work best on macOS/Linux; Windows may need a copy with a clear header."
+Write-Host "- Avoid symlink-based consolidation; some agent scanners may count both paths as separate context."
+Write-Host "- If duplicates are generated under plugins/, edit skills/ and run npm run sync instead."
