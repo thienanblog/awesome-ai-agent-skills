@@ -31,6 +31,10 @@ done
 
 root="$(cd -- "$root" && pwd)"
 home_dir="${HOME:-}"
+codex_home="${CODEX_HOME:-}"
+if [[ -z "$codex_home" && -n "$home_dir" ]]; then
+  codex_home="$home_dir/.codex"
+fi
 
 print_header() {
   echo "Agent Context Report"
@@ -123,6 +127,7 @@ print_header
 print_section "Project Instruction Files"
 
 report_file "CLAUDE.md" "$root/CLAUDE.md" || true
+report_file "AGENTS.override.md" "$root/AGENTS.override.md" || true
 report_file "AGENTS.md" "$root/AGENTS.md" || true
 report_file "GitHub Copilot" "$root/.github/copilot-instructions.md" || true
 report_file "Cursor" "$root/.cursorrules" || true
@@ -149,10 +154,15 @@ print_section "Global Instruction Files"
 
 if [[ -n "$home_dir" ]]; then
   report_file "Claude Code Global Prompt" "$home_dir/.claude/CLAUDE.md" || true
-  report_file "Codex Config" "$home_dir/.codex/config.toml" || true
   report_dir "Roo Code Global Rules" "$home_dir/.roo/rules" || true
   list_glob_files "Roo Code Global Rules (modes)" "$home_dir/.roo/rules-*" || true
   report_dir "Kilo Code Global Rules" "$home_dir/.kilocode/rules" || true
+fi
+
+if [[ -n "$codex_home" ]]; then
+  report_file "Codex Global Override" "$codex_home/AGENTS.override.md" || true
+  report_file "Codex Global Instructions" "$codex_home/AGENTS.md" || true
+  report_file "Codex Config" "$codex_home/config.toml" || true
 fi
 
 echo
@@ -187,5 +197,5 @@ fi
 
 echo
 print_section "Notes"
-echo "- Global system prompts can override project rules. Review them for conflicts."
+echo "- Global instructions and override files can affect project rules. Review them for conflicts."
 echo "- Use --mcp-path <path> to scan additional MCP config locations."

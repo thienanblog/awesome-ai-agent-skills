@@ -1,6 +1,6 @@
 # Merge Strategy Reference
 
-This document defines how to update existing CLAUDE.md/AGENTS.md files while preserving user customizations.
+This document defines how to update existing AGENTS.md/CLAUDE.md files while preserving user customizations.
 
 ## Overview
 
@@ -9,6 +9,8 @@ When a user requests an update to an existing instruction file, the merge strate
 2. Update outdated information with new detections
 3. Add new sections that don't exist
 4. Provide clear conflict resolution
+
+Default to `AGENTS.md` as the primary file. `CLAUDE.md` should be treated as a secondary Claude Code compatibility file unless the user explicitly wants separate Claude-specific guidance.
 
 ## File Parsing
 
@@ -97,7 +99,7 @@ For sections that exist in both versions, perform line-level analysis:
 ### Mode 3: Full Replace (User-Requested)
 
 When user explicitly requests full replacement:
-1. Create backup: `CLAUDE.md.backup`
+1. Create backup of the primary file: `AGENTS.md.backup`
 2. Generate completely new file
 3. Show diff summary to user
 
@@ -281,7 +283,7 @@ Total changes: 4 lines added, 2 lines modified, 0 lines removed
 
 1. Create timestamped backup:
    ```
-   CLAUDE.md.backup.2024-01-15T10-30-00
+   AGENTS.md.backup.2024-01-15T10-30-00
    ```
 
 2. Keep last 3 backups, remove older ones
@@ -298,11 +300,11 @@ Total changes: 4 lines added, 2 lines modified, 0 lines removed
 
 ```
 Option 1: Same directory (default)
-  CLAUDE.md.backup
+  AGENTS.md.backup
 
 Option 2: Hidden backup directory
-  .claude-backups/
-    CLAUDE.md.2024-01-15
+  .agent-instructions-backups/
+    AGENTS.md.2024-01-15
 
 Option 3: Git-based (if git repo)
   Commit current state before changes

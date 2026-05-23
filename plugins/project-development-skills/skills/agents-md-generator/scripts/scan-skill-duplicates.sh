@@ -14,7 +14,7 @@ Options:
 
 Notes:
   - Computes a combined hash of each skill folder (file paths + contents).
-  - Reports duplicate skill folders and suggests symlink consolidation.
+  - Reports duplicate skill folders and suggests choosing one canonical source.
 EOF
 }
 
@@ -27,6 +27,9 @@ while [[ $# -gt 0 ]]; do
 done
 
 skills_dir="$(cd -- "$skills_dir" && pwd)"
+hash_index="$(mktemp)"
+sorted_index="$(mktemp)"
+trap 'rm -f "$hash_index" "$sorted_index"' EXIT
 
 hash_file() {
   local file="$1"
@@ -46,9 +49,6 @@ echo "Skill Duplicate Scan"
 echo "Skills root: $skills_dir"
 echo
 
-declare -A hash_to_dirs
-declare -A hash_to_names
-
 found_skill="false"
 for dir in "$skills_dir"/*; do
   [[ -d "$dir" ]] || continue
@@ -66,12 +66,7 @@ for dir in "$skills_dir"/*; do
 
   combined_hash="$(hash_file "$tmp_file")"
   rm -f "$tmp_file"
-
-  if [[ -n "${hash_to_dirs[$combined_hash]:-}" ]]; then
-    hash_to_dirs[$combined_hash]="${hash_to_dirs[$combined_hash]}|$dir"
-  else
-    hash_to_dirs[$combined_hash]="$dir"
-  fi
+  printf "%s\t%s\n" "$combined_hash" "$dir" >> "$hash_index"
 done
 
 if [[ "$found_skill" == "false" ]]; then
@@ -80,8 +75,11 @@ if [[ "$found_skill" == "false" ]]; then
 fi
 
 duplicate_found="false"
-for hash in "${!hash_to_dirs[@]}"; do
-  IFS='|' read -r -a dirs <<< "${hash_to_dirs[$hash]}"
+print_group() {
+  local hash="$1"
+  shift
+  local dirs=("$@")
+
   if (( ${#dirs[@]} > 1 )); then
     duplicate_found="true"
     echo "Duplicate group: $hash"
@@ -89,17 +87,40 @@ for hash in "${!hash_to_dirs[@]}"; do
       echo "  - $dup_dir"
     done
     canonical="${dirs[0]}"
-    for ((i=1; i<${#dirs[@]}; i++)); do
-      target="${dirs[$i]}"
-      echo "  Suggest: ln -s \"${canonical}\" \"${target}\""
-    done
+    echo "  Suggested canonical source: $canonical"
+    echo "  Merge any unique content into the canonical folder, then remove or regroup duplicates."
     echo
   fi
-done
+}
+
+sort -k1,1 "$hash_index" > "$sorted_index"
+
+current_hash=""
+current_dirs=()
+while IFS=$'\t' read -r hash dir; do
+  if [[ -z "$current_hash" ]]; then
+    current_hash="$hash"
+    current_dirs=("$dir")
+    continue
+  fi
+
+  if [[ "$hash" == "$current_hash" ]]; then
+    current_dirs+=("$dir")
+  else
+    print_group "$current_hash" "${current_dirs[@]}"
+    current_hash="$hash"
+    current_dirs=("$dir")
+  fi
+done < "$sorted_index"
+
+if [[ -n "$current_hash" ]]; then
+  print_group "$current_hash" "${current_dirs[@]}"
+fi
 
 if [[ "$duplicate_found" == "false" ]]; then
   echo "No duplicate skills found."
 fi
 
 echo "Notes:"
-echo "- Symlinks work best on macOS/Linux; Windows may need a copy with a clear header."
+echo "- Avoid symlink-based consolidation; some agent scanners may count both paths as separate context."
+echo "- If duplicates are generated under plugins/, edit skills/ and run npm run sync instead."

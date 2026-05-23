@@ -1,6 +1,6 @@
 # Section Templates Reference
 
-This document provides complete templates for each standard section of CLAUDE.md/AGENTS.md files. Use these as building blocks when generating instruction files.
+This document provides complete templates for each standard section of AGENTS.md/CLAUDE.md instruction files. Use these as building blocks when generating instruction files.
 
 ## Section 1: Header & Role
 
@@ -474,6 +474,8 @@ These prompts can override project instructions. Review and align them with this
 * **Kilo Code Rules**: `.kilocoderules` / `.kilo/` / `.kilocodemodes`
 * **Roo Code Rules**: `.roo/rules/` / `.roo/rules-*` / `.roorules*`
 * **OpenCode Config**: `opencode.jsonc`
+* **Codex Project Instructions**: `AGENTS.override.md` / `AGENTS.md`
+* **Codex Global Instructions**: `~/.codex/AGENTS.override.md` / `~/.codex/AGENTS.md`
 * **Codex Config**: `~/.codex/config.toml`
 
 If any of these conflict with this file, update the global/system prompts first.

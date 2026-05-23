@@ -448,15 +448,15 @@ jobs:
 | Kilo Code | `.kilocoderules`, `.kilo/`, `.kilocodemodes`, `.kilocode/config.json` | HIGH |
 | Roo Code | `.roo/rules/`, `.roo/rules-*`, `.roorules*`, `.roo/mcp.json` | HIGH |
 | OpenCode | `opencode.jsonc` or `OPENCODE_CONFIG` env | MEDIUM |
-| Codex | `AGENTS.md` (project) | MEDIUM |
-| Claude Code | `.claude/CLAUDE.md`, `.mcp.json` | MEDIUM |
+| Codex | `AGENTS.override.md`, `AGENTS.md` (project) | MEDIUM |
+| Claude Code | `CLAUDE.md`, `.claude/CLAUDE.md`, `.mcp.json` | MEDIUM |
 
 ### Global Instruction Files
 
 | Tool | Detection Pattern | Confidence |
 |------|-------------------|------------|
 | Claude Code | `~/.claude/CLAUDE.md` | MEDIUM |
-| Codex | `~/.codex/config.toml` | MEDIUM |
+| Codex | `~/.codex/AGENTS.override.md`, `~/.codex/AGENTS.md`, `~/.codex/config.toml` | MEDIUM |
 | Roo Code | `~/.roo/rules/` | MEDIUM |
 | Kilo Code | `~/.kilocode/rules/` | MEDIUM |
 

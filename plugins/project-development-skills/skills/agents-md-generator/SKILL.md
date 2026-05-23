@@ -1,6 +1,6 @@
 ---
 name: agents-md-generator
-description: Generate or update CLAUDE.md/AGENTS.md files for AI coding agents through auto-scanning project files combined with interactive Q&A. Supports multiple tech stacks, development environments, and preserves customizations when updating.
+description: Generate or update AGENTS.md/CLAUDE.md files for AI coding agents through auto-scanning project files combined with interactive Q&A. Supports multiple tech stacks, development environments, and preserves customizations when updating.
 context: fork
 ---
 
@@ -8,7 +8,7 @@ context: fork
 
 ## Overview
 
-This skill helps you generate comprehensive instruction files (CLAUDE.md or AGENTS.md) that teach AI coding agents how to work effectively in your project. It combines automatic project scanning with interactive questions to create tailored guidelines.
+This skill helps you generate comprehensive instruction files (AGENTS.md with optional CLAUDE.md compatibility) that teach AI coding agents how to work effectively in your project. It combines automatic project scanning with interactive questions to create tailored guidelines.
 
 **When to use this skill:**
 - Setting up a new project for AI-assisted development
@@ -20,11 +20,19 @@ This skill helps you generate comprehensive instruction files (CLAUDE.md or AGEN
 
 **Do not duplicate specialized skills.** If a request falls into a specialized domain (e.g., Design System), delegate to the specialized skill when available.
 
+**Use `AGENTS.md` as the shared project manual.** `AGENTS.md` is plain Markdown with no required fields. Cover the details an agent needs to work effectively: project overview, build and test commands, code style, testing expectations, security notes, PR/commit rules, and deployment gotchas.
+
+**Handle `AGENTS.override.md` as a Codex-specific override, not the default.** Codex checks `AGENTS.override.md` before `AGENTS.md` at both global and project-directory scopes, and includes at most one instruction file per directory. If both files exist in the same directory, Codex uses `AGENTS.override.md` and ignores that directory's `AGENTS.md`. Create or update `AGENTS.override.md` only when the user explicitly wants a Codex-specific or nested-directory override.
+
+**Respect Codex instruction discovery.** Codex builds its instruction chain once per run/session: global instructions first, then project files from repository root down to the current working directory. The global Codex directory defaults to `~/.codex` and can be changed with `CODEX_HOME`. Files closer to the current directory appear later and override earlier guidance. Codex skips empty files and stops adding files when the combined size reaches `project_doc_max_bytes` (32 KiB by default). If `~/.codex/config.toml` defines `project_doc_fallback_filenames`, Codex checks those names after `AGENTS.override.md` and `AGENTS.md`.
+
+**Use `CLAUDE.md` only as Claude Code compatibility by default.** Claude Code reads `CLAUDE.md`, not `AGENTS.md` directly, so a shared setup needs a `CLAUDE.md` file that imports `AGENTS.md`.
+
 ## Quick Start
 
-To generate a new CLAUDE.md file:
+To generate a new AGENTS.md file:
 1. Navigate to your project root
-2. Tell the AI agent: "Use the agents-md-generator skill to create a CLAUDE.md file"
+2. Tell the AI agent: "Use the agents-md-generator skill to create an AGENTS.md file"
 3. Answer the interactive questions about your project
 4. Review and customize the generated file
 
@@ -46,7 +54,7 @@ Short form is never required; it is only provided for convenience.
 - Maximum customization
 
 **Quick Mode:**
-- Tell the AI: "Generate CLAUDE.md in quick mode"
+- Tell the AI: "Generate AGENTS.md in quick mode"
 - Skips all questions, uses auto-detection only
 - Best for experienced users or simple projects
 - Uses Medium scan depth by default
@@ -57,16 +65,30 @@ Short form is never required; it is only provided for convenience.
 ### Phase 1: Initialization & Discovery
 
 **Check for existing files:**
-1. Look for `CLAUDE.md` or `AGENTS.md` in the project root
-2. If found, ask user: "I found an existing [filename]. Would you like to:"
+1. Look for `CLAUDE.md`, `AGENTS.md`, and `AGENTS.override.md` in the project root.
+2. If `AGENTS.md` exists, ask user: "I found an existing AGENTS.md. Would you like to:"
    1. Update it (merge new content while preserving customizations)
    2. Replace it (generate fresh, backup existing)
    3. Cancel
    - Reply examples (optional): `1` or `update`; `2` or `replace`; `3` or `cancel`
+3. If `CLAUDE.md` exists but `AGENTS.md` does not, ask user before changing it:
+   1. Migrate to `AGENTS.md` as the primary file and replace `CLAUDE.md` with a compatibility reference to `AGENTS.md`
+   2. Keep `CLAUDE.md` and `AGENTS.md` side by side with separate instructions for different AI agents
+   3. Cancel
+   - Reply examples (optional): `1` or `migrate`; `2` or `keep both`; `3` or `cancel`
+4. If both `AGENTS.md` and `CLAUDE.md` exist, ask whether `AGENTS.md` should become the single source of truth with `CLAUDE.md` referencing it, or whether the user intentionally wants both files to remain independent.
+5. If `AGENTS.override.md` exists, explain that Codex gives it priority over `AGENTS.md` in that directory. Ask whether to update the override, merge it back into `AGENTS.md`, or leave it as a Codex-specific override.
 
 **Determine primary file:**
-- Default: `CLAUDE.md` as primary, `AGENTS.md` as symlink
-- For Windows or if user prefers: Both files with sync header
+- Default: `AGENTS.md` as primary source of truth.
+- `AGENTS.override.md` is not the primary file. Use it only for Codex-specific overrides, temporary overrides, or nested directory rules that should supersede broader `AGENTS.md` guidance for Codex.
+- `CLAUDE.md` is a secondary compatibility file for Claude Code, because Claude Code reads `CLAUDE.md` rather than `AGENTS.md` directly. Do not use symbolic links; some AI agents may read both files and duplicate context.
+- When sharing the same instructions with Claude Code, make `CLAUDE.md` a normal text file whose first line is:
+  ```markdown
+  @AGENTS.md
+  ```
+- Additional Claude-specific instructions may be added below the import only when the user explicitly wants them.
+- If the project already has a meaningful `CLAUDE.md`, ask the user before replacing it. The user may prefer to keep both files with different guidance for different AI tools.
 
 ### Phase 1b: Agent Tooling & System Prompt Alignment (Scripted)
 
@@ -78,7 +100,7 @@ Short form is never required; it is only provided for convenience.
 
 The script should report:
 - Project instruction files for AI tools (Copilot, Cursor, Cline, Kilo Code, Roo Code, OpenCode, Codex, Claude Code)
-- Global instruction files (e.g., `~/.claude/CLAUDE.md`, `~/.codex/config.toml`, `~/.roo/rules/`, `~/.kilocode/rules/`)
+- Global instruction files (e.g., `~/.claude/CLAUDE.md`, `~/.codex/AGENTS.override.md`, `~/.codex/AGENTS.md`, `~/.codex/config.toml`, `~/.roo/rules/`, `~/.kilocode/rules/`)
 - MCP config files and server names (from `.mcp.json`, `.roo/mcp.json`, `mcp_settings.json`, plus any `--mcp-path` entries)
 
 **If script is unavailable:**
@@ -97,7 +119,8 @@ I detected these AI tool instruction sources:
 - .kilocoderules / .kilo/ / .kilocodemodes (Kilo Code)
 - .roo/rules/ / .roo/rules-* / .roorules* (Roo Code)
 - opencode.jsonc (OpenCode)
-- ~/.codex/config.toml (Codex)
+- AGENTS.override.md / AGENTS.md (Codex project instructions)
+- ~/.codex/AGENTS.override.md / ~/.codex/AGENTS.md / ~/.codex/config.toml (Codex global instructions and config)
 - .claude/CLAUDE.md or ~/.claude/CLAUDE.md (Claude Code)
 
 Which of these do you actively use for this project, and should we align or ignore any of them?
@@ -114,9 +137,9 @@ If a `skills/` folder exists, run the duplicate scan script to avoid copy-pasted
 - Windows cmd: `skills\agents-md-generator\scripts\scan-skill-duplicates.cmd --skills-dir skills`
 
 If duplicates are detected:
-- Recommend consolidating with symlinks so there is one source of truth.
-- Example (macOS/Linux): `ln -s ./skills/skill-a ./skills/skill-b`
-- On Windows, recommend a copy with a clear header if symlinks are not supported.
+- Recommend choosing one canonical folder under `skills/` and merging any unique content into it.
+- Do not recommend symbolic links for duplicate skill folders; agent scanners may count both paths as separate context.
+- If a duplicate only exists under `plugins/<plugin-name>/skills/`, treat it as a generated package copy. Edit the source under `skills/` and run `npm run sync`.
 
 ### Phase 2: Scan Depth Selection
 
@@ -235,7 +258,7 @@ Reply examples:
    - Kilo Code (`.kilocoderules`, `.kilo/`, `.kilocodemodes`, `.kilocode/config.json`)
    - Roo Code (`.roo/rules/`, `.roo/rules-*`, `.roorules*`, `.roo/mcp.json`, `mcp_settings.json`)
    - OpenCode (`opencode.jsonc`, `OPENCODE_CONFIG`)
-   - Codex (`~/.codex/config.toml`)
+   - Codex (`AGENTS.override.md`, `AGENTS.md`, `~/.codex/AGENTS.override.md`, `~/.codex/AGENTS.md`, `~/.codex/config.toml`)
    - Claude Code (`.claude/CLAUDE.md`, `~/.claude/CLAUDE.md`, `.mcp.json`)
 
 **Present findings to user:**
@@ -565,6 +588,8 @@ These prompts can override project instructions. Review and align them with this
 * **Kilo Code Rules**: `.kilocoderules` / `.kilo/` / `.kilocodemodes`
 * **Roo Code Rules**: `.roo/rules/` / `.roo/rules-*` / `.roorules*`
 * **OpenCode Config**: `opencode.jsonc`
+* **Codex Project Instructions**: `AGENTS.override.md` / `AGENTS.md`
+* **Codex Global Instructions**: `~/.codex/AGENTS.override.md` / `~/.codex/AGENTS.md`
 * **Codex Config**: `~/.codex/config.toml`
 
 If any of these conflict with this file, update the global/system prompts first.
@@ -608,18 +633,34 @@ If a memory MCP server is used instead, keep `PROGRESS.md` minimal or omit it.
 ### Phase 6: File Creation/Update
 
 **For new files:**
-1. Write `CLAUDE.md` with generated content
-2. Create `AGENTS.md` as symlink:
-   ```bash
-   ln -s CLAUDE.md AGENTS.md
-   ```
-3. If symlink fails (Windows), create copy with header:
+1. Write `AGENTS.md` with generated content.
+2. Create `CLAUDE.md` as a normal text file for Claude Code compatibility. The first line must be:
    ```markdown
-   <!-- This file mirrors CLAUDE.md. Edit CLAUDE.md as the primary source. -->
+   @AGENTS.md
    ```
+3. Do not create a symbolic link between `CLAUDE.md` and `AGENTS.md`. Claude Code supports symlinks, but this skill intentionally uses the `@AGENTS.md` import to avoid duplicate-context behavior in other agents.
+4. If the user wants Claude-specific rules, add them below the `@AGENTS.md` import under a `## Claude Code` heading.
+5. Do not create `AGENTS.override.md` by default. Create it only when the user asks for Codex-specific override behavior.
+
+**If `AGENTS.override.md` exists or is requested:**
+1. Treat it as a Codex-only override with higher precedence than `AGENTS.md` in the same directory.
+2. If it exists beside `AGENTS.md`, warn that Codex ignores that directory's `AGENTS.md` and reads the override instead.
+3. For specialized subprojects, place `AGENTS.override.md` as close as possible to the files it should govern.
+4. Keep override content narrow; common instructions should remain in `AGENTS.md`.
+5. If the project uses `project_doc_fallback_filenames`, mention that fallback files are checked only after `AGENTS.override.md` and `AGENTS.md`.
+
+**If an existing `CLAUDE.md` is present without `AGENTS.md`:**
+1. Ask the user whether to migrate or keep both files.
+2. If migrating:
+   - Back up the existing `CLAUDE.md`.
+   - Move or merge its useful guidance into `AGENTS.md`.
+   - Replace `CLAUDE.md` with a normal text file starting with `@AGENTS.md`.
+3. If keeping both:
+   - Treat `AGENTS.md` and `CLAUDE.md` as intentionally separate instruction files.
+   - Ask which guidance belongs in each file before editing.
 
 **For updates (merge mode):**
-1. Parse existing file into sections (split by `## ` headers)
+1. Parse the primary existing file (`AGENTS.md` by default) into sections (split by `## ` headers)
 2. Compare auto-detected findings against existing guidance; if they conflict, ask the user whether to keep existing content, replace it, or merge.
 3. For each section:
    - If exists in both: Show diff and ask user preference
@@ -627,7 +668,7 @@ If a memory MCP server is used instead, keep `PROGRESS.md` minimal or omit it.
    - If only in new: Add with note
 4. Generate merged file
 5. Show summary of changes
-6. Ensure the generated content does not instruct the agent to read `CLAUDE.md` or `AGENTS.md`, since those files are already loaded by AI tools.
+6. Ensure the generated `AGENTS.md` content does not instruct the agent to read `CLAUDE.md` or `AGENTS.md`, since those files are already loaded by AI tools.
 
 ## Design System Delegation (Skill Reuse Policy)
 
@@ -718,19 +759,28 @@ Archiving rule: keep `PROGRESS.md` readable (about 200-300 lines max). Move old 
 
 ## Output File Naming
 
-**Primary file:** `CLAUDE.md`
+**Primary file:** `AGENTS.md`
 - This is the main instruction file that AI agents read
 - All edits should be made to this file
+- Keep it concise; Codex has a combined project-doc size cap (`project_doc_max_bytes`, 32 KiB by default)
+- Use nested `AGENTS.md` files for subprojects when closer-directory guidance should override broader guidance
 
-**Secondary file:** `AGENTS.md`
-- Symlink to CLAUDE.md (Unix/macOS/Linux)
-- Or copy with header note (Windows)
-- Provides compatibility with tools expecting AGENTS.md
+**Codex override file:** `AGENTS.override.md`
+- Higher priority than `AGENTS.md` for Codex in the same directory
+- Use only for Codex-specific, temporary, or nested-directory override rules
+- Do not create by default because Codex includes at most one instruction file per directory
+
+**Secondary file:** `CLAUDE.md`
+- Normal text file for Claude Code compatibility
+- First line: `@AGENTS.md`
+- May contain separate Claude-specific guidance only if the user explicitly wants parallel files
+- Claude Code expands `@AGENTS.md` when loading `CLAUDE.md`
 
 **Why this approach:**
 - Single source of truth prevents drift
 - Works across all AI coding tools
-- Follows Claude Code conventions while supporting others
+- Avoids symbolic links that can cause duplicate context reads
+- Lets Claude Code share `AGENTS.md` through a lightweight file reference
 
 ---
 
