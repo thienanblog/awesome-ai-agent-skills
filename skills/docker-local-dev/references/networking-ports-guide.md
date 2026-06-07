@@ -246,7 +246,7 @@ For managing multiple Docker projects with custom domains.
 ### When to Use NPM
 
 - Running 3+ Docker projects
-- Need custom domains (myapp.local, api.local)
+- Need custom domains (app.localhost, api.localhost)
 - Want automatic SSL certificates
 - Prefer visual configuration
 
@@ -305,20 +305,61 @@ services:
 
 ### Local Domain Setup
 
-**Add to /etc/hosts:**
+Prefer explicit `*.localhost` hostnames unless the user explicitly needs wildcard local routing. Host machines commonly resolve `*.localhost` to `127.0.0.1`, so users usually do not need to edit `/etc/hosts`.
+
+**Use local hostnames directly:**
 ```
-127.0.0.1 myapp.local
-127.0.0.1 api.local
-127.0.0.1 admin.local
+app.localhost
+api.localhost
+admin.localhost
 ```
 
-**Or use dnsmasq for wildcard:**
+If a specific OS or resolver does not resolve `*.localhost`, fall back to explicit `/etc/hosts` entries:
+```
+127.0.0.1 app.localhost
+127.0.0.1 api.localhost
+127.0.0.1 admin.localhost
+```
+
+**Use dnsmasq for custom wildcard domains only when local wildcard testing is required:**
 ```bash
 # macOS with Homebrew
 brew install dnsmasq
-echo 'address=/.local/127.0.0.1' >> /usr/local/etc/dnsmasq.conf
+echo 'address=/.test/127.0.0.1' >> /usr/local/etc/dnsmasq.conf
 sudo brew services start dnsmasq
 ```
+
+If both explicit and wildcard routes exist, configure explicit hosts first in the reverse proxy so admin/customer/API routes do not get swallowed by a renderer catch-all.
+
+### Same-Origin `/api` Proxy
+
+For frontend apps that call the API through a same-origin `/api` prefix, keep that proxy path in local Docker routing. This avoids browser CORS/preflight complexity while preserving a production-like URL shape.
+
+**Nginx example:**
+```nginx
+server {
+    listen 80;
+    server_name app.localhost admin.localhost;
+
+    location /api/ {
+        proxy_pass http://api:8000/api/;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+    }
+
+    location / {
+        proxy_pass http://web:3000;
+    }
+}
+```
+
+If the API already serves routes under `/api`, keep path rewriting explicit and test a real endpoint. Avoid accidentally producing `/api/api/...`.
+
+### Production Wildcard Domains
+
+Production wildcard domains such as `*.example.com` should be handled by the edge proxy/load balancer. For HTTPS wildcard certificates, Caddy/Traefik generally need DNS-01 automation or a preloaded wildcard certificate. Do not imply that local wildcard DNS is required just because production wildcard routing exists.
 
 ## Configuration Storage
 

@@ -1,6 +1,6 @@
 ---
 name: docker-local-dev
-description: Generate Docker Compose and Dockerfile configurations for local development through interactive Q&A. Supports PHP/Laravel, WordPress, Drupal, Joomla, Node.js, and Python stacks with Nginx, Supervisor/PM2, databases, Redis, and email testing. Always asks clarifying questions before generating configurations.
+description: Generate Docker Compose and Dockerfile configurations for local development through interactive Q&A. Supports single-app and monorepo PHP/Laravel, WordPress, Drupal, Joomla, Node.js, and Python stacks with live reload, dependency installer jobs, Nginx/reverse proxy routing, databases, Redis, queues, schedulers, and email testing. Use when designing local dev stacks that differ from optimized production images.
 context: fork
 ---
 
@@ -29,6 +29,16 @@ This skill uses an **interactive approach**. Before generating any files, I will
 
 **Why this approach?** Docker configurations are project-specific. Asking questions ensures the setup matches YOUR requirements, not generic defaults. This prevents issues and saves debugging time later.
 
+## Core Design Defaults
+
+- Treat local development and production as separate targets. Local prioritizes live reload, bind mounts, fast debug/test cycles, and optional debug tooling. Production prioritizes immutable images, small runtime layers, no bind mounts, no dev dependency installers, and scoped runtime secrets.
+- Prefer bind-mounted source plus named dependency volumes for active development. For PHP/Node monorepos, one-shot dependency installer services are valid and intentional; they install `vendor`, `node_modules`, or package-manager stores into named volumes, exit with code 0, and may appear as stopped in Docker UIs.
+- Use dependency installer services only for local/dev compose unless the user explicitly wants a production-like dev image. Production images should install dependencies during image build.
+- Do not assume wildcard local domains. Prefer explicit `*.localhost` hostnames because host machines commonly resolve them to `127.0.0.1` without `/etc/hosts` changes. Ask whether wildcard routing is needed locally only when the user is actively testing wildcard behavior. If the user only needs production wildcard support, use explicit local hostnames and document production wildcard requirements separately.
+- When frontend apps use same-origin `/api` proxying to the API, preserve that route through the local reverse proxy instead of introducing browser CORS/preflight requirements.
+- Generalize examples for community-safe reuse. Use neutral local placeholders such as `app.localhost`, `api.localhost`, `apps/web`, and `packages/ui`; never copy private project names, customer names, private domains, internal paths, secrets, or production data into reusable skill content.
+- For implementation details, read the relevant reference before generating files: service strategy in `references/service-configuration-guide.md`, domain/networking in `references/networking-ports-guide.md`, and verification in `references/health-check-patterns.md`.
+
 ## Quick Start
 
 To generate a Docker development environment:
@@ -42,7 +52,7 @@ To generate a Docker development environment:
 
 | Stack | Framework/CMS | Process Manager | Notes |
 |-------|--------------|-----------------|-------|
-| PHP | Laravel 10/11/12 | Supervisor | Queue workers, scheduler |
+| PHP | Laravel 10/11/12/13 | Supervisor | Queue workers, scheduler |
 | PHP | WordPress | WP-CLI | Debug plugins, error logging |
 | PHP | Drupal 10/11 | Drush | Development services |
 | PHP | Joomla 4/5 | - | CLI tools, debug mode |
@@ -145,6 +155,35 @@ How would you like this stack named in Docker UIs?
 - Prefer kebab-case names
 - Keep the same prefix across project name, image tags, and container names when possible
 - If an existing stack already has a stable naming convention, preserve it unless the user asks to rename it
+
+### Phase 1.75: Monorepo Discovery
+
+**Detect monorepo/workspace layout before generating services:**
+
+```bash
+find . -maxdepth 3 \( -name pnpm-workspace.yaml -o -name turbo.json -o -name nx.json -o -name lerna.json -o -name package.json -o -name composer.json \) -print
+find . -maxdepth 2 -type d \( -name apps -o -name packages -o -name services \) -print
+```
+
+**Ask monorepo-specific questions:**
+```
+This looks like a monorepo/workspace.
+
+Which apps should run in Docker?
+- App path and role, for example apps/api, apps/web, services/worker
+- Dev command for each app
+- Internal port for each app
+- Public local hostname, if any
+- Shared packages that must live-reload
+- Package manager and lockfile location
+```
+
+**Recommended monorepo defaults:**
+- Use the repository root as `build.context` when Dockerfiles need shared packages or root lockfiles.
+- Set app-specific `dockerfile`, `working_dir`, command, and dependency volumes per service.
+- Mount the repo root only when workspace resolution or shared package live reload requires it; otherwise mount app paths narrowly.
+- Keep top-level Compose `name:` explicit and service names role-based under that project.
+- Do not leak real project names/domains in reusable examples; use neutral names such as `api`, `web`, `admin`, `worker`, `app.localhost`, and `apps/*`.
 
 ### Phase 2: Tech Stack Confirmation
 
@@ -332,7 +371,12 @@ Which email testing service would you prefer?
 For Laravel, check if queues are actually used:
 ```bash
 grep -E '^QUEUE_CONNECTION=' .env
-# Also check if jobs table exists or queue jobs are defined
+# Also check if async jobs, failed jobs, queued listeners, or dispatch calls exist
+find app -path '*/Jobs/*' -type f 2>/dev/null
+grep -R "ShouldQueue\|queue:work\|dispatch(" app routes config 2>/dev/null
+
+# If dependencies are installed, inspect scheduler tasks
+php artisan schedule:list --no-interaction 2>/dev/null || true
 ```
 
 **If QUEUE_CONNECTION=sync:**
@@ -352,6 +396,11 @@ Do you need background task processing?
 3. Both queue workers and scheduler
 4. No background processing needed
 ```
+
+**Laravel scheduler rule:**
+- A scheduler service is infrastructure support, not proof that scheduled tasks exist.
+- If `schedule:list` shows no tasks, ask whether to add a scheduler service now or document it as production-ready but idle.
+- In production compose, run queue workers and the scheduler as separate services from the web/API container.
 
 For Node.js:
 ```
@@ -397,6 +446,23 @@ Do you still want to expose the database port for external tools (DBeaver/DataGr
 1. Yes, expose database port (3306/5432) for SQL tools
 2. No, keep everything internal
 ```
+
+**Local domain strategy:**
+```
+Which local domains should this stack support?
+
+Examples:
+- admin.localhost
+- app.localhost
+- renderer.localhost
+
+Do you need wildcard domains locally?
+1. No, use explicit `*.localhost` hosts only (recommended unless actively testing wildcard routing)
+2. Yes, configure wildcard local DNS/proxy routing
+3. Production wildcard only, keep local explicit
+```
+
+If explicit and wildcard hosts are both used, configure specific hosts before wildcard routes. For host-machine access, prefer `*.localhost` names so the user does not need to edit `/etc/hosts`. Reserve apex/company domains that the user says are not implemented yet; do not route them to placeholder services unless asked.
 
 **If NOT using reverse proxy (Option 2), then ask port strategy:**
 ```
@@ -485,7 +551,7 @@ Are you running multiple Docker projects on this machine?
 
 1. Yes, I have multiple projects
    → Consider Nginx Proxy Manager for:
-   - Custom domains (myapp.local, api.local)
+   - Custom domains (app.localhost, api.localhost)
    - Automatic SSL certificates
    - Centralized reverse proxy
 
@@ -526,6 +592,23 @@ Note: Bind mounts have ~10-20% slower file I/O on macOS,
 but the instant sync is worth it for development.
 ```
 
+**Dependency installation strategy:**
+```
+How should dependencies be handled for local development?
+
+1. One-shot dependency installer services (recommended for bind-mounted live reload)
+   - Install Composer/npm/pnpm dependencies into named Docker volumes
+   - App containers can start after dependency services complete successfully
+   - Installer containers exit 0 and will show as stopped; this is expected
+
+2. Install dependencies inside the dev image
+   - Faster after image build
+   - Requires rebuilding when lockfiles change
+   - Better for production-like dev, less flexible for active local edits
+```
+
+For production builds, install dependencies in image build stages and do not generate dependency installer services.
+
 ### Phase 8: Generation & Verification
 
 **Docker Compose Version Note:**
@@ -542,10 +625,19 @@ but the instant sync is worth it for development.
 1. Create backup of existing files (if any)
 2. Generate `.env.docker` or update `.env`
 3. Generate `Dockerfile`
-4. Generate `docker-compose.yml` (without version field, with explicit top-level `name:` when requested or when working in a monorepo)
-5. Generate Nginx configuration
-6. Generate Supervisor/PM2 configuration (if needed)
-7. Create helper scripts
+4. Generate `.dockerignore` or update it to exclude secrets and build artifacts
+5. Generate `docker-compose.yml` (without version field, with explicit top-level `name:` when requested or when working in a monorepo)
+6. Add one-shot dependency installer services only for local/dev compose when chosen
+7. Keep production compose separate from dev compose when the user asks for both
+8. Generate Nginx/reverse proxy configuration
+9. Generate Supervisor/PM2 configuration (if needed)
+10. Create helper scripts
+
+**Production boundary:**
+- Do not load app-local `.env` files into production compose.
+- Prefer a root production env file or deployment secrets mechanism and scope env vars to only the services that need them.
+- Do not pass database, SMTP, S3, or app secrets to frontend/static/proxy containers unless they genuinely need them.
+- For Caddy/Traefik wildcard HTTPS, document DNS-01 or preloaded wildcard certificate requirements.
 
 **After docker-compose up (AUTOMATIC):**
 
@@ -621,6 +713,13 @@ docker compose logs -f
 ## Container Networking (Important)
 
 When the app runs inside Docker, `localhost` points to the app container. To connect to other services, use the Docker Compose service name (for example `db`, `redis`, `mailpit`) instead of `localhost`.
+
+## Dependency Installer Containers
+
+If this stack uses dependency installer services such as `api-deps` or `node-deps`, they are expected to exit successfully after installing dependencies into named volumes. In Docker Desktop/OrbStack they may appear as stopped. Check the exit code and logs before treating them as failed:
+
+docker compose ps -a
+docker compose logs api-deps node-deps
 
 ## Stack-Specific Commands
 
