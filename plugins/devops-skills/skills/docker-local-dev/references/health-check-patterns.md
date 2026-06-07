@@ -184,6 +184,18 @@ docker compose exec app php artisan cache:clear
 docker compose exec app php artisan queue:work --once
 ```
 
+**Queue and scheduler discovery:**
+```bash
+# Queue driver and failed jobs
+docker compose exec app sh -lc "grep -E '^QUEUE_CONNECTION=' .env .env.docker 2>/dev/null || true"
+docker compose exec app php artisan queue:failed 2>/dev/null || true
+
+# Scheduled commands
+docker compose exec app php artisan schedule:list --no-interaction
+```
+
+If `schedule:list` has no real tasks, the scheduler service can still be valid infrastructure but should be documented as idle. Do not report "scheduler support" as "scheduled jobs implemented" unless actual scheduled commands exist.
+
 ### WordPress
 
 **WP-CLI version:**
@@ -278,6 +290,19 @@ docker compose exec app node -v
 ```
 
 ## Queue Worker Checks
+
+### One-Shot Dependency Installer Checks
+
+Dependency installer services such as `api-deps`, `composer-deps`, `node-deps`, or `pnpm-deps` are expected to stop after successful installation. Treat them as healthy when they exited with code 0 and the app containers can see the dependency directories.
+
+```bash
+docker compose ps -a api-deps node-deps
+docker compose logs api-deps node-deps
+docker compose exec app test -d vendor
+docker compose exec web test -d node_modules
+```
+
+If an installer service exits non-zero, inspect lockfile compatibility, package manager availability, auth tokens for private packages, and volume mount targets before restarting app containers.
 
 ### Supervisor Process
 
@@ -416,9 +441,15 @@ docker compose exec worker supervisorctl status
 # Check worker logs
 docker compose logs worker
 
+# Check queue driver and actual pending/failed jobs
+docker compose exec app sh -lc "grep -E '^QUEUE_CONNECTION=' .env .env.docker 2>/dev/null || true"
+docker compose exec app php artisan queue:failed 2>/dev/null || true
+
 # Manually run job
 docker compose exec app php artisan queue:work --once
 ```
+
+Also verify that the application actually defines queued jobs/listeners. A running worker with no `ShouldQueue` jobs or dispatched work is not a failure.
 
 ## Health Check in docker-compose.yml
 

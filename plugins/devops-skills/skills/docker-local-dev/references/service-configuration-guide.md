@@ -47,6 +47,20 @@ Options:
 - Docker Compose v2 deprecated this field
 - Modern compose files don't need it
 
+## Local Dev vs Production Images
+
+Use different Docker patterns for local development and production:
+
+| Concern | Local development | Production |
+|---------|-------------------|------------|
+| Source code | Bind mount for live reload | Copy source into immutable image |
+| Dependencies | Named volumes plus one-shot installer services when useful | Install during image build |
+| Debugging | Optional Xdebug/dev tools, verbose logs | Minimal runtime tools and logs |
+| Commands | Dev servers/watchers | Optimized web server/runtime command |
+| Secrets | Local `.env.docker` or safe local defaults | Deployment env/secrets, scoped per service |
+
+Do not reuse one-shot dependency installer services in production compose. Production images should be self-contained enough to start without first running Composer, npm, pnpm, or migrations inside a dependency helper container.
+
 ## Nginx Configuration
 
 ### PHP-FPM (Laravel/WordPress)
@@ -176,11 +190,11 @@ db:
     - "${DB_PORT:-3306}:3306"
 ```
 
-### PostgreSQL 16.x
+### PostgreSQL 16/17.x
 
 ```yaml
 db:
-  image: postgres:16-alpine
+  image: postgres:17-alpine
   environment:
     POSTGRES_DB: ${DB_DATABASE:-app}
     POSTGRES_USER: ${DB_USERNAME:-app}
@@ -190,6 +204,25 @@ db:
   ports:
     - "${DB_PORT:-5432}:5432"
 ```
+
+### PostgreSQL 18+ Data Volume Mount
+
+For `postgres:18` and newer official images, mount the named volume at `/var/lib/postgresql`, not `/var/lib/postgresql/data`. PostgreSQL 18+ uses a version-specific data directory under that parent path, and mounting only the old `data` path can create confusing anonymous-volume behavior during recreation or upgrades.
+
+```yaml
+db:
+  image: postgres:18-alpine
+  environment:
+    POSTGRES_DB: ${DB_DATABASE:-app}
+    POSTGRES_USER: ${DB_USERNAME:-app}
+    POSTGRES_PASSWORD: ${DB_PASSWORD:-secret}
+  volumes:
+    - db_data:/var/lib/postgresql
+  ports:
+    - "${DB_PORT:-5432}:5432"
+```
+
+For older PostgreSQL images, `/var/lib/postgresql/data` remains acceptable. When generating a stack, choose the mount target based on the selected image major version.
 
 ## Redis Configuration
 
@@ -302,6 +335,22 @@ opcache.revalidate_freq=0
 ; opcache.revalidate_freq=60     ; Or check less frequently
 ```
 
+## Laravel Development Server
+
+When a Laravel app has a host `.env` file but Docker Compose provides different environment variables, `php artisan serve` can be a poor dev-server command because the framework serve command may pass a narrow environment set to the child PHP server. If Compose env values must reliably override the app `.env`, prefer running PHP's built-in server directly from `public/`:
+
+```yaml
+services:
+  api:
+    command: >
+      sh -lc "cd public &&
+      php -d variables_order=EGPCS
+      -S 0.0.0.0:8000
+      ../vendor/laravel/framework/src/Illuminate/Foundation/resources/server.php"
+```
+
+Use `php artisan serve` only when you have verified the intended env values are visible to the served process, or when the project uses a Docker-specific app env file.
+
 ## Supervisor Configuration
 
 ### Laravel Queue Worker
@@ -407,6 +456,127 @@ volumes:
   node_modules_cache:
 ```
 
+### One-Shot Dependency Installer Services
+
+For live-reload development with bind-mounted source, dependency directories are often hidden by the bind mount or should be isolated from the host. A one-shot installer service can populate named volumes, then exit successfully.
+
+```yaml
+services:
+  api-deps:
+    image: composer:2
+    working_dir: /app
+    command: composer install --no-interaction --prefer-dist
+    volumes:
+      - ./apps/api:/app
+      - api_vendor:/app/vendor
+
+  api:
+    build:
+      context: .
+      dockerfile: infra/docker/api.dev.Dockerfile
+    depends_on:
+      api-deps:
+        condition: service_completed_successfully
+    volumes:
+      - ./apps/api:/app
+      - api_vendor:/app/vendor
+
+volumes:
+  api_vendor:
+```
+
+```yaml
+services:
+  node-deps:
+    image: node:22-alpine
+    working_dir: /repo
+    command: sh -lc "corepack enable && pnpm install --frozen-lockfile"
+    volumes:
+      - ./:/repo
+      - node_modules:/repo/node_modules
+      - pnpm_store:/root/.local/share/pnpm/store
+
+volumes:
+  node_modules:
+  pnpm_store:
+```
+
+These containers are expected to stop after successful installation. Explain this in generated usage docs so a stopped `*-deps` container is not mistaken for a failed app container. Verify with `docker compose ps -a` and logs.
+
+### Monorepo Dependency and Build Context Strategy
+
+For monorepos, first identify whether dependencies are installed at the repository root, per app, or both. Do not assume every app has independent lockfiles.
+
+**Common patterns:**
+
+| Layout | Compose strategy |
+|--------|------------------|
+| Root `pnpm-workspace.yaml` with `apps/*` and `packages/*` | Use repo root as build context, root dependency installer, app-specific `working_dir` |
+| Laravel API under `apps/api` plus Node apps under `apps/*` | Separate Composer and Node dependency volumes; separate installer services |
+| Shared packages under `packages/*` | Bind mount shared packages or repo root so live reload sees local package changes |
+| App-local lockfiles | Use app path as build context when no shared packages are needed |
+
+**Generic pnpm workspace example:**
+
+```yaml
+services:
+  node-deps:
+    image: node:22-alpine
+    working_dir: /workspace
+    command: sh -lc "corepack enable && pnpm install --frozen-lockfile"
+    volumes:
+      - ./:/workspace
+      - workspace_node_modules:/workspace/node_modules
+      - pnpm_store:/root/.local/share/pnpm/store
+
+  web:
+    image: node:22-alpine
+    working_dir: /workspace/apps/web
+    command: sh -lc "corepack enable && pnpm dev --hostname 0.0.0.0"
+    depends_on:
+      node-deps:
+        condition: service_completed_successfully
+    volumes:
+      - ./:/workspace
+      - workspace_node_modules:/workspace/node_modules
+      - web_next:/workspace/apps/web/.next
+
+volumes:
+  workspace_node_modules:
+  pnpm_store:
+  web_next:
+```
+
+**Generic PHP app inside monorepo:**
+
+```yaml
+services:
+  api-deps:
+    image: composer:2
+    working_dir: /workspace/apps/api
+    command: composer install --no-interaction --prefer-dist
+    volumes:
+      - ./:/workspace
+      - api_vendor:/workspace/apps/api/vendor
+
+  api:
+    build:
+      context: .
+      dockerfile: infra/docker/api.dev.Dockerfile
+    working_dir: /workspace/apps/api
+    depends_on:
+      api-deps:
+        condition: service_completed_successfully
+    volumes:
+      - ./:/workspace
+      - api_vendor:/workspace/apps/api/vendor
+
+volumes:
+  api_vendor:
+```
+
+Keep examples generic. Replace `apps/web`, `apps/api`, and `packages/*` with the user's actual paths only in that user's project files, not in reusable skill documentation.
+
 ## Environment Variables
 
 ### .env File Approach (Recommended)
@@ -444,3 +614,41 @@ services:
       MYSQL_DATABASE: app
       MYSQL_PASSWORD: secret
 ```
+
+### `.dockerignore` for Dev and Production Builds
+
+When generating Dockerfiles, also generate or update `.dockerignore` to avoid leaking secrets or copying bulky local artifacts:
+
+```dockerignore
+.git
+.env
+.env.*
+**/.env
+**/.env.*
+node_modules
+**/node_modules
+vendor
+**/vendor
+.next
+**/.next
+storage/logs
+**/storage/logs
+```
+
+If examples are committed, allow them explicitly:
+
+```dockerignore
+!.env.example
+!**/.env.example
+!.env.production.example
+!**/.env.production.example
+```
+
+### Production Environment Scoping
+
+For production compose files:
+
+- Use a root deployment env file such as `.env.production` or an external secrets mechanism; do not load app-local development `.env` files.
+- Scope env vars by service. API/PHP workers need database, cache, mail, queue, and storage secrets; frontend/static/proxy containers usually do not.
+- Do not pass `DB_PASSWORD`, `AWS_SECRET_ACCESS_KEY`, SMTP credentials, or app private keys to Caddy/Nginx or Next.js containers unless the service genuinely needs them at runtime.
+- Keep production example files free of real secrets.
