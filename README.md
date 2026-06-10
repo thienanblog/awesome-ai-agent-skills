@@ -2,6 +2,14 @@
 
 A community-shared collection of reusable skills for AI coding agents. Works with Claude Code, Cursor, Kilo Code, Windsurf, OpenAI Codex, and any AI tools that support skills or custom instructions.
 
+## Source of Truth
+
+- Author skills only under `skills/<skill-name>/`.
+- Assign each skill to exactly one installable bundle in `plugin-groups.json`.
+- Treat `.claude-plugin/marketplace.json`, `.agents/plugins/marketplace.json`, `plugins/**`, and generated README tables as sync outputs.
+- Do not edit `plugins/<plugin-name>/skills/**` directly; those are Codex plugin package copies regenerated from `skills/`.
+- Run `npm run sync` after changing skills or plugin grouping, then run `npm run validate`.
+
 ## What are Skills?
 
 Skills are self-contained instruction sets that teach AI agents specific workflows, guidelines, or capabilities. Each skill includes:
@@ -41,7 +49,7 @@ Skills are self-contained instruction sets that teach AI agents specific workflo
 /plugin marketplace update
 ```
 
-Claude Code marketplace entries use `source: "./"`, `strict: false`, and explicit `skills` arrays so this repository can curate multiple related skill folders into one installable plugin. See the official Claude Code docs for [plugin marketplaces](https://code.claude.com/docs/en/plugin-marketplaces) and [plugin structure](https://code.claude.com/docs/en/plugins).
+Claude Code marketplace entries use `source: "./"`, `strict: false`, and explicit `skills` arrays so this repository can curate multiple related skill folders into one installable plugin without copying them into a Claude-specific plugin package. See the official Claude Code docs for [plugin marketplaces](https://code.claude.com/docs/en/plugin-marketplaces) and [plugin structure](https://code.claude.com/docs/en/plugins).
 
 ### OpenAI Codex
 
@@ -85,6 +93,8 @@ codex plugin marketplace add .
 
 This repository includes a Codex-compatible marketplace at `.agents/plugins/marketplace.json` and plugin packages under `plugins/`. The layout follows OpenAI's docs: marketplace entries point at `./plugins/<plugin-name>`, plugin manifests live in `.codex-plugin/plugin.json`, and bundled skills live inside the plugin root. See OpenAI's [Plugins](https://developers.openai.com/codex/plugins) and [Build plugins](https://developers.openai.com/codex/plugins/build) docs.
 
+The repeated skill folders under `plugins/<plugin-name>/skills/` are generated Codex package copies. If they differ from `skills/<skill-name>/`, edit the canonical skill folder and rerun `npm run sync`.
+
 ### Skills CLI
 
 The open `skills` CLI works with Codex, Claude Code, Cursor, and many other agents.
@@ -117,7 +127,7 @@ You can also copy individual skill instructions directly into your AI agent's co
 | [docker-local-dev](./skills/docker-local-dev) | Generate Docker Compose and Dockerfile configurations for local development through interactive Q&A. Supports single-app and monorepo PHP/Laravel, WordPress, Drupal, Joomla, Node.js, and Python stacks with live reload, dependency installer jobs, Nginx/reverse proxy routing, databases, Redis, queues, schedulers, and email testing. Use when designing local dev stacks that differ from optimized production images. |
 | [documentation-guidelines](./skills/documentation-guidelines) | Create, reorganize, or update documentation for monorepos or single-project repos using root docs indexes, unique repo/module/feature identifiers, repo-owned detailed docs, cross-repo relationship maps, machine-readable frontmatter, API contracts, workflows, runbooks, testing, and debugging guidance. |
 | [laravel-11-12-app-guidelines](./skills/laravel-11-12-app-guidelines) | Guidelines and workflow for working on Laravel 11 or Laravel 12 applications across common stacks (API-only or full-stack), including optional Docker Compose/Sail, Inertia + React, Livewire, Vue, Blade, Tailwind v4, Fortify, Wayfinder, PHPUnit, Pint, and Laravel Boost MCP tools. Use when implementing features, fixing bugs, or making UI/backend changes while following project-specific instructions (AGENTS.md, docs/). |
-| [office-web-ui-system](./skills/office-web-ui-system) | Design and refactor polished office-style web app interfaces for admin, internal, and back-office products. Use when an AI agent needs to build or improve dashboards, stat cards, page heroes, filter/search bars, data tables, shells, side panels, semantic locator classes, or reusable page composition that stays portable across Vue, React, Laravel, and other web stacks with or without PrimeVue. |
+| [office-web-ui-system](./skills/office-web-ui-system) | Design and refactor admin dashboard, internal dashboard, customer/user management dashboard, back-office console, and reporting UI. Use only for dashboard-style management systems with operational workflows such as metrics, stat cards, filters, data tables, CRUD/list/detail pages, forms, side panels, and admin shells. Do not use for general UI/UX design, marketing pages, landing pages, portfolios, product sites, games, or consumer app screens unless the task is specifically an admin or management dashboard. |
 | [project-development-mindset](./skills/project-development-mindset) | Universal developer mindset and project workflow guide for programming projects. Use when creating a new project, choosing or reviewing a tech stack, modifying an existing codebase, implementing features, fixing bugs, writing or updating documentation, designing architecture or folder structure, improving UI/UX consistency, adding tests, debugging errors, improving performance, preparing deployment, or working across multiple repositories. Useful for experienced developers, beginners, non-developers, founders, and anyone who needs AI assistance to build, maintain, document, test, debug, or deploy software safely. |
 | [vps-docker-traefik-deploy](./skills/vps-docker-traefik-deploy) | Plan and implement secure production deployments of Docker Compose applications on self-hosted VPS or cloud servers using Docker Engine, Docker Compose, Traefik, private registries, SSH tunnels, least-privilege users, persistent volumes, backups, DNS, and storage growth planning. Use when an AI agent needs to design, review, document, or execute a real deploy for websites, APIs, websockets, workers, databases, and object storage integrations on Ubuntu or Debian style Linux hosts. |
 <!-- SKILLS_TABLE_END -->

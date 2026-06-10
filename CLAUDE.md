@@ -38,6 +38,14 @@ description: Brief description of what the skill does and when to use it.
 
 Do not add `author` to skill frontmatter. This repository only tracks the required `name` and `description` fields for skills.
 
+## Source of Truth and Generated Files
+
+- Author skill content only in `skills/<skill-name>/`.
+- Use `plugin-groups.json` as the source of truth for which installable plugin bundle owns each skill.
+- Treat `.claude-plugin/marketplace.json`, `.agents/plugins/marketplace.json`, `plugins/**`, and generated README tables as outputs of `npm run sync`.
+- Do not edit `plugins/<plugin-name>/skills/**` directly; those folders are Codex plugin package copies generated from `skills/`.
+- Do not duplicate a skill under multiple plugin groups. If two skills overlap, merge the unique guidance into one canonical skill folder and keep exactly one plugin assignment.
+
 ## Scanning and Updating Marketplace
 
 When the user asks to "scan and update marketplace" or "update marketplace.json", follow this workflow:
