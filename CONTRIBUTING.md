@@ -25,6 +25,16 @@ Thank you for your interest in contributing! This guide will help you create and
 
 ## Creating a New Skill
 
+### Canonical Files and Generated Files
+
+This repository supports both Claude Code and OpenAI Codex from the same canonical skills:
+
+- `skills/<skill-name>/` is the only place to author or edit skill content.
+- `plugin-groups.json` is the only place to decide which installable plugin bundle owns a skill.
+- `.claude-plugin/marketplace.json`, `.agents/plugins/marketplace.json`, `plugins/**`, and generated README tables are produced by `npm run sync`.
+- Do not edit `plugins/<plugin-name>/skills/**` directly. Those folders are Codex package copies and will be overwritten.
+- A skill should appear in exactly one plugin group. If two skills overlap, merge the unique content into one canonical `skills/<skill-name>/` folder instead of publishing both.
+
 ### Step 1: Create Skill Folder
 
 Create a new folder in `skills/` with your skill name (use kebab-case):
@@ -128,12 +138,12 @@ Fix the reported errors before pushing. Common issues:
 | Missing "name" in frontmatter | Add `name: your-skill-name` to frontmatter |
 | Missing "description" in frontmatter | Add `description: ...` to frontmatter |
 | Author field is present | Remove `author` from frontmatter |
-| Skill not in any plugin's skills array | Run `npm run sync` to auto-add it |
+| Skill not in any plugin's skills array | Add the skill to exactly one plugin in `plugin-groups.json`, then run `npm run sync` |
 | Codex plugin package is out of sync | Run `npm run sync` to regenerate `.agents/plugins/marketplace.json` and `plugins/**` |
 
-### Sync Marketplaces (Optional)
+### Sync Marketplaces
 
-If you want to update generated marketplace and plugin files locally:
+After changing skills or plugin groups, update generated marketplace and plugin files locally:
 
 ```bash
 npm run sync
@@ -146,7 +156,7 @@ This will:
 - Regenerate Codex plugin packages under `plugins/`
 - Update the skills table in `README.md`
 
-**Note:** The sync happens automatically on merge via GitHub Actions, so this step is optional.
+**Note:** Pull request CI checks that generated files are current. Run sync before validating and pushing so your PR does not depend on the merge workflow to fix stale files.
 
 ### Update Plugin Groups
 
@@ -159,13 +169,14 @@ Domain guidance:
 - Ensure each skill appears in exactly one plugin.
 - Keep plugin descriptions short, clear, and action-focused.
 
-After updating `plugin-groups.json`, update the "Plugin Groups" table in `README.md` to match.
+After updating `plugin-groups.json`, run `npm run sync` to update the marketplace files and README tables.
 
 ## Submitting Your Skill
 
 ### Step 1: Validate
 
 ```bash
+npm run sync
 npm run validate
 ```
 

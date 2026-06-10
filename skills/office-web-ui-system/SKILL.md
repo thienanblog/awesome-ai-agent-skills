@@ -1,13 +1,17 @@
 ---
 name: office-web-ui-system
-description: Design and refactor polished office-style web app interfaces for admin, internal, and back-office products. Use when an AI agent needs to build or improve dashboards, stat cards, page heroes, filter/search bars, data tables, shells, side panels, semantic locator classes, or reusable page composition that stays portable across Vue, React, Laravel, and other web stacks with or without PrimeVue.
+description: Design and refactor admin dashboard, internal dashboard, customer/user management dashboard, back-office console, and reporting UI. Use only for dashboard-style management systems with operational workflows such as metrics, stat cards, filters, data tables, CRUD/list/detail pages, forms, side panels, and admin shells. Do not use for general UI/UX design, marketing pages, landing pages, portfolios, product sites, games, or consumer app screens unless the task is specifically an admin or management dashboard.
 ---
 
 # Office Web UI System
 
 ## Overview
 
-Use this skill to build or evolve internal web app UI with office-style structure, strong visual hierarchy, and reusable composition while keeping the result portable across frameworks and component libraries.
+Use this skill to build or evolve dashboard-style management interfaces with office-style structure, strong visual hierarchy, and reusable composition while keeping the result portable across frameworks and component libraries.
+
+Activate this skill only for admin dashboards, internal dashboards, back-office consoles, reporting systems, customer/user management systems, CRM/ERP-style management pages, or similarly operational products where users repeatedly scan, filter, compare, edit, approve, or manage records.
+
+Do not activate this skill for general UI/UX polish, marketing pages, landing pages, portfolios, brand sites, editorial sites, ecommerce product pages, games, consumer app screens, or one-off visual redesigns unless the user explicitly says the work is for an admin, dashboard, internal tool, back-office, or management system.
 
 This skill is written as the source of truth in `SKILL.md` so it can be reused across AI tools that support skills, prompt packs, or custom instructions. Tool-specific metadata should stay in adapter files only and must not change the core workflow.
 
@@ -15,16 +19,17 @@ Prioritize two outcomes at the same time:
 - deliver a clear, high-density, professional interface
 - make important UI regions easy for humans and AI agents to identify by name
 
-This skill is not only for shells and navigation. Use it when the user needs a polished:
-- dashboard or report page
-- CRUD/list page
-- workspace/detail page
-- form or wizard page
-- stat card system
-- filter/search/action region
+This skill is not only for shells and navigation. Use it when the management product needs a polished:
+- admin dashboard or reporting page
+- customer, user, order, content, ticket, or account management page
+- CRUD/list page inside an admin or back-office system
+- workspace/detail page for operational records
+- form or wizard page for internal workflows
+- stat card system tied to operational metrics
+- filter/search/action region for managing records
 - table-heavy admin page with stronger UI states
 
-When the user asks for a page to feel "beautiful", "modern", "premium", or "like a real web app", do not answer with generic dashboard boilerplate.
+When the user asks for a page to feel "beautiful", "modern", "premium", or "like a real web app", first confirm the task is an admin/dashboard/management surface before applying this skill. Do not turn unrelated UI work into generic dashboard boilerplate.
 
 Default expectation:
 - choose a page archetype
