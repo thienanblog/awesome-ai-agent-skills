@@ -2,6 +2,14 @@
 
 A community-shared collection of reusable skills for AI coding agents. Works with Claude Code, Cursor, Kilo Code, Windsurf, OpenAI Codex, and any AI tools that support skills or custom instructions.
 
+## Source of Truth
+
+- Author skills only under `skills/<skill-name>/`.
+- Assign each skill to exactly one installable bundle in `plugin-groups.json`.
+- Treat `.claude-plugin/marketplace.json`, `.agents/plugins/marketplace.json`, `plugins/**`, and generated README tables as sync outputs.
+- Do not edit `plugins/<plugin-name>/skills/**` directly; those are Codex plugin package copies regenerated from `skills/`.
+- Run `npm run sync` after changing skills or plugin grouping, then run `npm run validate`.
+
 ## What are Skills?
 
 Skills are self-contained instruction sets that teach AI agents specific workflows, guidelines, or capabilities. Each skill includes:
@@ -41,7 +49,7 @@ Skills are self-contained instruction sets that teach AI agents specific workflo
 /plugin marketplace update
 ```
 
-Claude Code marketplace entries use `source: "./"`, `strict: false`, and explicit `skills` arrays so this repository can curate multiple related skill folders into one installable plugin. See the official Claude Code docs for [plugin marketplaces](https://code.claude.com/docs/en/plugin-marketplaces) and [plugin structure](https://code.claude.com/docs/en/plugins).
+Claude Code marketplace entries use `source: "./"`, `strict: false`, and explicit `skills` arrays so this repository can curate multiple related skill folders into one installable plugin without copying them into a Claude-specific plugin package. See the official Claude Code docs for [plugin marketplaces](https://code.claude.com/docs/en/plugin-marketplaces) and [plugin structure](https://code.claude.com/docs/en/plugins).
 
 ### OpenAI Codex
 
@@ -84,6 +92,8 @@ codex plugin marketplace add .
 ```
 
 This repository includes a Codex-compatible marketplace at `.agents/plugins/marketplace.json` and plugin packages under `plugins/`. The layout follows OpenAI's docs: marketplace entries point at `./plugins/<plugin-name>`, plugin manifests live in `.codex-plugin/plugin.json`, and bundled skills live inside the plugin root. See OpenAI's [Plugins](https://developers.openai.com/codex/plugins) and [Build plugins](https://developers.openai.com/codex/plugins/build) docs.
+
+The repeated skill folders under `plugins/<plugin-name>/skills/` are generated Codex package copies. If they differ from `skills/<skill-name>/`, edit the canonical skill folder and rerun `npm run sync`.
 
 ### Skills CLI
 
