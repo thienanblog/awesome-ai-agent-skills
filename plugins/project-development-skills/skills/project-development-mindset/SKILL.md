@@ -371,6 +371,16 @@ Debugging strategy:
 - For TypeScript, run type checks, lint, or fast builds when available.
 - For compiled frontend or script projects, run the fastest command that can expose the error before running heavier commands.
 
+Binary Debug for unclear failures:
+
+- Use Binary Debug when the source of a bug is unclear after normal reproduction, logs, and fast checks.
+- Create the cleanest temporary baseline that still loads and runs. Comment, stub, feature-flag, or bypass code at safe boundaries instead of deleting it; an almost-empty file is acceptable when the project can still load it.
+- Re-enable one logical section at a time and run the fastest check that exposes the failure.
+- When a newly re-enabled section fails, disable it again to confirm it is a candidate source. Then continue re-enabling unrelated sections to find any other candidate sources instead of stopping at the first failure.
+- Fix one confirmed source at a time while keeping other candidate sources disabled. Re-enable and verify the fixed source before moving to the next candidate.
+- After all isolated sources are fixed, restore the temporarily disabled code, remove debug-only comments or stubs, and run targeted plus broader verification.
+- Keep this workflow local and reversible. Do not commit temporary debug comments, use it on production systems, or apply it to destructive migrations.
+
 ## Deployment
 
 Create or maintain deployment documentation in `deploy/README.md` and related files inside `deploy/`.
