@@ -130,6 +130,7 @@ You can also copy individual skill instructions directly into your AI agent's co
 | [office-web-ui-system](./skills/office-web-ui-system) | Design and refactor admin dashboard, internal dashboard, customer/user management dashboard, back-office console, and reporting UI. Use only for dashboard-style management systems with operational workflows such as metrics, stat cards, filters, data tables, CRUD/list/detail pages, forms, side panels, and admin shells. Do not use for general UI/UX design, marketing pages, landing pages, portfolios, product sites, games, or consumer app screens unless the task is specifically an admin or management dashboard. |
 | [project-development-mindset](./skills/project-development-mindset) | Universal developer mindset and project workflow guide for programming projects. Use when creating a new project, choosing or reviewing a tech stack, modifying an existing codebase, implementing features, fixing bugs, writing or updating documentation, designing architecture or folder structure, improving UI/UX consistency, adding tests, debugging errors, improving performance, preparing deployment, or working across multiple repositories. Useful for experienced developers, beginners, non-developers, founders, and anyone who needs AI assistance to build, maintain, document, test, debug, or deploy software safely. |
 | [vps-docker-traefik-deploy](./skills/vps-docker-traefik-deploy) | Plan and implement secure production deployments of Docker Compose applications on self-hosted VPS or cloud servers using Docker Engine, Docker Compose, Traefik, private registries, SSH tunnels, least-privilege users, persistent volumes, backups, DNS, and storage growth planning. Use when an AI agent needs to design, review, document, or execute a real deploy for websites, APIs, websockets, workers, databases, and object storage integrations on Ubuntu or Debian style Linux hosts. |
+| [x-twitter-scraper](./skills/x-twitter-scraper) | Use Xquik for X/Twitter automation tasks such as tweet search, profile tweets, follower export, media download, posting tweets, replies, DMs, webhooks, and MCP workflows. |
 <!-- SKILLS_TABLE_END -->
 
 ## Plugin Groups
@@ -143,6 +144,7 @@ Plugins bundle related skills so you can install by domain. The source of truth 
 | [laravel-app-skills](./plugin-groups.json) | Guidelines for building Laravel 11/12 apps across common stacks and tooling. | [laravel-11-12-app-guidelines](./skills/laravel-11-12-app-guidelines) |
 | [devops-skills](./plugin-groups.json) | Skills for Docker-based local development environment configuration. | [docker-local-dev](./skills/docker-local-dev) |
 | [office-web-ui-skills](./plugin-groups.json) | Skills for designing and refactoring admin, internal, and back-office web interfaces. | [office-web-ui-system](./skills/office-web-ui-system) |
+| [social-media-automation-skills](./plugin-groups.json) | Skills for X/Twitter data access, tweet search, posting, and social workflow automation. | [x-twitter-scraper](./skills/x-twitter-scraper) |
 <!-- PLUGINS_TABLE_END -->
 
 ## Repository Cleanup
