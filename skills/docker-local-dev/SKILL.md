@@ -38,6 +38,7 @@ This skill uses an **interactive approach**. Before generating any files, I will
 - When frontend apps use same-origin `/api` proxying to the API, preserve that route through the local reverse proxy instead of introducing browser CORS/preflight requirements.
 - Generalize examples for community-safe reuse. Use neutral local placeholders such as `app.localhost`, `api.localhost`, `apps/web`, and `packages/ui`; never copy private project names, customer names, private domains, internal paths, secrets, or production data into reusable skill content.
 - For implementation details, read the relevant reference before generating files: service strategy in `references/service-configuration-guide.md`, domain/networking in `references/networking-ports-guide.md`, and verification in `references/health-check-patterns.md`.
+- For host port tracking, use a per-user registry path, never a machine-specific project path. Resolve it as `${DOCKER_LOCAL_DEV_PORT_REGISTRY}` when set; otherwise use `${XDG_STATE_HOME:-$HOME/.local/state}/docker-local-dev/HOST_PORT_REGISTRY.md`. Read an existing registry before proposing host-exposed ports. Before creating or updating it, explain the exact path and scan root, then ask for confirmation because the registry may record local project names, service names, and exposed ports.
 
 ## Quick Start
 
@@ -425,6 +426,37 @@ Background task processing options:
 
 **IMPORTANT: Ask about reverse proxy first before exposing ports.**
 
+**Host Port Registry Preflight:**
+
+Before asking for or suggesting any host-exposed port, resolve and check the user's host port registry:
+
+```bash
+PORT_REGISTRY_FILE="${DOCKER_LOCAL_DEV_PORT_REGISTRY:-${XDG_STATE_HOME:-$HOME/.local/state}/docker-local-dev/HOST_PORT_REGISTRY.md}"
+test -f "$PORT_REGISTRY_FILE" && sed -n '1,220p' "$PORT_REGISTRY_FILE"
+```
+
+Use the `Suggested Free Ports`, `Conflicts And Shared Ports`, `Configured Ports`, and `Runtime Listeners` sections to avoid reusing ports already assigned to Docker Compose stacks, Vite dev servers, Webpack dev servers, Next/Nuxt dev servers, local databases, Redis, Mailpit/MailHog, reverse proxies, or running host processes.
+
+If the registry is missing or stale, do not create or update it silently. Ask first:
+
+```
+I did not find a current host port registry at:
+$PORT_REGISTRY_FILE
+
+Do you want me to create/update it by scanning this root?
+<absolute scan root>
+
+The registry may include local project names, service names, file paths, and host-exposed ports.
+```
+
+Only after the user confirms, run the scanner from this skill directory:
+
+```bash
+node ./scripts/scan-host-ports.mjs --root "<absolute scan root>" --out "$PORT_REGISTRY_FILE" --yes
+```
+
+Ask which scan root to use when it is not obvious. Use the current project root only after confirming that the user wants a project-scoped registry scan. Do not assume any private projects folder.
+
 **Reverse Proxy Check:**
 ```
 Are you using a reverse proxy (Nginx Proxy Manager, Traefik, Caddy)?
@@ -490,6 +522,8 @@ Port 3306: IN USE (another MySQL instance)
 
 Port 6379: Available
 ```
+
+When reporting availability, include both the live socket check (`lsof`, `nc`, or `docker ps`) and the registry check. A port listed in the resolved host port registry should be treated as reserved even when it is not currently listening.
 
 **Configuration Storage:**
 ```
@@ -632,6 +666,7 @@ For production builds, install dependencies in image build stages and do not gen
 8. Generate Nginx/reverse proxy configuration
 9. Generate Supervisor/PM2 configuration (if needed)
 10. Create helper scripts
+11. If host-exposed Docker ports or dev-server ports changed, ask before updating the resolved host port registry. After confirmation, refresh it with `node ./scripts/scan-host-ports.mjs --root "<absolute scan root>" --out "$PORT_REGISTRY_FILE" --yes`.
 
 **Production boundary:**
 - Do not load app-local `.env` files into production compose.

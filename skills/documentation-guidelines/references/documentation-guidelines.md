@@ -38,16 +38,16 @@ apps/api/
       README.md
     modules/
       order/
-        README.md
+        order-module.md
         features/
-          approve-order-api.md
+          approve-order-api-feature.md
         workflows/
-          order-approval-flow.md
+          order-approval-workflow.md
         runbooks/
-          debug-order-approval.md
-        testing.md
+          debug-order-approval-runbook.md
+        order-testing.md
     reference/
-      api-errors.md
+      api-errors-reference.md
 
 apps/office-web/
   README.md
@@ -61,12 +61,12 @@ apps/office-web/
       README.md
     modules/
       order-management/
-        README.md
+        order-management-module.md
         features/
-          approve-order-office-ui.md
+          approve-order-office-ui-feature.md
         workflows/
-          order-approval-screen-flow.md
-        testing.md
+          order-approval-screen-workflow.md
+        order-management-testing.md
 ```
 
 ### Single Project
@@ -81,19 +81,35 @@ docs/
     README.md
   modules/
     order/
-      README.md
+      order-module.md
       features/
-        approve-order-api.md
+        approve-order-api-feature.md
       workflows/
-        order-approval-flow.md
+        order-approval-workflow.md
       runbooks/
-        debug-order-approval.md
-      testing.md
+        debug-order-approval-runbook.md
+      order-testing.md
   reference/
-    api-errors.md
+    api-errors-reference.md
   runbooks/
     README.md
 ```
+
+## File Naming Rules
+
+Use explicit suffixes for detailed docs so developers can find files quickly by name and do not need to open many repeated `README.md` files.
+
+| Suffix | Use For | Example |
+| :--- | :--- | :--- |
+| `-module.md` | Module overview, ownership boundary, source paths, feature index | `order-module.md` |
+| `-feature.md` | One feature, workflow surface, or API contract | `approve-order-api-feature.md` |
+| `-workflow.md` | Multi-step business or UI flow larger than one feature doc | `order-approval-workflow.md` |
+| `-runbook.md` | Debugging, operations, maintenance, incident response | `debug-order-approval-runbook.md` |
+| `-reference.md` | Catalogs, legacy references, external mappings | `api-errors-reference.md` |
+| `-testing.md` | Test matrix, verification commands, test data rules | `order-testing.md` |
+| `-roadmap.md` | Plans, phases, milestones, rollout sequencing | `order-roadmap.md` |
+
+Reserve `README.md` for root/repo entrypoints and intentional folder indexes such as `docs/README.md`, repo `docs/README.md`, `architecture/README.md`, and `runbooks/README.md`. Do not create `docs/modules/<module-id>/README.md` for new module docs when the project follows suffix naming.
 
 ## Root `docs/README.md` Template
 
@@ -139,9 +155,9 @@ project_shape: monorepo
 
 | Repo Prompt Name | Module Name | Module ID | Owner Docs | Main Features | Related Areas | Coordination Required | Notes |
 | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- |
-| API Repo | Order Module | order | `apps/api/docs/modules/order/README.md` | Order creation, approval, cancellation | Office Web Repo / Order Management Module | Yes | API contract owner |
-| Office Web Repo | Order Management Module | order-management | `apps/office-web/docs/modules/order-management/README.md` | Order list, order detail, approval UI | API Repo / Order Module | Yes | Consumer of API Repo order contracts |
-| Tooling Repo | Import Tools Module | import-tools | `tools/docs/modules/import-tools/README.md` | CSV import helpers | None | No | Independent developer tooling |
+| API Repo | Order Module | order | `apps/api/docs/modules/order/order-module.md` | Order creation, approval, cancellation | Office Web Repo / Order Management Module | Yes | API contract owner |
+| Office Web Repo | Order Management Module | order-management | `apps/office-web/docs/modules/order-management/order-management-module.md` | Order list, order detail, approval UI | API Repo / Order Module | Yes | Consumer of API Repo order contracts |
+| Tooling Repo | Import Tools Module | import-tools | `tools/docs/modules/import-tools/import-tools-module.md` | CSV import helpers | None | No | Independent developer tooling |
 
 ## Feature Indexes
 
@@ -157,8 +173,8 @@ Root docs link to repo-level feature indexes instead of listing every feature.
 
 | Source | Target | Level | Relationship | Contract Owner | Read When | Required Docs | Notes |
 | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- |
-| Office Web Repo / Order Management Module | API Repo / Order Module | Required | Consumes REST API and error contracts | API Repo | Designing or changing order workflows | `apps/api/docs/modules/order/README.md` | UI must not duplicate API business rules |
-| API Repo / Order Module | Office Web Repo / Order Management Module | Recommended | Provides API behavior used by office workflows | API Repo | Changing payloads, statuses, permissions, errors | `apps/office-web/docs/modules/order-management/README.md` | Review consumer impact |
+| Office Web Repo / Order Management Module | API Repo / Order Module | Required | Consumes REST API and error contracts | API Repo | Designing or changing order workflows | `apps/api/docs/modules/order/order-module.md` | UI must not duplicate API business rules |
+| API Repo / Order Module | Office Web Repo / Order Management Module | Recommended | Provides API behavior used by office workflows | API Repo | Changing payloads, statuses, permissions, errors | `apps/office-web/docs/modules/order-management/order-management-module.md` | Review consumer impact |
 | Tooling Repo / Import Tools Module | API Repo / Order Module | None | No runtime relationship | None | Only when prompt mentions import tools | None | Do not broaden scope automatically |
 
 ## Independent Areas
@@ -194,7 +210,7 @@ repo_id: api
 
 | Module Name | Module ID | Owner Docs | Main Features | Related Areas | Coordination Required | Notes |
 | :--- | :--- | :--- | :--- | :--- | :--- | :--- |
-| Order Module | order | `modules/order/README.md` | Approve Order API | Office Web Repo / Order Management Module | Yes | API contract owner |
+| Order Module | order | `modules/order/order-module.md` | Approve Order API | Office Web Repo / Order Management Module | Yes | API contract owner |
 ````
 
 ## Repo-Level `features.md` Template
@@ -214,12 +230,12 @@ repo_id: api
 
 | Feature Name | Feature ID | Module Name | Owner Doc | Status | Related Docs | Verification |
 | :--- | :--- | :--- | :--- | :--- | :--- | :--- |
-| Approve Order API | approve-order-api | Order Module | `modules/order/features/approve-order-api.md` | Planned | `../../office-web/docs/modules/order-management/features/approve-order-office-ui.md` | API tests, seed approval scenarios |
+| Approve Order API | approve-order-api | Order Module | `modules/order/features/approve-order-api-feature.md` | Planned | `../../office-web/docs/modules/order-management/features/approve-order-office-ui-feature.md` | API tests, seed approval scenarios |
 ````
 
 ## Module Doc Template
 
-Place module docs at `docs/modules/<module-id>/README.md` inside the owning repo.
+Place module docs at `docs/modules/<module-id>/<module-id>-module.md` inside the owning repo. Reserve `README.md` for root/repo entrypoints and intentional index folders.
 
 ````markdown
 ---
@@ -236,7 +252,7 @@ module_aliases:
   - Orders
 related_docs:
   - ../../features.md
-  - ../../../../office-web/docs/modules/order-management/README.md
+  - ../../../../office-web/docs/modules/order-management/order-management-module.md
 ---
 
 # Order Module
@@ -271,7 +287,7 @@ Describe what this module owns and why it exists.
 
 | Contract | Owner | Consumer | Doc |
 | :--- | :--- | :--- | :--- |
-| Order approval REST API | API Repo / Order Module | Office Web Repo / Order Management Module | `features/approve-order-api.md` |
+| Order approval REST API | API Repo / Order Module | Office Web Repo / Order Management Module | `features/approve-order-api-feature.md` |
 
 ## Data Model
 
@@ -281,13 +297,13 @@ Use tables and Mermaid ERDs when they clarify relationships.
 
 | Feature Name | Feature ID | Doc | Status |
 | :--- | :--- | :--- | :--- |
-| Approve Order API | approve-order-api | `features/approve-order-api.md` | Planned |
+| Approve Order API | approve-order-api | `features/approve-order-api-feature.md` | Planned |
 
 ## Cross-Repo Relationships
 
 | Target | Level | Relationship | Required Docs | Notes |
 | :--- | :--- | :--- | :--- | :--- |
-| Office Web Repo / Order Management Module | Required | Consumes order approval contract | `../../../../office-web/docs/modules/order-management/README.md` | Review client impact when statuses, payloads, permissions, or errors change |
+| Office Web Repo / Order Management Module | Required | Consumes order approval contract | `../../../../office-web/docs/modules/order-management/order-management-module.md` | Review client impact when statuses, payloads, permissions, or errors change |
 
 ## Local Development
 
@@ -308,7 +324,7 @@ Document edge cases, historical decisions, migration risks, and compatibility li
 
 ## Feature Doc Template
 
-Place feature docs at `docs/modules/<module-id>/features/<feature-id>.md` inside the owning repo.
+Place feature docs at `docs/modules/<module-id>/features/<feature-id>-feature.md` inside the owning repo.
 
 ````markdown
 ---
@@ -326,9 +342,9 @@ feature_id: approve-order-api
 feature_aliases:
   - Order Approval API
 related_docs:
-  - ../README.md
+  - ../order-module.md
   - ../../../features.md
-  - ../../../../../office-web/docs/modules/order-management/features/approve-order-office-ui.md
+  - ../../../../../office-web/docs/modules/order-management/features/approve-order-office-ui-feature.md
 ---
 
 # Approve Order API
@@ -389,7 +405,7 @@ Provide canonical JSON examples for request, success response, validation failur
 
 | Consumer | Level | Required Docs | Impact |
 | :--- | :--- | :--- | :--- |
-| Office Web Repo / Order Management Module | Required | `../../../../../office-web/docs/modules/order-management/features/approve-order-office-ui.md` | UI consumes status, permissions, and error codes |
+| Office Web Repo / Order Management Module | Required | `../../../../../office-web/docs/modules/order-management/features/approve-order-office-ui-feature.md` | UI consumes status, permissions, and error codes |
 
 ## Testing Plan
 
@@ -463,7 +479,7 @@ When a user asks for design, implementation, debugging, or testing work:
 4. If the prompt names both repo and module, trust that routing unless docs show ambiguity.
 5. Read the owning repo docs index.
 6. If the prompt only names a feature, use repo-level feature indexes linked from root `docs/README.md` to find its owner doc.
-7. Read the owning module `README.md`.
+7. Read the owning module `*-module.md`.
 8. Read existing feature docs if the feature already exists.
 9. Read relationship docs marked `Required`.
 10. For design work, also read testing/debug/runbook docs if listed by the module.
@@ -482,10 +498,10 @@ Expected reading path:
 | Resolve repo/module | `docs/README.md` |
 | API repo docs | `apps/api/docs/README.md` |
 | API feature index | `apps/api/docs/features.md` |
-| Order module docs | `apps/api/docs/modules/order/README.md` |
-| Existing order approval docs | `apps/api/docs/modules/order/features/approve-order-api.md` if present |
-| Related office workflow | `apps/office-web/docs/modules/order-management/README.md` if Relationship Map says `Required` |
-| Debug/testing references | `apps/api/docs/modules/order/testing.md`, `apps/api/docs/modules/order/runbooks/debug-order-approval.md` if present |
+| Order module docs | `apps/api/docs/modules/order/order-module.md` |
+| Existing order approval docs | `apps/api/docs/modules/order/features/approve-order-api-feature.md` if present |
+| Related office workflow | `apps/office-web/docs/modules/order-management/order-management-module.md` if Relationship Map says `Required` |
+| Debug/testing references | `apps/api/docs/modules/order/order-testing.md`, `apps/api/docs/modules/order/runbooks/debug-order-approval-runbook.md` if present |
 
 ## Update Checklist
 
@@ -494,7 +510,7 @@ When adding a new repo, module, feature, or cross-repo behavior:
 1. Update root `docs/README.md`.
 2. Update the owning repo `docs/README.md`.
 3. Update the owning repo `modules.md` or `features.md`.
-4. Update or create the owning module `README.md`.
+4. Update or create the owning module `*-module.md`.
 5. Create or update feature docs.
 6. Confirm canonical module and feature names/IDs are unique across the project.
 7. Add cross-repo relationships if contracts, workflows, events, jobs, shared packages, or data dependencies cross repo boundaries.
@@ -502,6 +518,7 @@ When adding a new repo, module, feature, or cross-repo behavior:
 9. Add testing and debugging notes close to the owning module/feature docs.
 10. Search for stale old paths, old prompt names, old module names, and old feature names.
 11. Verify every linked file exists.
+12. Confirm detailed docs use explicit suffix filenames: `*-module.md`, `*-feature.md`, `*-workflow.md`, `*-runbook.md`, `*-reference.md`, `*-testing.md`, or `*-roadmap.md`.
 
 ## Markdown Style
 

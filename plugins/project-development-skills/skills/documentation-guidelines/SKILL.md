@@ -8,7 +8,7 @@ context: fork
 
 ## Overview
 
-Produce documentation that is easy to locate, owned by the correct repo/module/feature, and safe to use as a source of truth. Use this skill for monorepos and single-project repos when creating, reorganizing, or updating architecture docs, module docs, feature docs, API contracts, workflows, runbooks, testing notes, or debugging guidance.
+Produce documentation that is easy to locate, owned by the correct repo/module/feature, and safe to use as a source of truth. Use this skill for monorepos and single-project repos when creating, reorganizing, or updating architecture docs, module docs, feature docs, API contracts, workflows, runbooks, testing notes, or debugging guidance. Prefer searchable filenames with explicit suffixes over repeated `README.md` files for detailed module docs.
 
 Apply the workflow directly unless the repository has newer explicit agent instructions or a newer docs index that conflicts.
 
@@ -22,9 +22,10 @@ Before summarizing, moving, deleting, or editing documentation:
 2. If root `docs/README.md` exists, read it first. It is the project routing index.
 3. Read the owning repo `README.md`, local agent guide, and repo `docs/README.md` when they exist.
 4. Read repo-level `modules.md` and `features.md` when resolving a module or feature.
-5. Read all relationship docs marked `Required`.
-6. Do not infer business logic from filenames, folder names, translated labels, role display names, or stale references.
-7. If two docs appear duplicated, read both completely and identify the source-of-truth owner before deleting or merging.
+5. Read the owning module doc at `docs/modules/<module-id>/<module-id>-module.md` when it exists. If a project still uses legacy `docs/modules/<module-id>/README.md`, read it and consider migrating it when editing.
+6. Read all relationship docs marked `Required`.
+7. Do not infer business logic from filenames, folder names, translated labels, role display names, or stale references.
+8. If two docs appear duplicated, read both completely and identify the source-of-truth owner before deleting or merging.
 
 ## Project Shape
 
@@ -50,6 +51,15 @@ apps/<repo>/
     features.md
     architecture/
     modules/
+      order/
+        order-module.md
+        features/
+          approve-order-api-feature.md
+        workflows/
+          order-approval-workflow.md
+        runbooks/
+          debug-order-approval-runbook.md
+        order-testing.md
     reference/
     runbooks/
     memories/
@@ -72,6 +82,15 @@ docs/
   features.md
   architecture/
   modules/
+    order/
+      order-module.md
+      features/
+        approve-order-api-feature.md
+      workflows/
+        order-approval-workflow.md
+      runbooks/
+        debug-order-approval-runbook.md
+      order-testing.md
   reference/
   runbooks/
   memories/
@@ -92,7 +111,23 @@ Root `docs/README.md` is the first file an AI agent should use to resolve natura
 - Independent/tooling areas.
 - AI reading workflow and update rules.
 
-Repo-level `modules.md` lists modules owned by that repo. Repo-level `features.md` lists features owned by that repo.
+Repo-level `modules.md` lists modules owned by that repo. Repo-level `features.md` lists features owned by that repo. Detailed module docs should use searchable suffix filenames such as `docs/modules/<module-id>/<module-id>-module.md`, not repeated module `README.md` files, unless a project explicitly requires folder landing pages.
+
+## File Naming Rules
+
+Use explicit suffixes for detailed docs so developers can find files quickly by name:
+
+| Suffix | Use For | Example |
+| :--- | :--- | :--- |
+| `-module.md` | Module overview, ownership boundary, source paths, feature index | `order-module.md` |
+| `-feature.md` | One feature, workflow surface, or API contract | `approve-order-api-feature.md` |
+| `-workflow.md` | Multi-step business or UI flow larger than one feature doc | `order-approval-workflow.md` |
+| `-runbook.md` | Debugging, operations, maintenance, incident response | `debug-order-approval-runbook.md` |
+| `-reference.md` | Catalogs, legacy references, external mappings | `api-errors-reference.md` |
+| `-testing.md` | Test matrix, verification commands, test data rules | `order-testing.md` |
+| `-roadmap.md` | Plans, phases, milestones, rollout sequencing | `order-roadmap.md` |
+
+Reserve `README.md` for root/repo entrypoints and intentional index folders. Do not create `docs/modules/<module-id>/README.md` for new module docs when the project follows suffix naming.
 
 ## Global Uniqueness Rules
 
@@ -146,7 +181,7 @@ When creating or updating docs:
 1. Read root `docs/README.md` when present.
 2. Resolve the repo prompt name, module name, and feature name from the user prompt.
 3. If only a feature is named, use repo-level feature indexes linked from root `docs/README.md` to find its owner.
-4. Read the owning repo docs index, repo `modules.md`, repo `features.md`, owning module `README.md`, and existing feature docs.
+4. Read the owning repo docs index, repo `modules.md`, repo `features.md`, owning module `*-module.md`, and existing feature docs.
 5. Read relationship docs marked `Required`; read `Recommended` docs for design, contract, workflow, and user-facing changes.
 6. Decide whether the work is an index update, module doc, feature doc, API contract, workflow, runbook, memory/convention, archive/move, or cross-repo relationship update.
 7. Create or update docs in the owning docs folder. Remove obsolete content instead of appending contradictory sections.
@@ -195,7 +230,7 @@ feature_id: approve-order-api
 feature_aliases:
   - Order Approval API
 related_docs:
-  - ../README.md
+  - ../order-module.md
   - ../../../features.md
 ```
 
@@ -235,6 +270,7 @@ For client/workflow docs, include when applicable:
 Before finishing:
 
 - Confirm new or moved docs are discoverable from root `docs/README.md` and the owning repo indexes.
+- Confirm detailed docs use the project's required suffix naming, such as `*-module.md`, `*-feature.md`, `*-workflow.md`, `*-runbook.md`, `*-reference.md`, `*-testing.md`, and `*-roadmap.md`.
 - Confirm root docs do not contain detailed app/service contracts in a monorepo.
 - Confirm repo/module/feature names and IDs are unique.
 - Confirm independent/tooling areas have `None` relationship scope when appropriate.

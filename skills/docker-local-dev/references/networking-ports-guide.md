@@ -4,6 +4,37 @@ Configuration guide for port management and Docker networking.
 
 ## Port Selection Strategy
 
+### Host Port Registry
+
+Use a per-user host port registry when the user wants persistent local port tracking. Do not hardcode a machine-specific project path into reusable skill content.
+
+Resolve the registry path as:
+
+```bash
+PORT_REGISTRY_FILE="${DOCKER_LOCAL_DEV_PORT_REGISTRY:-${XDG_STATE_HOME:-$HOME/.local/state}/docker-local-dev/HOST_PORT_REGISTRY.md}"
+```
+
+Before choosing a new host port:
+
+```bash
+test -f "$PORT_REGISTRY_FILE" && sed -n '1,220p' "$PORT_REGISTRY_FILE"
+```
+
+Rules:
+- Treat ports in `Configured Ports`, `Runtime Listeners`, and `Conflicts And Shared Ports` as reserved, even if the port is not currently listening.
+- Prefer the `Suggested Free Ports` section for new assignments.
+- If the registry is missing or stale, ask the user before creating or updating it. State the exact registry path and scan root before writing.
+- The registry may include local project names, service names, file paths, and host-exposed ports, so do not write it without confirmation.
+- Ask which root to scan when it is not obvious. Use the current project root only after confirming the user wants a project-scoped scan.
+- Re-run a scan or update the registry after changing Docker Compose `ports`, Vite `server.port`, Webpack dev server ports, Next/Nuxt dev ports, or package scripts with `--port`.
+- If a reverse proxy is used, prefer no host port exposure except for local tools that truly need direct database, mail, or debug access.
+
+After confirmation, refresh or create the registry from this skill directory with:
+
+```bash
+node ./scripts/scan-host-ports.mjs --root "<absolute scan root>" --out "$PORT_REGISTRY_FILE" --yes
+```
+
 ### Common Development Port Ranges
 
 | Service | Default | Range | Notes |
