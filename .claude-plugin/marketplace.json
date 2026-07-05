@@ -6,16 +6,19 @@
   },
   "metadata": {
     "description": "Community-shared skills for AI coding agents",
-    "version": "1.15.0"
+    "version": "1.16.0"
   },
   "plugins": [
     {
       "name": "project-development-skills",
-      "description": "A cohesive workflow bundle for project setup, documentation, design systems, and production deployment planning.",
+      "description": "A cohesive workflow bundle for project setup, source-of-truth development, testing, debugging, performance, documentation, design systems, and production deployment planning.",
       "source": "./",
       "strict": false,
       "skills": [
         "./skills/project-development-mindset",
+        "./skills/testing-verification",
+        "./skills/debugging-workflow",
+        "./skills/performance-optimization",
         "./skills/agents-md-generator",
         "./skills/documentation-guidelines",
         "./skills/design-system-generator",

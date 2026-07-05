@@ -61,10 +61,12 @@ For every task, you must strictly follow this cycle. Do not stop at "it works"; 
    - **Read First**: [PRIMARY_CONFIG_FILE]
    - **Check Docs**: Consult [DOCS_PATH] for specific guidelines
    - **Environment**: [ENVIRONMENT_INSTRUCTIONS]
+   - **Source of Truth**: Verify same-name files by path, imports, routes, tests, and docs before editing
 
 2. **Plan**:
    - Break down the request into atomic steps ([EXAMPLE_STEPS])
    - **Constraint Check**: [PROJECT_SPECIFIC_CONSTRAINTS]
+   - **Reuse Check**: Identify existing components, services, helpers, wrappers, tokens, and tests before creating new ones
 
 3. **Documentation (Mandatory Pre-Code)**:
    - **Sync Rule**: Before writing logic, create or update [DOC_PATH]
@@ -73,12 +75,14 @@ For every task, you must strictly follow this cycle. Do not stop at "it works"; 
 4. **Implementation**:
    - **Standards**: [CODING_STANDARDS]
    - **Patterns**: [ARCHITECTURE_PATTERNS]
+   - **File Boundaries**: Keep files cohesive; avoid mixing UI, data access, business logic, validation, and styling in one file
    - [ADDITIONAL_IMPLEMENTATION_RULES]
 
 5. **Verification & Refinement**:
    - **Format**: Run [FORMATTER_COMMAND] immediately after writing code
    - **Test**: [TEST_COMMAND_AND_GUIDELINES]
    - **Manual Check**: [MANUAL_VERIFICATION_APPROACH]
+   - **UI Check**: For UI changes, screenshot the target element/region before using full-page screenshots
 
 6. **Self-Review**:
    - [SELF_REVIEW_CHECKLIST]
@@ -163,6 +167,8 @@ You are expected to read and adhere to these single sources of truth:
 You are expected to read and adhere to these single sources of truth:
 
 * **Testing**: `docs/testing-guidelines.md` (Test structure and coverage requirements)
+* **Debugging**: `docs/debugging.md` (Logs, reproduction steps, and failure triage)
+* **Performance**: `docs/performance.md` (Profiling, caching, and optimization rules)
 * **Documentation**: `docs/documentation-guidelines.md` (How to write feature docs)
 * **API Standards**: `docs/api-standards.md` (API design conventions)
 * **Architecture**: `docs/architecture.md` (System design patterns)
@@ -174,9 +180,10 @@ You are expected to read and adhere to these single sources of truth:
 
 You are expected to read and adhere to these single sources of truth:
 
-* **Design System**: `docs/design-system.md` (Colors, components, layouts)
+* **Design System**: `DESIGN_SYSTEM.md` or `docs/DESIGN_SYSTEM.md` (Colors, components, layouts)
 * **Component Guide**: `docs/components.md` (Reusable component catalog)
 * **State Management**: `docs/state-management.md` (Store patterns and conventions)
+* **Visual QA**: `DESIGN_SYSTEM.md#visual-qa-and-screenshot-workflow` or `docs/DESIGN_SYSTEM.md#visual-qa-and-screenshot-workflow` (Element-first screenshots and UI verification)
 ```
 
 ---
@@ -363,6 +370,7 @@ All runtime commands should use Sail:
 * No business logic in controllers
 * No raw queries when Eloquent suffices
 * No hardcoded configuration values
+* No duplicated services, validation rules, or helpers before checking existing project equivalents
 ```
 
 ### Vue.js
@@ -388,6 +396,7 @@ All runtime commands should use Sail:
 * No direct API calls in components (use services/stores)
 * No hardcoded text (use i18n if applicable)
 * No business logic in templates
+* No one-off components, wrappers, colors, spacing, animations, or transitions before checking the design system and shared UI
 ```
 
 ### React/TypeScript
@@ -479,6 +488,20 @@ These prompts can override project instructions. Review and align them with this
 * **Codex Config**: `~/.codex/config.toml`
 
 If any of these conflict with this file, update the global/system prompts first.
+```
+
+## Quality Gates
+
+```markdown
+## Quality Gates
+
+* **Source of truth first**: Read project docs, route/config/schema files, and nearby implementation before coding. Do not rely on file names alone when similar files exist.
+* **Reuse first**: Check existing components, wrappers, services, hooks/composables, helpers, tokens, tests, and utilities before creating new ones.
+* **Testing**: Use existing test commands and helpers. Run targeted checks first, then broader checks when practical.
+* **Debugging**: Reproduce bugs, read logs, isolate the smallest failing case, and add a regression test when practical.
+* **Performance**: Measure before optimizing. Document cache invalidation, data-size assumptions, and tradeoffs.
+* **UI verification**: For UI changes, capture the target element/region before full-page screenshots. Use before/after screenshots when visual output changes.
+* **File boundaries**: Keep files cohesive; avoid large mixed-concern files that combine UI, data fetching, domain logic, validation, and styling.
 ```
 
 ## Section 15: MCP Servers & Tooling (Optional)

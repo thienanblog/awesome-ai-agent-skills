@@ -23,6 +23,8 @@
 - Files:
   - `styles/tokens.css`
   - `styles/design-tokens.json` (optional)
+- Generated token policy:
+- Manual token edit policy:
 
 ### 3.2 Color system
 - Brand colors:
@@ -57,6 +59,8 @@ Rules:
 - Duration scale:
 - Easing:
 - Reduced motion policy:
+- Transition source of truth:
+- Animation source of truth:
 
 ## 4. UI foundations
 ### 4.1 Base styles / reset
@@ -82,12 +86,20 @@ Components must be implementable in:
 ### 5.2 Naming & structure
 - Naming conventions:
 - Folder conventions:
+- Shared wrappers/components to prefer before creating new files:
+- Rules for extending existing components:
 
 ### 5.3 Required component states
 All interactive components define:
 - default, hover, active, focus, disabled
 - loading (if async)
 - error (if validation)
+
+### 5.4 Custom classes and utilities
+- Source of truth for custom classes:
+- Semantic locator class policy:
+- Utility class policy:
+- One-off style policy:
 
 ## 6. Component inventory (minimum)
 - Button (primary/secondary/ghost/destructive)
@@ -136,8 +148,16 @@ Build outputs a manifest mapping logical to hashed filenames.
 - Reduced motion supported
 - Semantic HTML first
 
-## 10. Examples
-### 10.1 Token usage (CSS variables)
+## 10. Visual QA and screenshot workflow
+- Use browser-based verification for UI changes when available.
+- Capture the specific element or region being changed before capturing the full page.
+- Use full-page screenshots only when page-level layout, scroll, or surrounding context matters.
+- Capture before/after screenshots for visual changes when practical.
+- If a provided UI image is unclear, create a labeled annotated copy with circles/arrows before implementation.
+- Verify default, loading, empty, error, disabled, validation, responsive, and theme states when relevant.
+
+## 11. Examples
+### 11.1 Token usage (CSS variables)
 ```css
 :root {
   --color-bg: #ffffff;
@@ -147,7 +167,7 @@ Build outputs a manifest mapping logical to hashed filenames.
 }
 ```
 
-### 10.2 Component example
+### 11.2 Component example
 ```html
 <button class="btn btn-primary">
   Submit

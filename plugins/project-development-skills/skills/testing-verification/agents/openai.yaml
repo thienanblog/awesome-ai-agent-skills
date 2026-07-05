@@ -1,0 +1,4 @@
+interface:
+  display_name: "Testing Verification"
+  short_description: "Testing and verification workflow"
+  default_prompt: "Use $testing-verification to plan and verify a project change with the right tests and checks."

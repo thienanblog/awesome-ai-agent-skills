@@ -1,6 +1,6 @@
 ---
 name: office-web-ui-system
-description: Design and refactor admin dashboard, internal dashboard, customer/user management dashboard, back-office console, and reporting UI. Use only for dashboard-style management systems with operational workflows such as metrics, stat cards, filters, data tables, CRUD/list/detail pages, forms, side panels, and admin shells. Do not use for general UI/UX design, marketing pages, landing pages, portfolios, product sites, games, or consumer app screens unless the task is specifically an admin or management dashboard.
+description: Design, verify, and refactor admin dashboard, internal dashboard, customer/user management dashboard, back-office console, and reporting UI. Use only for dashboard-style management systems with operational workflows such as metrics, stat cards, filters, data tables, CRUD/list/detail pages, forms, side panels, admin shells, Playwright/browser UI verification, screenshot-based dashboard fixes, or visual QA for operational interfaces. Do not use for general UI/UX design, marketing pages, landing pages, portfolios, product sites, games, or consumer app screens unless the task is specifically an admin or management dashboard.
 ---
 
 # Office Web UI System
@@ -45,6 +45,8 @@ Default expectation:
 Inspect the real project first:
 - identify the framework, CSS strategy, and component library
 - identify whether the app already has a shell pattern for topbar, sidebar, cards, panels, tables, filters, and page headers
+- read `AGENTS.md`, `CLAUDE.md`, `docs/DESIGN_SYSTEM.md`, component docs, screenshots, and UI source-of-truth files when present
+- inspect theme config, Tailwind config, CSS variables, global CSS, shared wrappers, custom classes, animations, and transitions before inventing new visual code
 - preserve the existing visual language when it is coherent
 
 Read these references as needed:
@@ -131,6 +133,7 @@ Before implementing, be able to state:
 - which region should dominate the screen
 - which 2 or 3 components are carrying the page's visual identity
 - which regions must remain restrained so the page stays usable
+- which existing wrappers, components, tokens, custom classes, animations, and transitions are the source of truth
 
 ### 6. Build with office-web-app defaults
 
@@ -168,7 +171,24 @@ Before handoff, check:
 - the page does not look like interchangeable SaaS boilerplate
 - the decorative treatment stops before it hurts density or readability
 
-### 9. Verify density, dark mode, and locator clarity
+### 9. Verify with focused screenshots
+
+For dashboard UI work, use Playwright MCP, Playwright, Chrome DevTools MCP, or equivalent real-browser tooling when available.
+
+Screenshot policy:
+- capture the specific element or region that needs work before capturing the full page
+- use full-page screenshots only when page-level composition, scroll behavior, viewport balance, or neighboring regions matter
+- capture before and after screenshots for visual changes when practical
+- use the same viewport, theme, data state, and account state for comparison when possible
+- verify default, loading, empty, error, disabled, validation, hover/focus when practical, responsive, and dark/light states when relevant
+
+When the user provides an unclear dashboard screenshot or mockup:
+- create a separate annotated copy when image tooling is available
+- circle or arrow each unclear area
+- label each area with a stable name such as `A`, `B`, `Filter row`, `Table density`, or `Primary action`
+- ask concise questions using those labels before coding
+
+### 10. Verify density, dark mode, and locator clarity
 
 Run the bundled scanner before asking the user where a UI element lives:
 
@@ -198,10 +218,13 @@ Also verify:
 ## Rules
 
 - Preserve an existing good design language instead of forcing one visual language everywhere.
+- Treat `docs/DESIGN_SYSTEM.md`, theme config, shared components, wrappers, custom classes, animations, and transitions as source of truth when present.
 - Choose the page archetype before styling.
 - Choose the visual weight before adding expressive treatments.
 - Prefer semantic wrappers for important regions even in utility-first codebases.
 - Keep major interactive regions identifiable by class name.
+- Reuse existing dashboard components, wrappers, tokens, utility classes, and motion rules before creating new ones.
+- Avoid one-off custom classes, colors, spacing, shadows, transitions, or animations when reusable project rules exist.
 - Use modifiers like `--collapsed`, `--active`, `--open`, `--rail` for state, not entirely different base names.
 - Favor layout patterns that maximize usable width for table-heavy admin work.
 - Prefer restrained surfaces on CRUD and other dense table pages unless stronger expression clearly improves hierarchy.

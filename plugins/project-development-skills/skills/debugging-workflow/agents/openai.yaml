@@ -1,0 +1,4 @@
+interface:
+  display_name: "Debugging Workflow"
+  short_description: "Structured debugging and log triage"
+  default_prompt: "Use $debugging-workflow to reproduce, isolate, and fix a project issue without guessing."
