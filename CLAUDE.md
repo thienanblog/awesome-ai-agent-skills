@@ -102,11 +102,14 @@ If a new skill `api-testing` is added to `skills/api-testing/SKILL.md`, update `
   "plugins": [
     {
       "name": "project-development-skills",
-      "description": "A cohesive workflow bundle for project setup, documentation, design systems, and production deployment planning.",
+      "description": "A cohesive workflow bundle for project setup, source-of-truth development, testing, debugging, performance, documentation, design systems, and production deployment planning.",
       "source": "./",
       "strict": false,
       "skills": [
         "./skills/project-development-mindset",
+        "./skills/testing-verification",
+        "./skills/debugging-workflow",
+        "./skills/performance-optimization",
         "./skills/agents-md-generator",
         "./skills/documentation-guidelines",
         "./skills/design-system-generator",
@@ -133,12 +136,15 @@ If a new skill `api-testing` is added to `skills/api-testing/SKILL.md`, update `
 | Skill                        | Path                                   | Description                                                        |
 |------------------------------|----------------------------------------|--------------------------------------------------------------------|
 | agents-md-generator          | `./skills/agents-md-generator`         | Generate or update CLAUDE.md/AGENTS.md files for AI coding agents |
+| debugging-workflow           | `./skills/debugging-workflow`          | Reproduce, isolate, and fix bugs without guessing                  |
 | design-system-generator      | `./skills/design-system-generator`     | Generate project-specific DESIGN_SYSTEM.md files                   |
 | docker-local-dev             | `./skills/docker-local-dev`            | Generate Docker local development environments                     |
 | documentation-guidelines     | `./skills/documentation-guidelines`    | Backend feature documentation following DOCUMENTATION_GUIDELINES.md |
 | laravel-11-12-app-guidelines | `./skills/laravel-11-12-app-guidelines`| Laravel 11/12 application development guidelines                   |
 | office-web-ui-system         | `./skills/office-web-ui-system`        | Design and refactor office-style admin web interfaces              |
+| performance-optimization     | `./skills/performance-optimization`    | Diagnose and improve performance with measurements                 |
 | project-development-mindset  | `./skills/project-development-mindset` | Universal developer mindset and project workflow guide             |
+| testing-verification         | `./skills/testing-verification`        | Plan, add, repair, and run tests and verification                  |
 | vps-docker-traefik-deploy    | `./skills/vps-docker-traefik-deploy`   | Plan and implement secure Docker/Traefik VPS deployments           |
 
 ## GitHub CI Validation

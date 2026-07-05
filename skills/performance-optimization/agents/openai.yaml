@@ -1,0 +1,4 @@
+interface:
+  display_name: "Performance Optimization"
+  short_description: "Measured performance diagnosis"
+  default_prompt: "Use $performance-optimization to diagnose and improve performance with evidence."

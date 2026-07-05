@@ -1,7 +1,6 @@
 ---
 name: design-system-generator
-description: Generate a project-specific DESIGN_SYSTEM.md that enforces consistent UI/UX across SPAs, traditional server-rendered sites, and hybrid systems. Includes tokens, component rules, accessibility gates, and production asset/manifest guidance.
-context: fork
+description: Generate or update a project-specific DESIGN_SYSTEM.md that enforces consistent UI/UX across SPAs, traditional server-rendered sites, and hybrid systems. Use for design tokens, reusable component rules, UI source-of-truth conventions, animation/transition/custom class rules, accessibility gates, visual QA, Playwright screenshot guidance, and production asset/manifest requirements.
 ---
 
 # Design System Generator
@@ -14,12 +13,6 @@ This skill generates a project-specific **`DESIGN_SYSTEM.md`** that enforces con
 - Hybrid systems (admin + marketing + docs)
 
 The design system must be **component-based**, portable, and practical for real implementation.
-
-**When to use this skill:**
-- Setting up UI consistency rules for a new project
-- Standardizing component patterns across teams
-- Establishing design tokens (colors, typography, spacing)
-- Defining accessibility and performance requirements
 
 ## Interactive Workflow
 
@@ -70,6 +63,15 @@ If the project already uses a template or styling system, adapt to it.
 ### Rule 2: Choose one best-fit direction
 Do not provide 3-5 "options" unless the user requests comparison. Pick one approach and commit.
 
+### Rule 3: Source of truth before invention
+Before generating or updating `DESIGN_SYSTEM.md`, inspect existing UI source of truth:
+- project instructions (`AGENTS.md`, `CLAUDE.md`, equivalent)
+- existing design docs, screenshots, prototypes, brand notes, and component docs
+- shared components, wrappers, layouts, forms, tables, modals, navigation, and state components
+- theme config, Tailwind config, CSS variables, global CSS, tokens, custom classes, animations, and transitions
+
+Do not invent tokens, classes, wrappers, animation rules, or component architecture when a project-owned source already defines them.
+
 ### Safe Defaults
 
 - **React SPA**: TailwindCSS + shadcn/ui (Radix primitives) + CSS variables tokens
@@ -101,6 +103,18 @@ Do not provide 3-5 "options" unless the user requests comparison. Pick one appro
 - Minify CSS/JS for production
 - Image optimization pipeline (including SVG optimization)
 - Font loading strategy (`font-display: swap`, limit weights)
+
+### Source of Truth / Reuse
+- Reusable component and wrapper rules
+- Token ownership and generated-token policy
+- Animation, transition, and custom class policy
+- No one-off visual styles when a token, utility, wrapper, or component exists
+
+### UI Verification
+- Playwright/browser screenshot workflow
+- Element or region screenshots before full-page screenshots
+- Before/after screenshot comparison when visual output changes
+- Ambiguous user images require labeled annotated copies before coding
 
 ## Document Style
 
@@ -138,7 +152,8 @@ Generate a tailored document using this structure:
    - Manifest requirement
    - Optimization checklist
 10. **Accessibility checklist** (ship gate)
-11. **Examples** (token usage + one component example)
+11. **Visual QA and screenshot workflow**
+12. **Examples** (token usage + one component example)
 
 ## SPA vs Traditional Guidance
 
@@ -172,7 +187,9 @@ After generating `DESIGN_SYSTEM.md`, also output a short patch snippet to add to
 ## Design System
 All UI components and pages must follow `DESIGN_SYSTEM.md`:
 - Use design tokens (no hardcoded colors/sizes).
+- Reuse shared components, wrappers, utilities, and motion rules before creating new ones.
 - Implement component states (hover/focus/disabled/loading/error).
+- For UI changes, capture the target element/region before full-page screenshots.
 - Meet accessibility and performance requirements.
 ```
 
@@ -190,6 +207,7 @@ Before generating `DESIGN_SYSTEM.md`, read these reference files:
 
 - `DESIGN_SYSTEM.md` is tailored to the user's stack and constraints
 - Contains token rules, component state rules, accessibility gates, and production/manifest rules
+- Contains source-of-truth, reusable component, custom class, animation, transition, and visual QA rules
 - Avoids "AI" language entirely in the generated docs
 - Recommends a single coherent approach (unless user asked for alternatives)
 - Includes an `AGENTS.md` / `CLAUDE.md` patch snippet referencing `DESIGN_SYSTEM.md`

@@ -1,7 +1,6 @@
 ---
 name: agents-md-generator
-description: Generate or update AGENTS.md/CLAUDE.md files for AI coding agents through auto-scanning project files combined with interactive Q&A. Supports multiple tech stacks, development environments, and preserves customizations when updating.
-context: fork
+description: Generate or update AGENTS.md/CLAUDE.md files for AI coding agents through auto-scanning project files combined with interactive Q&A. Supports multiple tech stacks, development environments, source-of-truth rules, reuse-first implementation guidance, testing/debugging/performance quality gates, UI visual QA guidance, and preserves customizations when updating.
 ---
 
 # AGENTS.md / CLAUDE.md Generator
@@ -21,6 +20,10 @@ This skill helps you generate comprehensive instruction files (AGENTS.md with op
 **Do not duplicate specialized skills.** If a request falls into a specialized domain (e.g., Design System), delegate to the specialized skill when available.
 
 **Use `AGENTS.md` as the shared project manual.** `AGENTS.md` is plain Markdown with no required fields. Cover the details an agent needs to work effectively: project overview, build and test commands, code style, testing expectations, security notes, PR/commit rules, and deployment gotchas.
+
+**Encode source-of-truth and reuse-first rules.** Generated project instructions should tell agents to read local docs/config/source before coding, verify same-name files by path and imports, reuse existing components/services/helpers/tokens before creating new ones, and keep files cohesive instead of adding large mixed-concern files.
+
+**Delegate quality depth to specialized skills when available.** Do not turn this skill into a full testing, debugging, or performance guide. Generated instructions should point agents to project docs and, when installed, `testing-verification`, `debugging-workflow`, and `performance-optimization` for deep work.
 
 **Handle `AGENTS.override.md` as a Codex-specific override, not the default.** Codex checks `AGENTS.override.md` before `AGENTS.md` at both global and project-directory scopes, and includes at most one instruction file per directory. If both files exist in the same directory, Codex uses `AGENTS.override.md` and ignores that directory's `AGENTS.md`. Create or update `AGENTS.override.md` only when the user explicitly wants a Codex-specific or nested-directory override.
 
@@ -363,11 +366,11 @@ planning, [STACK_SPECIFIC_RESPONSIBILITIES].
 #### Section 2: Auto-Pilot Workflow
 
 Generate the 6-step workflow cycle:
-1. **Discovery & Context** - What to read first, where to find docs
+1. **Discovery & Context** - What to read first, where to find docs, how to identify source of truth
 2. **Plan** - How to break down tasks, constraints to check
 3. **Documentation** - When to update docs, what format to use
-4. **Implementation** - Coding standards, patterns to follow
-5. **Verification & Refinement** - Testing, linting, manual checks
+4. **Implementation** - Coding standards, reuse-first rules, file boundaries, patterns to follow
+5. **Verification & Refinement** - Testing, linting, manual checks, browser screenshots for UI
 6. **Self-Review** - Checklist of common mistakes to avoid
 
 Each step includes stack-specific instructions from templates.
@@ -387,6 +390,7 @@ You are expected to read and adhere to these single sources of truth:
 - `docs/`, `documentation/`
 - `README.md`, `CONTRIBUTING.md`
 - `docs/api/`, `docs/architecture/`
+- `docs/DESIGN_SYSTEM.md`, `docs/testing*`, `docs/debugging*`, `docs/performance*`, feature docs, runbooks
 - **Important**: Do not list `CLAUDE.md` or `AGENTS.md` in this section. These files are already loaded by AI tools, and self-references waste context.
 - For new docs, prefer YAML frontmatter + Markdown body (headings, tables, examples) so metadata and content stay consistent.
 
@@ -439,6 +443,9 @@ Based on detected stack:
 ```markdown
 ### Critical Anti-Patterns
 - [Stack-specific anti-patterns to avoid]
+- Creating new components/services/helpers/tokens before checking existing project equivalents
+- Adding large mixed-concern files that combine UI, data access, validation, business logic, and styling
+- Replacing project-specific business rules with generic assumptions
 ```
 
 #### Section 7: Domain Specifics (Optional)
@@ -688,7 +695,9 @@ Then this skill must:
 ## Design System
 All UI components and pages must follow `DESIGN_SYSTEM.md`:
 - Use design tokens (no hardcoded colors/sizes).
+- Reuse shared components, wrappers, utilities, and motion rules before creating new ones.
 - Implement component states (hover/focus/disabled/loading/error).
+- For UI changes, capture the target element/region before full-page screenshots.
 - Meet accessibility and performance requirements.
 ```
 
@@ -727,6 +736,10 @@ Minify CSS/JS and optimize images/fonts.
 Do not pick Tailwind/MUI/shadcn/etc. in the scaffold unless the project already uses it.
 
 **Never** implement the full Design System logic inside `agents-md-generator`.
+
+## Quality Skill Delegation Reference
+
+For testing, debugging, performance, and UI visual QA guidance in generated project instructions, read `references/quality-skill-delegation.md`. Keep generated instructions concise and project-specific; do not duplicate full specialized skill workflows in `AGENTS.md`.
 
 ## Tech Stack Detection Reference
 
