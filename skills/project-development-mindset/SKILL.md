@@ -38,6 +38,7 @@ Optional skills to check before use:
 - `testing-verification`: use when testing, QA, CI checks, browser verification, visual screenshots, or acceptance criteria are a meaningful part of the task. Fallback: use the testing rules below.
 - `debugging-workflow`: use when the task starts from an error, failing test with unclear cause, regression, log, stack trace, or broken behavior. Fallback: use the debugging rules below.
 - `performance-optimization`: use when the task focuses on slowness, latency, memory, CPU, query count, bundle size, rendering lag, caching, or resource usage. Fallback: use the performance rules below.
+- `ui-ux-concept-implementation`: use for implementing UI/UX from selected concepts, screenshots, mockups, visual references, or a website the user wants to emulate or clone. Fallback: use the UI/UX concept routing and browser verification rules below.
 - `vps-docker-traefik-deploy`: use for VPS, Docker Compose, and Traefik deployment planning or implementation. Fallback: provide general deployment guidance manually.
 
 Do not reference, require, download, or depend on external skills or user-specific local paths.
@@ -88,6 +89,7 @@ Read `references/quality-skill-routing.md` when deciding whether to stay in this
 - Use `testing-verification` for test planning, automated checks, UI screenshot verification, visual comparison, CI test failures, and acceptance criteria.
 - Use `debugging-workflow` for unknown failures, broken behavior, logs, stack traces, regressions, flaky tests, and root-cause isolation.
 - Use `performance-optimization` for measured slowness, query issues, rendering lag, memory/CPU pressure, caching, payload size, bundle size, and slow builds/tests.
+- Read `references/ui-ux-concept-routing.md` and use `ui-ux-concept-implementation` when UI/UX work includes concepts, a selected visual direction, screenshots, mockups, visual references, or website clone/emulation.
 - Use this skill as the coordinator when a task spans multiple concerns.
 
 ## General Workflow
@@ -189,6 +191,10 @@ Rules:
 - Prefer shared components and wrappers for repeated UI patterns.
 - Keep page-level code focused on composition and data flow.
 - Match the project's density, tone, interaction model, and accessibility conventions.
+- When UI/UX work includes user-requested concepts, present the concepts with both a Technical Leader recommendation and the concept the user is most likely to prefer before implementation.
+- After the user chooses a concept, save the selected concept immediately in a project-local temporary folder such as `.tmp/ui-ux-concepts/`, ensure it is ignored or listed in `.git/info/exclude`, and never stage or commit it.
+- Suggest a Goal when the environment supports persistent goals so before/current/after UI verification can continue until the concept implementation is complete.
+- For concept implementation and visual before/after checks, prefer Playwright MCP first, Chrome DevTools MCP second, then local Playwright or equivalent browser automation. If both Playwright MCP and Chrome DevTools MCP are available, use Playwright MCP.
 - Verify important UI states: default, loading, empty, error, disabled, hover/focus when practical, validation, responsive behavior, and navigation.
 - If the project lacks a design system, document the practical conventions discovered from existing UI before inventing new ones.
 

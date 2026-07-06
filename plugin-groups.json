@@ -2,7 +2,7 @@
   "plugins": [
     {
       "name": "project-development-skills",
-      "description": "A cohesive workflow bundle for project setup, source-of-truth development, testing, debugging, performance, documentation, design systems, and production deployment planning.",
+      "description": "A cohesive workflow bundle for project setup, source-of-truth development, UI/UX concept implementation, testing, debugging, performance, documentation, design systems, and production deployment planning.",
       "skills": [
         "project-development-mindset",
         "testing-verification",
@@ -11,6 +11,7 @@
         "agents-md-generator",
         "documentation-guidelines",
         "design-system-generator",
+        "ui-ux-concept-implementation",
         "vps-docker-traefik-deploy"
       ]
     },

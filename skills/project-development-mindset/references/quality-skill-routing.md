@@ -42,6 +42,18 @@ Use `performance-optimization` when the task centers on:
 
 If the performance symptom cannot be reproduced or the cause is unknown, start with `debugging-workflow` and switch after the bottleneck is identified.
 
+## Switch To `ui-ux-concept-implementation`
+
+Use `ui-ux-concept-implementation` when the task centers on:
+
+- generating and selecting UI/UX concepts before implementation
+- implementing a selected concept, screenshot, mockup, or visual reference
+- emulating or cloning a reference website's look and interaction pattern
+- saving the selected concept outside commits
+- verifying before/current/after UI states with Playwright MCP, Chrome DevTools MCP, Playwright, or screenshots
+
+Use `testing-verification` too when screenshot comparison, acceptance criteria, or broader browser QA becomes the main verification risk.
+
 ## Combined Tasks
 
 For broad tasks:
