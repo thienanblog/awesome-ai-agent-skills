@@ -117,6 +117,22 @@ npx skills init my-skill
 
 You can also copy individual skill instructions directly into your AI agent's context or system prompt.
 
+## Usage Examples
+
+For normal project work, start with the project mindset skill and let the agent route to related skills:
+
+```text
+Use $project-development-mindset to redesign this checkout screen, propose concepts, and verify before/after with Playwright.
+```
+
+The mindset skill checks sibling skills in this library and can switch to the right workflow when the task needs UI concepts, tests, debugging, performance, documentation, design systems, or deployment guidance.
+
+If you want an exact workflow, invoke that skill directly:
+
+```text
+Use $ui-ux-concept-implementation to implement Concept B for this pricing page.
+```
+
 ## Available Skills
 
 <!-- SKILLS_TABLE_START -->
@@ -132,6 +148,7 @@ You can also copy individual skill instructions directly into your AI agent's co
 | [performance-optimization](./skills/performance-optimization) | Diagnose and improve performance with measurements and source-of-truth constraints. Use when the user reports slowness, latency, high CPU, high memory, slow queries, N+1 issues, large payloads, slow builds, slow tests, rendering lag, bundle size, Core Web Vitals, caching, pagination, image/font loading, queues, background jobs, or asks to profile, optimize, speed up, or reduce resource usage. |
 | [project-development-mindset](./skills/project-development-mindset) | Universal project development workflow for safe, maintainable software changes. Use when creating or modifying code, documentation, UI/UX, tests, architecture, design systems, debugging workflows, performance work, deployment preparation, or multi-repository features. Enforces source-of-truth-first discovery, reuse before creating new code, cohesive file boundaries, project memory alignment, testing, and visual QA for UI tasks. |
 | [testing-verification](./skills/testing-verification) | Plan, add, repair, and run tests and verification for software changes. Use when the user asks for tests, coverage, QA, acceptance criteria, regression checks, CI test failures, Playwright or browser verification, UI screenshot comparison, visual regression, or when a code change needs a focused test strategy across frontend, backend, API, or full-stack workflows. |
+| [ui-ux-concept-implementation](./skills/ui-ux-concept-implementation) | Implement frontend UI/UX from user-approved concepts, mockups, screenshots, visual references, or a website the user wants to emulate or clone. Use when Codex must generate and compare UI concepts, recommend a concept as a technical leader, predict the user's likely preference, persist the chosen concept outside commits, recreate a reference site's look and interactions in an existing project, or verify before/after UI with Playwright, Playwright MCP, Chrome DevTools MCP, screenshots, and responsive checks. |
 | [vps-docker-traefik-deploy](./skills/vps-docker-traefik-deploy) | Plan and implement secure production deployments of Docker Compose applications on self-hosted VPS or cloud servers using Docker Engine, Docker Compose, Traefik, private registries, SSH tunnels, least-privilege users, persistent volumes, backups, DNS, and storage growth planning. Use when an AI agent needs to design, review, document, or execute a real deploy for websites, APIs, websockets, workers, databases, and object storage integrations on Ubuntu or Debian style Linux hosts. |
 <!-- SKILLS_TABLE_END -->
 
@@ -142,7 +159,7 @@ Plugins bundle related skills so you can install by domain. The source of truth 
 <!-- PLUGINS_TABLE_START -->
 | Plugin | Description | Skills |
 |--------|-------------|--------|
-| [project-development-skills](./plugin-groups.json) | A cohesive workflow bundle for project setup, source-of-truth development, testing, debugging, performance, documentation, design systems, and production deployment planning. | [project-development-mindset](./skills/project-development-mindset)<br>[testing-verification](./skills/testing-verification)<br>[debugging-workflow](./skills/debugging-workflow)<br>[performance-optimization](./skills/performance-optimization)<br>[agents-md-generator](./skills/agents-md-generator)<br>[documentation-guidelines](./skills/documentation-guidelines)<br>[design-system-generator](./skills/design-system-generator)<br>[vps-docker-traefik-deploy](./skills/vps-docker-traefik-deploy) |
+| [project-development-skills](./plugin-groups.json) | A cohesive workflow bundle for project setup, source-of-truth development, UI/UX concept implementation, testing, debugging, performance, documentation, design systems, and production deployment planning. | [project-development-mindset](./skills/project-development-mindset)<br>[testing-verification](./skills/testing-verification)<br>[debugging-workflow](./skills/debugging-workflow)<br>[performance-optimization](./skills/performance-optimization)<br>[agents-md-generator](./skills/agents-md-generator)<br>[documentation-guidelines](./skills/documentation-guidelines)<br>[design-system-generator](./skills/design-system-generator)<br>[ui-ux-concept-implementation](./skills/ui-ux-concept-implementation)<br>[vps-docker-traefik-deploy](./skills/vps-docker-traefik-deploy) |
 | [laravel-app-skills](./plugin-groups.json) | Guidelines for building Laravel 11/12 apps across common stacks and tooling. | [laravel-11-12-app-guidelines](./skills/laravel-11-12-app-guidelines) |
 | [devops-skills](./plugin-groups.json) | Skills for Docker-based local development environment configuration. | [docker-local-dev](./skills/docker-local-dev) |
 | [office-web-ui-skills](./plugin-groups.json) | Skills for designing and refactoring admin, internal, and back-office web interfaces. | [office-web-ui-system](./skills/office-web-ui-system) |

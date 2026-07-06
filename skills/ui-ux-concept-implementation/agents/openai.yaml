@@ -1,0 +1,4 @@
+interface:
+  display_name: "UI/UX Concept Implementation"
+  short_description: "Implement UI from concepts or reference sites"
+  default_prompt: "Use $ui-ux-concept-implementation to implement a UI from selected concepts or a reference website."

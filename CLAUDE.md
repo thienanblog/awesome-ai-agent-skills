@@ -102,7 +102,7 @@ If a new skill `api-testing` is added to `skills/api-testing/SKILL.md`, update `
   "plugins": [
     {
       "name": "project-development-skills",
-      "description": "A cohesive workflow bundle for project setup, source-of-truth development, testing, debugging, performance, documentation, design systems, and production deployment planning.",
+      "description": "A cohesive workflow bundle for project setup, source-of-truth development, UI/UX concept implementation, testing, debugging, performance, documentation, design systems, and production deployment planning.",
       "source": "./",
       "strict": false,
       "skills": [
@@ -113,6 +113,7 @@ If a new skill `api-testing` is added to `skills/api-testing/SKILL.md`, update `
         "./skills/agents-md-generator",
         "./skills/documentation-guidelines",
         "./skills/design-system-generator",
+        "./skills/ui-ux-concept-implementation",
         "./skills/vps-docker-traefik-deploy"
       ]
     },
@@ -145,6 +146,7 @@ If a new skill `api-testing` is added to `skills/api-testing/SKILL.md`, update `
 | performance-optimization     | `./skills/performance-optimization`    | Diagnose and improve performance with measurements                 |
 | project-development-mindset  | `./skills/project-development-mindset` | Universal developer mindset and project workflow guide             |
 | testing-verification         | `./skills/testing-verification`        | Plan, add, repair, and run tests and verification                  |
+| ui-ux-concept-implementation | `./skills/ui-ux-concept-implementation`| Implement UI from selected concepts or reference websites          |
 | vps-docker-traefik-deploy    | `./skills/vps-docker-traefik-deploy`   | Plan and implement secure Docker/Traefik VPS deployments           |
 
 ## GitHub CI Validation
