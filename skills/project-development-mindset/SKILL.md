@@ -1,22 +1,24 @@
 ---
 name: project-development-mindset
-description: Universal project development workflow for safe, maintainable software changes. Use when creating or modifying code, documentation, UI/UX, tests, architecture, design systems, debugging workflows, performance work, deployment preparation, or multi-repository features. Enforces source-of-truth-first discovery, reuse before creating new code, cohesive file boundaries, project memory alignment, testing, and visual QA for UI tasks.
+description: Universal project development workflow for safe, maintainable, proportionate software changes. Use when creating or modifying code, documentation, UI/UX, tests, architecture, design systems, debugging workflows, performance work, deployment preparation, or multi-repository features. Enforces source-of-truth-first discovery, reuse before creation, smallest-reliable-solution decisions, dependency judgment, scoped verification, and visual QA for UI tasks.
 ---
 
 # Project Development Mindset
 
-Use this skill at the start of programming work. Treat it as an execution contract: understand the project before changing it, reuse what already exists, keep files cohesive, verify behavior, and keep durable project instructions synchronized.
+Use this skill at the start of programming work. Treat it as an execution contract: understand the relevant project context, reuse what already exists, implement only what the task needs, verify proportionately, and keep durable project instructions synchronized when they are affected.
 
 ## Operating Contract
 
 - Start from the existing project, not from a generic solution.
 - Read before changing code, docs, configuration, UI, tests, or deployment files.
-- Prefer the smallest maintainable change that solves the task.
+- Prefer the smallest reliable and maintainable change that solves the task.
+- Add code only when it serves a current requirement, an existing project rule, or a concrete observed risk.
 - Reuse existing components, services, wrappers, helpers, tokens, docs, tests, and conventions before creating new ones.
 - Do not create a new abstraction, component, utility, style, animation, API client, validation rule, or workflow until you have checked whether the project already has one.
 - Keep source of truth clear. Do not duplicate business rules, design rules, configuration, or project instructions across multiple places without a reason.
 - Keep files cohesive. Do not combine page layout, domain logic, data access, validation, styling, test helpers, and design primitives in one file when the project has clearer boundaries.
 - Do not move, delete, rename, or broadly restructure important files without user confirmation.
+- Stop when the requested behavior works, proportionate checks pass, and no concrete requirement or observed risk justifies more work.
 - Ask only when the decision is risky, destructive, ambiguous after inspection, related to credentials, production, billing, database migrations, deployment, or major architecture.
 - Explain important technical decisions in plain language when the user may need the reasoning.
 
@@ -64,6 +66,23 @@ Rules:
 - Do not replace unusual business behavior with generic logic. Special cases often exist because the project needs them.
 - When a task spans backend, frontend, admin, worker, mobile, API, or deployment repositories, inspect the related source of truth before changing only one side.
 
+## Implementation Economy Gate
+
+Before adding or expanding code, answer these questions:
+
+1. Is this code required by the user request, acceptance criteria, existing project rules, or a concrete observed risk?
+2. Does the codebase already provide the behavior, pattern, dependency, component, helper, or test support needed?
+3. If a small local implementation is clear, reliable, and easy to maintain, can it solve the task without a new dependency?
+4. Would an existing or well-justified external library materially reduce complexity, correctness risk, or maintenance cost?
+5. What is the smallest amount of code that completely solves the current task?
+6. Am I adding abstractions, options, edge cases, refactors, or future flexibility without a concrete present need?
+
+For small tasks, answer these questions implicitly. Do not turn them into extra planning, ceremony, or a user-facing report unless a tradeoff needs user input.
+
+Prefer the smallest reliable solution, not the fewest lines at any cost. Treat a solution as complete when it satisfies current requirements, follows project conventions, handles realistic failure cases, and passes proportionate verification.
+
+Do not implement hypothetical future requirements. Do not add extension points, configuration, compatibility layers, or abstractions without a current use case or an established project pattern that requires them.
+
 ## Context Confidence Gate
 
 Before substantial implementation, know enough to answer these questions:
@@ -96,9 +115,9 @@ Read `references/quality-skill-routing.md` when deciding whether to stay in this
 
 ### 1. Discover
 
-- Inspect repository structure and active workspace roots.
-- Identify stack, framework, package manager, lock file, build tool, test tool, lint/format tooling, deployment files, and documentation.
-- Locate project instruction files, feature docs, design-system docs, existing tests, and examples.
+- Inspect the task-relevant repository structure and workspace roots.
+- Identify only the stack, tooling, configuration, and documentation needed to make and verify the change safely.
+- Locate relevant project instruction files, feature docs, existing tests, and nearby examples.
 - In multi-repository projects, inspect related repositories when the task clearly crosses boundaries.
 
 ### 2. Understand
@@ -118,19 +137,19 @@ Read `references/quality-skill-routing.md` when deciding whether to stay in this
 - Follow existing architecture, naming, folder organization, style, framework conventions, and package-manager conventions.
 - Reuse before creating.
 - Keep files cohesive and avoid broad refactors unrelated to the task.
-- Do not introduce new libraries or tools unless the project lacks a reasonable existing solution and the benefit is clear.
+- Apply the Implementation Economy Gate before introducing code, abstractions, libraries, or tools.
 
 ### 5. Verify
 
 - Run the most relevant targeted tests or checks first.
-- Run broader tests when practical.
+- Run broader tests when the scope or risk of the change justifies them.
 - For UI changes, use real-browser screenshots and interaction checks when available.
 - If verification cannot be completed, explain why and provide the closest reliable check.
 
 ### 6. Document
 
-- Update docs when behavior, architecture, setup, testing, deployment, logs, or project conventions change.
-- Keep `AGENTS.md`, `CLAUDE.md`, and docs aligned.
+- Update docs when behavior, architecture, setup, testing, deployment, logs, or project conventions materially change.
+- Keep affected `AGENTS.md`, `CLAUDE.md`, and docs aligned; do not create or rewrite unrelated documentation.
 - Document difficult bugs and their fixes in the related module docs.
 
 ### 7. Report
@@ -155,7 +174,7 @@ Rules:
 
 - Prefer extending an existing shared surface over adding a near-duplicate local implementation.
 - If two reusable surfaces overlap, identify the canonical one before building on either.
-- If no reusable surface exists and the new behavior is likely to repeat, create the smallest project-consistent abstraction.
+- If no reusable surface exists and there is a current second use case or established project pattern, create the smallest project-consistent abstraction.
 - If behavior is truly one-off, keep it local but still separate unrelated concerns.
 - Do not add "helper" files that only hide one call site without improving clarity or reuse.
 
@@ -167,7 +186,7 @@ Rules:
 
 - Keep route/page/controller files thin when the project has components, services, handlers, or use-case layers.
 - Separate domain logic from UI rendering, data fetching, validation, formatting, and persistence when the project structure supports it.
-- Split feature UI into shared components, feature components, wrappers, hooks/composables, constants, types, and services according to existing conventions.
+- Split feature UI only when existing conventions, multiple responsibilities, or current reuse justify the boundary.
 - Avoid files that mix unrelated responsibilities simply because the task started in one file.
 - Treat file size as a signal, not a strict rule. A long cohesive file can be acceptable; a shorter file with mixed responsibilities can still need refactoring.
 - When editing an already-large file, avoid making it worse. Extract only the part directly related to the task and only when the extraction matches project patterns.
@@ -245,7 +264,7 @@ Rules:
 
 Use this when the project already contains source code, configs, docs, or deployment files.
 
-Create missing docs only when safe:
+Create missing docs only when the task requires durable documentation:
 
 - `README.md`
 - `docs/`
@@ -291,7 +310,7 @@ Rules:
 
 ## Design System Documentation
 
-For projects with UI, create or update `docs/DESIGN_SYSTEM.md` when the project lacks a durable design-system source of truth or when UI conventions change.
+For projects with UI, create or update `docs/DESIGN_SYSTEM.md` only when the task establishes or changes reusable UI conventions and the project lacks a stronger source of truth.
 
 Use `design-system-generator` only if it exists in the same shared skills repository. Otherwise, create a practical `DESIGN_SYSTEM.md` with:
 
@@ -336,7 +355,11 @@ Rules:
 - Prefer project code and docs first.
 - Use current official documentation, Context7 MCP, or reliable documentation sources when the task depends on external API behavior or recent library changes.
 - Do not invent APIs.
-- Do not replace existing libraries with new ones without a strong reason.
+- Prefer a small local implementation when it is clear, reliable, easy to test, and meaningfully simpler than adding a dependency.
+- Prefer an existing project dependency when it already solves the problem well.
+- Add a new library only when it materially reduces implementation complexity, correctness or security risk, or ongoing maintenance, and its project fit is clear.
+- Do not add a dependency to replace a few straightforward lines, and do not hand-roll security-sensitive protocols, cryptography, complex parsers, or standards where a trusted library is the safer solution.
+- Do not replace existing libraries with new ones without a concrete, task-relevant reason.
 - Avoid duplicate tools that solve the same problem.
 - Use the existing package manager and lock file.
 
@@ -349,7 +372,7 @@ Rules:
 
 ## Testing And Verification
 
-Every coding task should have a testing strategy. Use `testing-verification` when test design, browser verification, visual QA, CI checks, or acceptance criteria are substantial.
+Every coding task should have a proportionate testing strategy, which can be implicit for trivial changes. Use `testing-verification` when test design, browser verification, visual QA, CI checks, or acceptance criteria are substantial.
 
 Fallback rules:
 
@@ -446,7 +469,7 @@ When the user appears non-technical:
 
 ## Final Response Checklist
 
-At the end of each task, provide:
+At the end of each task, provide the applicable items without adding empty sections or unnecessary ceremony:
 
 - What changed
 - Files changed or created
