@@ -150,6 +150,7 @@ Use $ui-ux-concept-implementation to implement Concept B for this pricing page.
 | [testing-verification](./skills/testing-verification) | Plan, add, repair, and run tests and verification for software changes. Use when the user asks for tests, coverage, QA, acceptance criteria, regression checks, CI test failures, Playwright or browser verification, UI screenshot comparison, visual regression, or when a code change needs a focused test strategy across frontend, backend, API, or full-stack workflows. |
 | [ui-ux-concept-implementation](./skills/ui-ux-concept-implementation) | Implement frontend UI/UX from user-approved concepts, mockups, screenshots, visual references, or a website the user wants to emulate or clone. Use when Codex must generate and compare UI concepts, recommend a concept as a technical leader, predict the user's likely preference, persist the chosen concept outside commits, recreate a reference site's look and interactions in an existing project, or verify before/after UI with Playwright, Playwright MCP, Chrome DevTools MCP, screenshots, and responsive checks. |
 | [vps-docker-traefik-deploy](./skills/vps-docker-traefik-deploy) | Plan and implement secure production deployments of Docker Compose applications on self-hosted VPS or cloud servers using Docker Engine, Docker Compose, Traefik, private registries, SSH tunnels, least-privilege users, persistent volumes, backups, DNS, and storage growth planning. Use when an AI agent needs to design, review, document, or execute a real deploy for websites, APIs, websockets, workers, databases, and object storage integrations on Ubuntu or Debian style Linux hosts. |
+| [x-twitter-scraper](./skills/x-twitter-scraper) | Use Xquik for X/Twitter automation tasks such as tweet search, profile tweets, follower export, media download, posting tweets, replies, DMs, webhooks, and MCP workflows. |
 <!-- SKILLS_TABLE_END -->
 
 ## Plugin Groups
@@ -163,6 +164,7 @@ Plugins bundle related skills so you can install by domain. The source of truth 
 | [laravel-app-skills](./plugin-groups.json) | Guidelines for building Laravel 11/12 apps across common stacks and tooling. | [laravel-11-12-app-guidelines](./skills/laravel-11-12-app-guidelines) |
 | [devops-skills](./plugin-groups.json) | Skills for Docker-based local development environment configuration. | [docker-local-dev](./skills/docker-local-dev) |
 | [office-web-ui-skills](./plugin-groups.json) | Skills for designing and refactoring admin, internal, and back-office web interfaces. | [office-web-ui-system](./skills/office-web-ui-system) |
+| [social-media-automation-skills](./plugin-groups.json) | Skills for X/Twitter data access, tweet search, posting, and social workflow automation. | [x-twitter-scraper](./skills/x-twitter-scraper) |
 <!-- PLUGINS_TABLE_END -->
 
 ## Repository Cleanup

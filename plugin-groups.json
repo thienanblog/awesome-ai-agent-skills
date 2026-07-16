@@ -35,6 +35,13 @@
       "skills": [
         "office-web-ui-system"
       ]
+    },
+    {
+      "name": "social-media-automation-skills",
+      "description": "Skills for X/Twitter data access, tweet search, posting, and social workflow automation.",
+      "skills": [
+        "x-twitter-scraper"
+      ]
     }
   ]
 }

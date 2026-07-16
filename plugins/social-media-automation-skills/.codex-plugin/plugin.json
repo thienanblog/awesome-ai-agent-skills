@@ -1,0 +1,31 @@
+{
+  "name": "social-media-automation-skills",
+  "version": "1.7.0",
+  "description": "Skills for X/Twitter data access, tweet search, posting, and social workflow automation.",
+  "homepage": "https://github.com/thienanblog/awesome-ai-agent-skills",
+  "repository": "https://github.com/thienanblog/awesome-ai-agent-skills",
+  "license": "MIT",
+  "keywords": [
+    "codex",
+    "skills",
+    "x-twitter-scraper"
+  ],
+  "skills": "./skills/",
+  "interface": {
+    "displayName": "Social Media Automation Skills",
+    "shortDescription": "Skills for X/Twitter data access, tweet search, posting, and social workflow automation.",
+    "longDescription": "Skills for X/Twitter data access, tweet search, posting, and social workflow automation.",
+    "developerName": "Ân Vũ",
+    "category": "Productivity",
+    "capabilities": [
+      "Read",
+      "Write"
+    ],
+    "websiteURL": "https://github.com/thienanblog/awesome-ai-agent-skills",
+    "defaultPrompt": [
+      "Use x-twitter-scraper to guide this project task.",
+      "Apply social-media-automation-skills to review this repository."
+    ],
+    "brandColor": "#10A37F"
+  }
+}
