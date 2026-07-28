@@ -5,9 +5,10 @@ A community-shared collection of reusable skills for AI coding agents. Works wit
 ## Source of Truth
 
 - Author skills only under `skills/<skill-name>/`.
-- Assign each skill to exactly one installable bundle in `plugin-groups.json`.
+- Assign each skill to exactly one installable bundle in `plugin-groups.json`, which also holds the marketplace `owner` and each plugin's `displayName`.
+- Change generated marketplace/manifest shapes only in `scripts/lib/plugin-shape.js`.
 - Treat `.claude-plugin/marketplace.json`, `.agents/plugins/marketplace.json`, `plugins/**`, and generated README tables as sync outputs.
-- Do not edit `plugins/<plugin-name>/skills/**` directly; those are Codex plugin package copies regenerated from `skills/`.
+- Do not edit `plugins/<plugin-name>/**` directly; those are generated plugin packages (Claude Code + Codex) regenerated from `skills/`.
 - Run `npm run sync` after changing skills or plugin grouping, then run `npm run validate`.
 
 ## What are Skills?
@@ -49,7 +50,21 @@ Skills are self-contained instruction sets that teach AI agents specific workflo
 /plugin marketplace update
 ```
 
-Claude Code marketplace entries use `source: "./"`, `strict: false`, and explicit `skills` arrays so this repository can curate multiple related skill folders into one installable plugin without copying them into a Claude-specific plugin package. See the official Claude Code docs for [plugin marketplaces](https://code.claude.com/docs/en/plugin-marketplaces) and [plugin structure](https://code.claude.com/docs/en/plugins).
+**Claude Desktop app**
+
+The desktop app's plugin browser (**+** → **Plugins** → **Add plugin**) only lists marketplaces you have already configured — it cannot add one. Register this marketplace first from a terminal:
+
+```bash
+claude plugin marketplace add thienanblog/awesome-ai-agent-skills
+```
+
+Then reopen the plugin browser. If any marketplace command fails with `JSON Parse error: Unexpected EOF`, your local `~/.claude/plugins/known_marketplaces.json` is corrupt; delete that file and retry.
+
+**Layout**
+
+Each marketplace entry points at a self-contained plugin package under `plugins/<plugin-name>/`, which carries its own `.claude-plugin/plugin.json` and bundles only that plugin's skills. Claude Code copies just that package into its plugin cache and pins it to the released `version`. See the official Claude Code docs for [plugin marketplaces](https://code.claude.com/docs/en/plugin-marketplaces) and [plugin structure](https://code.claude.com/docs/en/plugins).
+
+The manifests deliberately stay on the schema keys that every current Claude Code release accepts. Newer-only keys (top-level `description`/`version`, per-plugin `displayName`, `$schema`, `renames`) are rejected as unrecognized by older clients, which makes the whole marketplace fail to load rather than degrade. `scripts/lib/plugin-shape.js` is the single definition of every generated shape, and `npm run validate` regenerates and diffs each file, so any stray key fails the build.
 
 ### OpenAI Codex
 
@@ -93,7 +108,7 @@ codex plugin marketplace add .
 
 This repository includes a Codex-compatible marketplace at `.agents/plugins/marketplace.json` and plugin packages under `plugins/`. The layout follows OpenAI's docs: marketplace entries point at `./plugins/<plugin-name>`, plugin manifests live in `.codex-plugin/plugin.json`, and bundled skills live inside the plugin root. See OpenAI's [Plugins](https://developers.openai.com/codex/plugins) and [Build plugins](https://developers.openai.com/codex/plugins/build) docs.
 
-The repeated skill folders under `plugins/<plugin-name>/skills/` are generated Codex package copies. If they differ from `skills/<skill-name>/`, edit the canonical skill folder and rerun `npm run sync`.
+The repeated skill folders under `plugins/<plugin-name>/skills/` are generated package copies shared by both agents. If they differ from `skills/<skill-name>/`, edit the canonical skill folder and rerun `npm run sync`.
 
 ### Skills CLI
 
@@ -197,7 +212,8 @@ See **[CONTRIBUTING.md](./CONTRIBUTING.md)** for detailed guidelines, validation
 
 - `plugin-groups.json` is the source of truth for plugin membership.
 - `npm run sync` regenerates `.claude-plugin/marketplace.json`, `.agents/plugins/marketplace.json`, `plugins/**`, and the generated tables in `README.md`.
-- `npm run validate` checks skill metadata, plugin assignments, Claude marketplace consistency, and Codex plugin package consistency.
+- `npm run validate` checks skill metadata and plugin assignments, then regenerates every marketplace and plugin manifest and diffs it against what is committed.
+- Bump `version` in `package.json` before syncing a release; it is stamped into every plugin entry, and users only receive an update when it changes.
 - Pull request CI reruns `npm run sync` and fails if generated files are out of date.
 
 ## For AI Agents

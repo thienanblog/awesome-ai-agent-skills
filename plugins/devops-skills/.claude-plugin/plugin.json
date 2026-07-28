@@ -1,0 +1,17 @@
+{
+  "name": "devops-skills",
+  "version": "1.18.0",
+  "description": "Skills for Docker-based local development environment configuration.",
+  "author": {
+    "name": "Ân Vũ",
+    "email": "8651688+thienanblog@users.noreply.github.com"
+  },
+  "homepage": "https://github.com/thienanblog/awesome-ai-agent-skills",
+  "repository": "https://github.com/thienanblog/awesome-ai-agent-skills",
+  "license": "MIT",
+  "keywords": [
+    "claude-code",
+    "agent-skills",
+    "docker-local-dev"
+  ]
+}
