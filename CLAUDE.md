@@ -41,9 +41,10 @@ Do not add `author` to skill frontmatter. This repository only tracks the requir
 ## Source of Truth and Generated Files
 
 - Author skill content only in `skills/<skill-name>/`.
-- Use `plugin-groups.json` as the source of truth for which installable plugin bundle owns each skill.
+- Use `plugin-groups.json` as the source of truth for plugin membership and identity: the marketplace `owner`, plus each plugin's `name`, `displayName`, `description`, and `skills`.
+- Use `scripts/lib/plugin-shape.js` as the single definition of every generated marketplace and manifest shape. `sync` writes those shapes; `validate` regenerates and diffs them. Change the shape there, never in a generated file.
 - Treat `.claude-plugin/marketplace.json`, `.agents/plugins/marketplace.json`, `plugins/**`, and generated README tables as outputs of `npm run sync`.
-- Do not edit `plugins/<plugin-name>/skills/**` directly; those folders are Codex plugin package copies generated from `skills/`.
+- Do not edit `plugins/<plugin-name>/**` directly; those folders are generated plugin packages (Claude Code and Codex) built from `skills/`.
 - Do not duplicate a skill under multiple plugin groups. If two skills overlap, merge the unique guidance into one canonical skill folder and keep exactly one plugin assignment.
 
 ## Scanning and Updating Marketplace
@@ -60,18 +61,21 @@ For each `SKILL.md`, extract the `name` and `description` from the YAML frontmat
 Update `.claude-plugin/marketplace.json`:
 - Keep the existing `name`, `owner`, and `metadata` sections
 - Update the `plugins` array based on `plugin-groups.json` so each plugin can contain multiple related skills
-- Each plugin requires: `name` (ending with `-skills`), `description`, `source: "./"`, `strict: false`, and a `skills` array
-- The `skills` array lists the skill paths for that plugin
+- Each plugin requires: `name` (ending with `-skills`), `source: "./plugins/<plugin-name>"`, `description`, and `version` (matching `package.json`)
 
-This repository uses `strict: false` with explicit `skills` lists so the marketplace entry defines each installable skill bundle.
+Each entry points at a real plugin package rather than the repository root, so Claude Code copies only that package into its plugin cache and discovers the bundled `skills/` directory. Keeping `version` in sync with `package.json` pins installs to a release instead of falling back to the git commit SHA.
 
-### 4. Update Codex marketplace and plugins
+**Schema compatibility is a hard constraint.** Claude Code rejects unrecognized manifest keys outright, so a key added in a newer release breaks the entire marketplace for anyone on an older client. The generated shapes therefore stay on keys accepted across releases in the wild: the marketplace description and version live under `metadata` (not top-level), and no entry carries `displayName`, `$schema`, or `renames`.
+
+This is enforced structurally, not by a list of banned keys. `scripts/lib/plugin-shape.js` is the single definition of every generated shape; `npm run validate` regenerates each file and diffs it against what is committed, so *any* extra or changed key fails the build. Before adding a key, confirm it is accepted by running `claude plugin validate .` and `claude plugin validate ./plugins/<plugin-name>` on the oldest Claude Code you intend to support.
+
+### 4. Update plugin packages and the Codex marketplace
 Update `.agents/plugins/marketplace.json` and `plugins/<plugin-name>/` from `plugin-groups.json`:
-- Each Codex plugin lives in `plugins/<plugin-name>/`
-- Each Codex plugin requires `.codex-plugin/plugin.json`
-- Each plugin manifest uses `skills: "./skills/"`
+- Each plugin package lives in `plugins/<plugin-name>/` and serves both agents
+- Each package requires `.claude-plugin/plugin.json` (Claude Code) and `.codex-plugin/plugin.json` (Codex)
+- The Codex manifest uses `skills: "./skills/"`; Claude Code scans `skills/` by default
 - Each plugin bundles copies of its skill folders under `plugins/<plugin-name>/skills/`
-- Each marketplace entry points to `./plugins/<plugin-name>` and includes `policy.installation`, `policy.authentication`, and `category`
+- Each Codex marketplace entry points to `./plugins/<plugin-name>` and includes `policy.installation`, `policy.authentication`, and `category`
 
 Use `npm run sync` to regenerate these files instead of editing generated plugin packages manually.
 
@@ -86,7 +90,26 @@ Report to the user:
 
 ### Example Update
 
-If a new skill `api-testing` is added to `skills/api-testing/SKILL.md`, update `plugin-groups.json` and add or extend the matching plugin entry:
+If a new skill `api-testing` is added to `skills/api-testing/SKILL.md`, assign it to a plugin in `plugin-groups.json`:
+
+```json
+{
+  "owner": {
+    "name": "Ân Vũ",
+    "email": "8651688+thienanblog@users.noreply.github.com"
+  },
+  "plugins": [
+    {
+      "name": "project-development-skills",
+      "displayName": "Project Development Skills",
+      "description": "A cohesive workflow bundle for project setup, ...",
+      "skills": ["project-development-mindset", "api-testing"]
+    }
+  ]
+}
+```
+
+Then run `npm run sync`. The generated `.claude-plugin/marketplace.json` looks like this:
 
 ```json
 {
@@ -97,36 +120,43 @@ If a new skill `api-testing` is added to `skills/api-testing/SKILL.md`, update `
   },
   "metadata": {
     "description": "Community-shared skills for AI coding agents",
-    "version": "1.0.0"
+    "version": "1.18.0"
   },
   "plugins": [
     {
       "name": "project-development-skills",
+      "source": "./plugins/project-development-skills",
       "description": "A cohesive workflow bundle for project setup, source-of-truth development, UI/UX concept implementation, testing, debugging, performance, documentation, design systems, and production deployment planning.",
-      "source": "./",
-      "strict": false,
-      "skills": [
-        "./skills/project-development-mindset",
-        "./skills/testing-verification",
-        "./skills/debugging-workflow",
-        "./skills/performance-optimization",
-        "./skills/agents-md-generator",
-        "./skills/documentation-guidelines",
-        "./skills/design-system-generator",
-        "./skills/ui-ux-concept-implementation",
-        "./skills/vps-docker-traefik-deploy"
-      ]
-    },
-    {
-      "name": "laravel-app-skills",
-      "description": "Guidelines for building Laravel 11/12 apps across common stacks and tooling.",
-      "source": "./",
-      "strict": false,
-      "skills": [
-        "./skills/laravel-11-12-app-guidelines"
-      ]
+      "version": "1.18.0",
+      "author": {
+        "name": "Ân Vũ",
+        "email": "8651688+thienanblog@users.noreply.github.com"
+      },
+      "homepage": "https://github.com/thienanblog/awesome-ai-agent-skills",
+      "repository": "https://github.com/thienanblog/awesome-ai-agent-skills",
+      "license": "MIT",
+      "keywords": ["claude-code", "agent-skills", "project-development-mindset"],
+      "category": "productivity"
     }
   ]
+}
+```
+
+The matching `plugins/project-development-skills/.claude-plugin/plugin.json`:
+
+```json
+{
+  "name": "project-development-skills",
+  "version": "1.18.0",
+  "description": "A cohesive workflow bundle for project setup, source-of-truth development, UI/UX concept implementation, testing, debugging, performance, documentation, design systems, and production deployment planning.",
+  "author": {
+    "name": "Ân Vũ",
+    "email": "8651688+thienanblog@users.noreply.github.com"
+  },
+  "homepage": "https://github.com/thienanblog/awesome-ai-agent-skills",
+  "repository": "https://github.com/thienanblog/awesome-ai-agent-skills",
+  "license": "MIT",
+  "keywords": ["claude-code", "agent-skills", "project-development-mindset"]
 }
 ```
 
@@ -158,24 +188,30 @@ This repository uses GitHub Actions for automated validation and syncing:
   - Each skill folder has a valid `SKILL.md`
   - YAML frontmatter contains required `name` and `description` fields
   - YAML frontmatter does not contain `author`
-  - All skills in `skills/` are listed in a plugin's `skills` array
-  - Each plugin has `source: "./"` and a valid `skills` array
-  - Codex plugin packages exist under `plugins/` and match `plugin-groups.json`
+  - Every skill in `skills/` is assigned to exactly one plugin in `plugin-groups.json`, and each plugin has an `owner`, `displayName`, and `description`
+  - Every generated file (both marketplaces, every `.claude-plugin/plugin.json` and `.codex-plugin/plugin.json`) byte-matches what `npm run sync` would write — this is what catches hand-edits and newer-only schema keys
+  - Bundled skills under `plugins/<plugin-name>/skills/` match their canonical `skills/<skill-name>/` source
+  - No stale plugin packages remain under `plugins/`
 - If validation fails, a comment is added to the PR with common issues
 
 ### On Merge to Main (sync-marketplace.yml)
 - Automatically runs `npm run sync` to:
   - Scan all skills in `skills/` folder
   - Update Claude and Codex marketplace files based on `plugin-groups.json`
-  - Update Codex plugin packages under `plugins/`
+  - Update plugin packages under `plugins/`
   - Update the skills table in `README.md`
   - Commit and push changes if any
 
 ### Local Validation Commands
 Before pushing changes, always run:
 ```bash
-npm run sync       # Update marketplace files, Codex plugins, and README.md
-npm run validate   # Check skill structure, marketplace files, and Codex plugins
+npm run sync       # Update marketplace files, plugin packages, and README.md
+npm run validate   # Check skill structure, marketplace files, and plugin packages
+```
+
+Then confirm against Claude Code's own validator, which catches schema keys `npm run validate` does not know about:
+```bash
+claude plugin validate .
 ```
 
 ## Quality Guidelines for New Skills
@@ -207,6 +243,12 @@ After completing any task that modifies skills, plugins, or documentation:
    ```bash
    npm run validate
    ```
+
+## Releasing
+
+`package.json` `version` is the single source of truth for the release version. Bump it first, then run `npm run sync` so it propagates into `.claude-plugin/marketplace.json` (both `metadata.version` and every plugin entry) and into each generated plugin manifest. `npm run validate` fails when these drift.
+
+Because plugin entries carry an explicit `version`, users only receive an update when the version changes. Skipping the bump means published skill changes never reach installed users.
 
 ## Commit and PR Conventions
 
