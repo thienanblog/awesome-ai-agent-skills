@@ -2,18 +2,30 @@
 
 import fs from 'fs';
 import path from 'path';
-import { parse as parseYaml } from 'yaml';
+import {
+  SKILLS_DIR,
+  PLUGINS_DIR,
+  MARKETPLACE_FILE,
+  CODEX_MARKETPLACE_FILE,
+  PLUGIN_GROUPS_FILE,
+  buildMarketplace,
+  buildClaudePluginManifest,
+  buildCodexPluginManifest,
+  buildCodexMarketplace,
+  claudeManifestPath,
+  codexManifestPath,
+  isGeneratedPluginPackage,
+  parseFrontmatter,
+  pluginRootPath,
+  pluginSkillsPath,
+  readPackageMeta,
+  serialize
+} from './lib/plugin-shape.js';
+import { loadPluginGroups } from './lib/plugin-groups.js';
 
-const SKILLS_DIR = 'skills';
-const MARKETPLACE_FILE = '.claude-plugin/marketplace.json';
-const CODEX_MARKETPLACE_FILE = '.agents/plugins/marketplace.json';
-const CODEX_PLUGINS_DIR = 'plugins';
 const README_FILE = 'README.md';
-const PLUGIN_GROUPS_FILE = 'plugin-groups.json';
-const PLUGIN_SUFFIX = '-skills';
 const PLUGINS_TABLE_START = '<!-- PLUGINS_TABLE_START -->';
 const PLUGINS_TABLE_END = '<!-- PLUGINS_TABLE_END -->';
-const REPOSITORY_URL = 'https://github.com/thienanblog/awesome-ai-agent-skills';
 
 function log(message) {
   console.log(message);
@@ -23,121 +35,9 @@ function success(message) {
   console.log(`✅ ${message}`);
 }
 
-function readPackageVersion() {
-  try {
-    const packageJson = JSON.parse(fs.readFileSync('package.json', 'utf-8'));
-    return packageJson.version || '1.0.0';
-  } catch {
-    return '1.0.0';
-  }
-}
-
-function titleCasePluginName(pluginName) {
-  return pluginName
-    .split('-')
-    .map(part => part.charAt(0).toUpperCase() + part.slice(1))
-    .join(' ');
-}
-
-function buildCodexDefaultPrompts(pluginName, skillNames) {
-  const primarySkill = skillNames[0] || pluginName;
-  const prompts = [
-    `Use ${primarySkill} to guide this project task.`,
-    `Apply ${pluginName} to review this repository.`
-  ];
-
-  if (skillNames.length > 1) {
-    prompts.push(`Use ${pluginName} to plan docs and delivery.`);
-  }
-
-  return prompts;
-}
-
-function loadPluginGroups(skills) {
-  if (!fs.existsSync(PLUGIN_GROUPS_FILE)) {
-    log(`❌ Missing ${PLUGIN_GROUPS_FILE}. Add plugin groups to continue.`);
-    process.exit(1);
-  }
-
-  let config;
-  try {
-    config = JSON.parse(fs.readFileSync(PLUGIN_GROUPS_FILE, 'utf-8'));
-  } catch (e) {
-    log(`❌ ${PLUGIN_GROUPS_FILE}: Invalid JSON - ${e.message}`);
-    process.exit(1);
-  }
-
-  if (!config || !Array.isArray(config.plugins)) {
-    log(`❌ ${PLUGIN_GROUPS_FILE}: Missing "plugins" array`);
-    process.exit(1);
-  }
-
-  const skillMap = new Map(skills.map(skill => [skill.folderName, skill]));
-  const assignedSkills = new Set();
-  let hasErrors = false;
-
-  for (const plugin of config.plugins) {
-    if (!plugin.name) {
-      log(`❌ ${PLUGIN_GROUPS_FILE}: Plugin missing "name"`);
-      hasErrors = true;
-      continue;
-    }
-    if (!plugin.description) {
-      log(`❌ ${PLUGIN_GROUPS_FILE}: Plugin "${plugin.name}" missing "description"`);
-      hasErrors = true;
-    }
-    if (!Array.isArray(plugin.skills) || plugin.skills.length === 0) {
-      log(`❌ ${PLUGIN_GROUPS_FILE}: Plugin "${plugin.name}" missing "skills" array`);
-      hasErrors = true;
-      continue;
-    }
-    if (!plugin.name.endsWith(PLUGIN_SUFFIX)) {
-      log(`❌ ${PLUGIN_GROUPS_FILE}: Plugin "${plugin.name}" must end with "${PLUGIN_SUFFIX}"`);
-      hasErrors = true;
-    }
-
-    for (const skillName of plugin.skills) {
-      if (!skillMap.has(skillName)) {
-        log(`❌ ${PLUGIN_GROUPS_FILE}: Plugin "${plugin.name}" references unknown skill "${skillName}"`);
-        hasErrors = true;
-        continue;
-      }
-      if (assignedSkills.has(skillName)) {
-        log(`❌ ${PLUGIN_GROUPS_FILE}: Skill "${skillName}" listed in multiple plugins`);
-        hasErrors = true;
-        continue;
-      }
-      assignedSkills.add(skillName);
-    }
-  }
-
-  for (const skill of skills) {
-    if (!assignedSkills.has(skill.folderName)) {
-      log(`❌ ${PLUGIN_GROUPS_FILE}: Skill "${skill.folderName}" not assigned to any plugin`);
-      hasErrors = true;
-    }
-  }
-
-  if (hasErrors) {
-    process.exit(1);
-  }
-
-  return config.plugins;
-}
-
-/**
- * Parse YAML frontmatter from a markdown file
- */
-function parseFrontmatter(content) {
-  const match = content.match(/^---\r?\n([\s\S]*?)\r?\n---/);
-  if (!match) {
-    return null;
-  }
-  try {
-    return parseYaml(match[1]);
-  } catch (e) {
-    return null;
-  }
+function fail(message) {
+  console.log(`❌ ${message}`);
+  process.exit(1);
 }
 
 /**
@@ -180,223 +80,133 @@ function getSkills() {
 }
 
 /**
- * Update marketplace.json with skills
- * Each plugin group defines the skills users can install as a bundle.
+ * Write marketplace.json from plugin-groups.json plus the released version.
  */
-function updateMarketplace(skills, pluginGroups) {
-  let marketplace = {
-    name: 'awesome-ai-agent-skills',
-    owner: {
-      name: 'Community',
-      email: ''
-    },
-    metadata: {
-      description: 'Community-shared AI agent skills for Claude Code',
-      version: '1.0.0'
-    },
-    plugins: []
-  };
+function updateMarketplace(pluginGroups, meta, owner) {
+  let existingPluginNames = new Set();
 
-  // Read existing marketplace to preserve owner and metadata
   if (fs.existsSync(MARKETPLACE_FILE)) {
     try {
-      const content = fs.readFileSync(MARKETPLACE_FILE, 'utf-8');
-      const existing = JSON.parse(content);
-      marketplace.name = existing.name || marketplace.name;
-      marketplace.owner = existing.owner || marketplace.owner;
-      marketplace.metadata = existing.metadata || marketplace.metadata;
-      marketplace.plugins = Array.isArray(existing.plugins) ? existing.plugins : marketplace.plugins;
+      const existing = JSON.parse(fs.readFileSync(MARKETPLACE_FILE, 'utf-8'));
+      existingPluginNames = new Set(
+        Array.isArray(existing.plugins) ? existing.plugins.map(p => p.name) : []
+      );
     } catch (e) {
       log(`⚠️  Could not read existing marketplace.json: ${e.message}`);
     }
   }
 
-  // Get existing plugin names for comparison
-  const existingPluginNames = new Set(
-    marketplace.plugins?.map(p => p.name) || []
-  );
+  fs.writeFileSync(MARKETPLACE_FILE, serialize(buildMarketplace(pluginGroups, meta, owner)));
 
-  // Build one plugin per domain group
-  // Each plugin has source: "./" and skills array with matching skill paths
-  marketplace.plugins = pluginGroups.map(plugin => ({
-    name: plugin.name,
-    description: plugin.description,
-    source: './',
-    strict: false,
-    skills: plugin.skills.map(skillName => `./skills/${skillName}`)
-  }));
-
-  // Determine changes
   const newPluginNames = new Set(pluginGroups.map(p => p.name));
-  const added = pluginGroups.filter(p => !existingPluginNames.has(p.name)).map(p => p.name);
-  const removed = [...existingPluginNames].filter(name => !newPluginNames.has(name));
-
-  // Write marketplace.json
-  fs.writeFileSync(
-    MARKETPLACE_FILE,
-    JSON.stringify(marketplace, null, 2) + '\n'
-  );
-
-  return { added, removed };
-}
-
-function buildCodexMarketplace(pluginGroups) {
   return {
-    name: 'awesome-ai-agent-skills',
-    interface: {
-      displayName: 'Awesome AI Agent Skills'
-    },
-    plugins: pluginGroups.map(plugin => ({
-      name: plugin.name,
-      source: {
-        source: 'local',
-        path: `./plugins/${plugin.name}`
-      },
-      policy: {
-        installation: 'AVAILABLE',
-        authentication: 'ON_INSTALL'
-      },
-      category: 'Productivity'
-    }))
-  };
-}
-
-function buildCodexPluginManifest(plugin, version) {
-  const displayName = titleCasePluginName(plugin.name);
-
-  return {
-    name: plugin.name,
-    version,
-    description: plugin.description,
-    homepage: REPOSITORY_URL,
-    repository: REPOSITORY_URL,
-    license: 'MIT',
-    keywords: [
-      'codex',
-      'skills',
-      ...plugin.skills.slice(0, 4)
-    ],
-    skills: './skills/',
-    interface: {
-      displayName,
-      shortDescription: plugin.description,
-      longDescription: plugin.description,
-      developerName: 'Ân Vũ',
-      category: 'Productivity',
-      capabilities: ['Read', 'Write'],
-      websiteURL: REPOSITORY_URL,
-      defaultPrompt: buildCodexDefaultPrompts(plugin.name, plugin.skills),
-      brandColor: '#10A37F'
-    }
+    added: pluginGroups.filter(p => !existingPluginNames.has(p.name)).map(p => p.name),
+    removed: [...existingPluginNames].filter(name => !newPluginNames.has(name))
   };
 }
 
 function copyPluginSkills(plugin) {
-  const pluginRoot = path.join(CODEX_PLUGINS_DIR, plugin.name);
-  const pluginSkillsDir = path.join(pluginRoot, 'skills');
+  const skillsDir = pluginSkillsPath(plugin.name);
 
-  fs.rmSync(pluginSkillsDir, { recursive: true, force: true });
-  fs.mkdirSync(pluginSkillsDir, { recursive: true });
+  fs.rmSync(skillsDir, { recursive: true, force: true });
+  fs.mkdirSync(skillsDir, { recursive: true });
 
   for (const skillName of plugin.skills) {
-    const sourceDir = path.join(SKILLS_DIR, skillName);
-    const targetDir = path.join(pluginSkillsDir, skillName);
-    fs.cpSync(sourceDir, targetDir, {
+    fs.cpSync(path.join(SKILLS_DIR, skillName), path.join(skillsDir, skillName), {
       recursive: true,
       filter: source => path.basename(source) !== '.DS_Store'
     });
   }
 }
 
-function removeStaleCodexPlugins(pluginGroups) {
-  if (!fs.existsSync(CODEX_PLUGINS_DIR)) {
+function removeStalePluginPackages(pluginGroups) {
+  if (!fs.existsSync(PLUGINS_DIR)) {
     return;
   }
 
   const expectedPluginNames = new Set(pluginGroups.map(plugin => plugin.name));
-  const entries = fs.readdirSync(CODEX_PLUGINS_DIR, { withFileTypes: true });
 
-  for (const entry of entries) {
+  for (const entry of fs.readdirSync(PLUGINS_DIR, { withFileTypes: true })) {
     if (!entry.isDirectory() || expectedPluginNames.has(entry.name)) {
       continue;
     }
 
-    const manifestPath = path.join(CODEX_PLUGINS_DIR, entry.name, '.codex-plugin', 'plugin.json');
-    if (fs.existsSync(manifestPath)) {
-      fs.rmSync(path.join(CODEX_PLUGINS_DIR, entry.name), { recursive: true, force: true });
+    const pluginRoot = path.join(PLUGINS_DIR, entry.name);
+    if (isGeneratedPluginPackage(pluginRoot)) {
+      fs.rmSync(pluginRoot, { recursive: true, force: true });
     }
   }
 }
 
-function updateCodexPlugins(pluginGroups) {
-  const version = readPackageVersion();
+function writeManifest(manifestPath, manifest) {
+  fs.mkdirSync(path.dirname(manifestPath), { recursive: true });
+  fs.writeFileSync(manifestPath, serialize(manifest));
+}
 
-  fs.mkdirSync(CODEX_PLUGINS_DIR, { recursive: true });
-  removeStaleCodexPlugins(pluginGroups);
+/**
+ * Generate the plugin packages under plugins/<name>.
+ *
+ * One package serves both agents: Claude Code reads .claude-plugin/plugin.json
+ * and Codex reads .codex-plugin/plugin.json, and both discover the same
+ * bundled skills/ directory.
+ */
+function updatePluginPackages(pluginGroups, meta, owner) {
+  fs.mkdirSync(PLUGINS_DIR, { recursive: true });
+  removeStalePluginPackages(pluginGroups);
 
   for (const plugin of pluginGroups) {
-    const pluginRoot = path.join(CODEX_PLUGINS_DIR, plugin.name);
-    const manifestPath = path.join(pluginRoot, '.codex-plugin', 'plugin.json');
-
-    fs.mkdirSync(path.dirname(manifestPath), { recursive: true });
-    fs.writeFileSync(
-      manifestPath,
-      JSON.stringify(buildCodexPluginManifest(plugin, version), null, 2) + '\n'
+    fs.mkdirSync(pluginRootPath(plugin.name), { recursive: true });
+    writeManifest(
+      claudeManifestPath(plugin.name),
+      buildClaudePluginManifest(plugin, meta.version, owner)
+    );
+    writeManifest(
+      codexManifestPath(plugin.name),
+      buildCodexPluginManifest(plugin, meta.version, owner)
     );
     copyPluginSkills(plugin);
   }
 
   fs.mkdirSync(path.dirname(CODEX_MARKETPLACE_FILE), { recursive: true });
-  fs.writeFileSync(
-    CODEX_MARKETPLACE_FILE,
-    JSON.stringify(buildCodexMarketplace(pluginGroups), null, 2) + '\n'
-  );
+  fs.writeFileSync(CODEX_MARKETPLACE_FILE, serialize(buildCodexMarketplace(pluginGroups)));
 }
 
 /**
- * Update README.md skills table
+ * Build the README.md skills table
  */
-function updateReadme(skills) {
-  if (!fs.existsSync(README_FILE)) {
-    log(`⚠️  README.md not found, skipping update`);
-    return false;
-  }
-
-  let content = fs.readFileSync(README_FILE, 'utf-8');
-
-  // Build skills table
+function buildSkillsTable(skills) {
   const tableHeader = '| Skill | Description |\n|-------|-------------|';
   const tableRows = skills.map(skill =>
     `| [${skill.name}](./skills/${skill.folderName}) | ${skill.description} |`
   ).join('\n');
-  const newTable = `<!-- SKILLS_TABLE_START -->\n${tableHeader}\n${tableRows}\n<!-- SKILLS_TABLE_END -->`;
 
-  // Check if markers exist
+  return `<!-- SKILLS_TABLE_START -->\n${tableHeader}\n${tableRows}\n<!-- SKILLS_TABLE_END -->`;
+}
+
+function replaceSkillsTable(content, skills) {
+  const newTable = buildSkillsTable(skills);
+
   if (content.includes('<!-- SKILLS_TABLE_START -->') && content.includes('<!-- SKILLS_TABLE_END -->')) {
-    // Replace between markers
-    content = content.replace(
+    return content.replace(
       /<!-- SKILLS_TABLE_START -->[\s\S]*?<!-- SKILLS_TABLE_END -->/,
       newTable
     );
-  } else {
-    // Try to find existing table under "## Available Skills"
-    const tableRegex = /(## Available Skills\s*\n+)\|[^\n]+\|\n\|[-|]+\|\n(\|[^\n]+\|\n?)*/;
-    if (tableRegex.test(content)) {
-      content = content.replace(tableRegex, `$1${newTable}\n`);
-    } else {
-      log(`⚠️  Could not find skills table in README.md. Add markers manually.`);
-      return false;
-    }
   }
 
-  fs.writeFileSync(README_FILE, content);
-  return true;
+  // Fallback: try to find an existing table under "## Available Skills"
+  const tableRegex = /(## Available Skills\s*\n+)\|[^\n]+\|\n\|[-|]+\|\n(\|[^\n]+\|\n?)*/;
+  if (tableRegex.test(content)) {
+    return content.replace(tableRegex, `$1${newTable}\n`);
+  }
+
+  log('⚠️  Could not find skills table in README.md. Add markers manually.');
+  return content;
 }
 
 /**
- * Update README.md plugin groups table
+ * Build the README.md plugin groups table
  */
-function updateReadmePluginGroups(content, pluginGroups) {
+function replacePluginGroupsTable(content, pluginGroups) {
   const tableHeader = '| Plugin | Description | Skills |\n|--------|-------------|--------|';
 
   const tableRows = pluginGroups.map(plugin => {
@@ -416,14 +226,31 @@ function updateReadmePluginGroups(content, pluginGroups) {
     );
   }
 
-  // Fallback: try to find existing table under "## Plugin Groups"
+  // Fallback: try to find an existing table under "## Plugin Groups"
   const tableRegex = /(## Plugin Groups\s*\n+[\s\S]*?\n)\|[^\n]+\|\n\|[-|]+\|\n(\|[^\n]+\|\n?)*/;
   if (tableRegex.test(content)) {
     return content.replace(tableRegex, `$1${newTable}\n`);
   }
 
-  log(`⚠️  Could not find plugin groups table in README.md. Add markers manually.`);
+  log('⚠️  Could not find plugin groups table in README.md. Add markers manually.');
   return content;
+}
+
+function updateReadme(skills, pluginGroups) {
+  if (!fs.existsSync(README_FILE)) {
+    log('⚠️  README.md not found, skipping update');
+    return false;
+  }
+
+  const original = fs.readFileSync(README_FILE, 'utf-8');
+  const updated = replacePluginGroupsTable(replaceSkillsTable(original, skills), pluginGroups);
+
+  if (updated === original) {
+    return false;
+  }
+
+  fs.writeFileSync(README_FILE, updated);
+  return true;
 }
 
 /**
@@ -435,17 +262,22 @@ function main() {
   log('=======================================');
   log('');
 
-  // Get all skills
+  let meta;
+  try {
+    meta = readPackageMeta();
+  } catch (e) {
+    fail(e.message);
+  }
+
   const skills = getSkills();
   log(`Found ${skills.length} valid skill(s)`);
   log('');
 
-  // Load plugin groups
-  const pluginGroups = loadPluginGroups(skills);
+  const config = loadPluginGroups(skills.map(skill => skill.folderName), fail);
+  const pluginGroups = config.plugins;
 
-  // Update marketplace.json
   log('🧩 Updating marketplace.json...');
-  const { added, removed } = updateMarketplace(skills, pluginGroups);
+  const { added, removed } = updateMarketplace(pluginGroups, meta, config.owner);
 
   if (added.length > 0) {
     success(`Added: ${added.join(', ')}`);
@@ -458,31 +290,23 @@ function main() {
   }
   log('');
 
-  // Update README.md
   log('📝 Updating README.md...');
-  const readmeUpdated = updateReadme(skills);
-  if (readmeUpdated) success('README.md skills table updated');
-
-  // Update README.md plugin groups table (best-effort)
-  let readmeContent = fs.readFileSync(README_FILE, 'utf-8');
-  const nextReadmeContent = updateReadmePluginGroups(readmeContent, pluginGroups);
-  if (nextReadmeContent !== readmeContent) {
-    fs.writeFileSync(README_FILE, nextReadmeContent);
-    success('README.md plugin groups table updated');
+  if (updateReadme(skills, pluginGroups)) {
+    success('README.md tables updated');
+  } else {
+    log('   No changes to README.md');
   }
   log('');
 
-  log('🔌 Updating Codex plugins...');
-  updateCodexPlugins(pluginGroups);
-  success('Codex marketplace and plugin packages updated');
+  log('🔌 Updating plugin packages...');
+  updatePluginPackages(pluginGroups, meta, config.owner);
+  success('Claude and Codex plugin packages updated');
   log('');
 
-  // Summary
   log('=======================================');
-  success('Sync complete!');
+  success(`Sync complete! (version ${meta.version})`);
   log('');
 
-  // List current skills
   log('Current skills:');
   for (const skill of skills) {
     log(`  • ${skill.name}`);

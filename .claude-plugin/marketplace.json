@@ -6,52 +6,87 @@
   },
   "metadata": {
     "description": "Community-shared skills for AI coding agents",
-    "version": "1.17.1"
+    "version": "1.18.0"
   },
   "plugins": [
     {
       "name": "project-development-skills",
+      "source": "./plugins/project-development-skills",
       "description": "A cohesive workflow bundle for project setup, source-of-truth development, UI/UX concept implementation, testing, debugging, performance, documentation, design systems, and production deployment planning.",
-      "source": "./",
-      "strict": false,
-      "skills": [
-        "./skills/project-development-mindset",
-        "./skills/testing-verification",
-        "./skills/debugging-workflow",
-        "./skills/performance-optimization",
-        "./skills/agents-md-generator",
-        "./skills/documentation-guidelines",
-        "./skills/design-system-generator",
-        "./skills/ui-ux-concept-implementation",
-        "./skills/vps-docker-traefik-deploy"
-      ]
+      "version": "1.18.0",
+      "author": {
+        "name": "Ân Vũ",
+        "email": "8651688+thienanblog@users.noreply.github.com"
+      },
+      "homepage": "https://github.com/thienanblog/awesome-ai-agent-skills",
+      "repository": "https://github.com/thienanblog/awesome-ai-agent-skills",
+      "license": "MIT",
+      "keywords": [
+        "claude-code",
+        "agent-skills",
+        "project-development-mindset",
+        "testing-verification",
+        "debugging-workflow",
+        "performance-optimization"
+      ],
+      "category": "productivity"
     },
     {
       "name": "laravel-app-skills",
+      "source": "./plugins/laravel-app-skills",
       "description": "Guidelines for building Laravel 11/12 apps across common stacks and tooling.",
-      "source": "./",
-      "strict": false,
-      "skills": [
-        "./skills/laravel-11-12-app-guidelines"
-      ]
+      "version": "1.18.0",
+      "author": {
+        "name": "Ân Vũ",
+        "email": "8651688+thienanblog@users.noreply.github.com"
+      },
+      "homepage": "https://github.com/thienanblog/awesome-ai-agent-skills",
+      "repository": "https://github.com/thienanblog/awesome-ai-agent-skills",
+      "license": "MIT",
+      "keywords": [
+        "claude-code",
+        "agent-skills",
+        "laravel-11-12-app-guidelines"
+      ],
+      "category": "productivity"
     },
     {
       "name": "devops-skills",
+      "source": "./plugins/devops-skills",
       "description": "Skills for Docker-based local development environment configuration.",
-      "source": "./",
-      "strict": false,
-      "skills": [
-        "./skills/docker-local-dev"
-      ]
+      "version": "1.18.0",
+      "author": {
+        "name": "Ân Vũ",
+        "email": "8651688+thienanblog@users.noreply.github.com"
+      },
+      "homepage": "https://github.com/thienanblog/awesome-ai-agent-skills",
+      "repository": "https://github.com/thienanblog/awesome-ai-agent-skills",
+      "license": "MIT",
+      "keywords": [
+        "claude-code",
+        "agent-skills",
+        "docker-local-dev"
+      ],
+      "category": "productivity"
     },
     {
       "name": "office-web-ui-skills",
+      "source": "./plugins/office-web-ui-skills",
       "description": "Skills for designing and refactoring admin, internal, and back-office web interfaces.",
-      "source": "./",
-      "strict": false,
-      "skills": [
-        "./skills/office-web-ui-system"
-      ]
+      "version": "1.18.0",
+      "author": {
+        "name": "Ân Vũ",
+        "email": "8651688+thienanblog@users.noreply.github.com"
+      },
+      "homepage": "https://github.com/thienanblog/awesome-ai-agent-skills",
+      "repository": "https://github.com/thienanblog/awesome-ai-agent-skills",
+      "license": "MIT",
+      "keywords": [
+        "claude-code",
+        "agent-skills",
+        "office-web-ui-system"
+      ],
+      "category": "productivity"
     }
   ]
 }

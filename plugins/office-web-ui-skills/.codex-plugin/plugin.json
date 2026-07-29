@@ -1,6 +1,6 @@
 {
   "name": "office-web-ui-skills",
-  "version": "1.17.1",
+  "version": "1.18.0",
   "description": "Skills for designing and refactoring admin, internal, and back-office web interfaces.",
   "homepage": "https://github.com/thienanblog/awesome-ai-agent-skills",
   "repository": "https://github.com/thienanblog/awesome-ai-agent-skills",
@@ -12,7 +12,7 @@
   ],
   "skills": "./skills/",
   "interface": {
-    "displayName": "Office Web Ui Skills",
+    "displayName": "Office Web UI Skills",
     "shortDescription": "Skills for designing and refactoring admin, internal, and back-office web interfaces.",
     "longDescription": "Skills for designing and refactoring admin, internal, and back-office web interfaces.",
     "developerName": "Ân Vũ",

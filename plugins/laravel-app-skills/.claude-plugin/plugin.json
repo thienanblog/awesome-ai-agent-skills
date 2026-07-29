@@ -1,0 +1,17 @@
+{
+  "name": "laravel-app-skills",
+  "version": "1.18.0",
+  "description": "Guidelines for building Laravel 11/12 apps across common stacks and tooling.",
+  "author": {
+    "name": "Ân Vũ",
+    "email": "8651688+thienanblog@users.noreply.github.com"
+  },
+  "homepage": "https://github.com/thienanblog/awesome-ai-agent-skills",
+  "repository": "https://github.com/thienanblog/awesome-ai-agent-skills",
+  "license": "MIT",
+  "keywords": [
+    "claude-code",
+    "agent-skills",
+    "laravel-11-12-app-guidelines"
+  ]
+}
