@@ -120,14 +120,14 @@ Then run `npm run sync`. The generated `.claude-plugin/marketplace.json` looks l
   },
   "metadata": {
     "description": "Community-shared skills for AI coding agents",
-    "version": "1.18.0"
+    "version": "1.19.0"
   },
   "plugins": [
     {
       "name": "project-development-skills",
       "source": "./plugins/project-development-skills",
-      "description": "A cohesive workflow bundle for project setup, source-of-truth development, UI/UX concept implementation, testing, debugging, performance, documentation, design systems, and production deployment planning.",
-      "version": "1.18.0",
+      "description": "A cohesive workflow bundle for project setup, source-of-truth development, reviewable multi-slice delivery, UI/UX concept implementation, testing, debugging, performance, documentation, design systems, and production deployment planning.",
+      "version": "1.19.0",
       "author": {
         "name": "Ân Vũ",
         "email": "8651688+thienanblog@users.noreply.github.com"
@@ -147,8 +147,8 @@ The matching `plugins/project-development-skills/.claude-plugin/plugin.json`:
 ```json
 {
   "name": "project-development-skills",
-  "version": "1.18.0",
-  "description": "A cohesive workflow bundle for project setup, source-of-truth development, UI/UX concept implementation, testing, debugging, performance, documentation, design systems, and production deployment planning.",
+  "version": "1.19.0",
+  "description": "A cohesive workflow bundle for project setup, source-of-truth development, reviewable multi-slice delivery, UI/UX concept implementation, testing, debugging, performance, documentation, design systems, and production deployment planning.",
   "author": {
     "name": "Ân Vũ",
     "email": "8651688+thienanblog@users.noreply.github.com"
@@ -175,6 +175,7 @@ The matching `plugins/project-development-skills/.claude-plugin/plugin.json`:
 | office-web-ui-system         | `./skills/office-web-ui-system`        | Design and refactor office-style admin web interfaces              |
 | performance-optimization     | `./skills/performance-optimization`    | Diagnose and improve performance with measurements                 |
 | project-development-mindset  | `./skills/project-development-mindset` | Universal developer mindset and project workflow guide             |
+| run-reviewable-subtask-loop  | `./skills/run-reviewable-subtask-loop` | Deliver large changes as right-sized, reviewable, testable slices  |
 | testing-verification         | `./skills/testing-verification`        | Plan, add, repair, and run tests and verification                  |
 | ui-ux-concept-implementation | `./skills/ui-ux-concept-implementation`| Implement UI from selected concepts or reference websites          |
 | vps-docker-traefik-deploy    | `./skills/vps-docker-traefik-deploy`   | Plan and implement secure Docker/Traefik VPS deployments           |

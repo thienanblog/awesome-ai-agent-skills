@@ -1,7 +1,7 @@
 {
   "name": "project-development-skills",
-  "version": "1.18.0",
-  "description": "A cohesive workflow bundle for project setup, source-of-truth development, UI/UX concept implementation, testing, debugging, performance, documentation, design systems, and production deployment planning.",
+  "version": "1.19.0",
+  "description": "A cohesive workflow bundle for project setup, source-of-truth development, reviewable multi-slice delivery, UI/UX concept implementation, testing, debugging, performance, documentation, design systems, and production deployment planning.",
   "author": {
     "name": "Ân Vũ",
     "email": "8651688+thienanblog@users.noreply.github.com"
@@ -13,8 +13,8 @@
     "claude-code",
     "agent-skills",
     "project-development-mindset",
+    "run-reviewable-subtask-loop",
     "testing-verification",
-    "debugging-workflow",
-    "performance-optimization"
+    "debugging-workflow"
   ]
 }
