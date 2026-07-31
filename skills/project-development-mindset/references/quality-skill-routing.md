@@ -10,6 +10,25 @@ Stay in the general workflow when:
 - Testing, debugging, or performance is only a small verification step.
 - The main risk is understanding project source of truth, reuse, file boundaries, or documentation alignment.
 
+## Switch To `run-reviewable-subtask-loop`
+
+Use `run-reviewable-subtask-loop` when the task centers on:
+
+- Executing a large plan, architecture migration, refactor, or feature roadmap
+  as multiple dependent slices.
+- Choosing coherent subtask boundaries that are substantial enough to code,
+  review, and test meaningfully without mixing unrelated responsibilities.
+- Creating atomic locally reviewed commits and last-known-good integration
+  checkpoints.
+- Recovering by rebuilding an invalid slice and its dependent suffix.
+- Budgeting local slice, phase, and final verification while reserving remote CI
+  for the aggregate review request.
+- Resuming a partially completed multi-slice delivery from branches, commits,
+  and repository records.
+
+Stay in `project-development-mindset` for a normal task whose review and recovery
+value does not justify multiple checkpoints.
+
 ## Switch To `testing-verification`
 
 Use `testing-verification` when the task centers on:
@@ -59,5 +78,7 @@ Use `testing-verification` too when screenshot comparison, acceptance criteria, 
 For broad tasks:
 
 1. Use `project-development-mindset` to establish source of truth, reuse, and file boundaries.
-2. Use the specialized skill for the deepest risk area.
-3. Return to `project-development-mindset` for documentation, project memory, and final reporting.
+2. Use `run-reviewable-subtask-loop` to coordinate delivery when the work needs
+   multiple independently recoverable slices.
+3. Use the specialized skill for the deepest risk area.
+4. Return to `project-development-mindset` for documentation, project memory, and final reporting.

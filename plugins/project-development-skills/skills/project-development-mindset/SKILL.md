@@ -34,6 +34,11 @@ Before using an optional skill:
 
 Optional skills to check before use:
 
+- `run-reviewable-subtask-loop`: use for large plans, migrations, refactors, or
+  roadmaps that need right-sized, coherent coding/review/testing slices,
+  last-known-good checkpoints, dependent-suffix recovery, aggregate
+  verification, and one final review request. Fallback: use the general
+  workflow with explicit dependency and recovery boundaries.
 - `documentation-guidelines`: use for feature, module, backend, API, workflow, and cross-repository documentation. Fallback: use the documentation rules below.
 - `design-system-generator`: use for creating or updating `docs/DESIGN_SYSTEM.md`. Fallback: create a practical design system document manually.
 - `agents-md-generator`: use for creating or updating `AGENTS.md`, `CLAUDE.md`, or equivalent project memory files. Fallback: create or update those files manually.
@@ -105,6 +110,10 @@ If confidence is low:
 
 Read `references/quality-skill-routing.md` when deciding whether to stay in this general workflow or switch to a specialized quality skill.
 
+- Use `run-reviewable-subtask-loop` for large multi-slice plans, migrations,
+  refactors, or roadmaps that need neither tiny nor over-broad subtasks, atomic
+  local checkpoints, dependent recovery, aggregate validation, and one final
+  review request.
 - Use `testing-verification` for test planning, automated checks, UI screenshot verification, visual comparison, CI test failures, and acceptance criteria.
 - Use `debugging-workflow` for unknown failures, broken behavior, logs, stack traces, regressions, flaky tests, and root-cause isolation.
 - Use `performance-optimization` for measured slowness, query issues, rendering lag, memory/CPU pressure, caching, payload size, bundle size, and slow builds/tests.
