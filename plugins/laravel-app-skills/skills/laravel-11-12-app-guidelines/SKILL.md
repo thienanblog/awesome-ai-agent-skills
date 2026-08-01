@@ -1,7 +1,6 @@
 ---
 name: laravel-11-12-app-guidelines
 description: Guidelines and workflow for working on Laravel 11 or Laravel 12 applications across common stacks (API-only or full-stack), including optional Docker Compose/Sail, Inertia + React, Livewire, Vue, Blade, Tailwind v4, Fortify, Wayfinder, PHPUnit, Pint, and Laravel Boost MCP tools. Use when implementing features, fixing bugs, or making UI/backend changes while following project-specific instructions (AGENTS.md, docs/).
-context: fork
 ---
 
 # Laravel 11/12 App Guidelines
@@ -9,6 +8,11 @@ context: fork
 ## Overview
 
 Apply a consistent workflow for Laravel 11/12 apps with optional frontend stacks, Dockerized commands, and Laravel Boost tooling.
+
+Run this skill in the main conversation. Do not spawn subagents, agent teams, or
+delegated parallel workers unless the user explicitly approves the proposed
+count and scope after being told that doing so can increase usage. Ask again
+before expanding an approved scope.
 
 ## Quick Start
 

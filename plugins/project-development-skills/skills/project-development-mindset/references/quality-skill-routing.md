@@ -10,9 +10,11 @@ Stay in the general workflow when:
 - Testing, debugging, or performance is only a small verification step.
 - The main risk is understanding project source of truth, reuse, file boundaries, or documentation alignment.
 
-## Switch To `run-reviewable-subtask-loop`
+## Optionally Propose `run-reviewable-subtask-loop`
 
-Use `run-reviewable-subtask-loop` when the task centers on:
+Do not switch to this skill automatically. Consider proposing it only during a
+user-initiated brainstorming or planning session before coding, when the
+discussion centers on:
 
 - Executing a large plan, architecture migration, refactor, or feature roadmap
   as multiple dependent slices.
@@ -26,8 +28,17 @@ Use `run-reviewable-subtask-loop` when the task centers on:
 - Resuming a partially completed multi-slice delivery from branches, commits,
   and repository records.
 
-Stay in `project-development-mindset` for a normal task whose review and recovery
-value does not justify multiple checkpoints.
+Present the proposal as optional and use the skill only after the user
+explicitly requests or accepts it. If the user declines it, stay in
+`project-development-mindset` and use a normal proportionate plan.
+
+Do not propose, load, or use `run-reviewable-subtask-loop` for an ordinary
+coding request with clear requirements and no prior user-requested brainstorming
+or implementation discussion. The agent's own internal planning does not count
+as a user-initiated brainstorm. Subtask boundaries also do not authorize
+subagents. Before any delegation, explain that it can increase usage and ask the
+user to approve the proposed agent count and scope; ask again before expanding
+that scope.
 
 ## Switch To `testing-verification`
 
@@ -78,7 +89,9 @@ Use `testing-verification` too when screenshot comparison, acceptance criteria, 
 For broad tasks:
 
 1. Use `project-development-mindset` to establish source of truth, reuse, and file boundaries.
-2. Use `run-reviewable-subtask-loop` to coordinate delivery when the work needs
-   multiple independently recoverable slices.
+2. During user-initiated brainstorming before coding, optionally propose
+   `run-reviewable-subtask-loop` when the work needs multiple independently
+   recoverable slices. Use it only after explicit user acceptance; otherwise
+   continue with the general workflow.
 3. Use the specialized skill for the deepest risk area.
 4. Return to `project-development-mindset` for documentation, project memory, and final reporting.

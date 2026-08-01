@@ -67,7 +67,8 @@ function validateSkill(skillName) {
     return null;
   }
 
-  const frontmatter = parseFrontmatter(fs.readFileSync(skillMdPath, 'utf-8'));
+  const skillContent = fs.readFileSync(skillMdPath, 'utf-8');
+  const frontmatter = parseFrontmatter(skillContent);
 
   if (!frontmatter) {
     error(`Skill "${skillName}": SKILL.md has no valid YAML frontmatter`);
@@ -84,6 +85,21 @@ function validateSkill(skillName) {
 
   if (Object.prototype.hasOwnProperty.call(frontmatter, 'author')) {
     error(`Skill "${skillName}": Remove "author" from frontmatter; this repository no longer tracks skill authors`);
+  }
+
+  if (String(frontmatter.context || '').toLowerCase() === 'fork' || frontmatter.agent) {
+    error(`Skill "${skillName}": Remove subagent execution frontmatter ("context: fork"/"agent"); skills must run in the main conversation unless the user explicitly approves subagents at runtime`);
+  }
+
+  const hasSubagentConsentGate = [
+    /main\s+conversation/i,
+    /increase\s+usage|usage\s+impact/i,
+    /proposed\s+(?:agent\s+)?count\s+and\s+scope/i,
+    /ask\s+again\s+before\s+expanding|expanding\s+(?:an\s+|the\s+)?approved\s+scope\s+requires\s+fresh\s+approval/i
+  ].every(pattern => pattern.test(skillContent));
+
+  if (!hasSubagentConsentGate) {
+    error(`Skill "${skillName}": Add a subagent consent gate that keeps work in the main conversation by default, warns that delegation can increase usage, requires approval for the proposed count and scope, and requires fresh approval before expansion`);
   }
 
   if (frontmatter.name && frontmatter.name !== skillName) {
