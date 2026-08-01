@@ -7,6 +7,11 @@ description: Reproduce, isolate, and fix software bugs without guessing. Use whe
 
 Use this skill when the task starts from a failure or unexplained behavior. Preserve business intent, isolate the smallest failing case, and fix the confirmed cause.
 
+Run this skill in the main conversation. Do not spawn subagents, agent teams, or
+delegated parallel workers unless the user explicitly approves the proposed
+count and scope after being told that doing so can increase usage. Ask again
+before expanding an approved scope.
+
 ## Operating Rules
 
 - Reproduce before fixing when possible.

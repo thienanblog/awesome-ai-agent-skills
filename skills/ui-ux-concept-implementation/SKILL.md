@@ -9,6 +9,11 @@ description: Implement frontend UI/UX from user-approved concepts, mockups, scre
 
 Use this skill to turn a selected visual direction into working UI while keeping concept decisions traceable, project-local, and verifiable in a real browser.
 
+Run this skill in the main conversation. Do not spawn subagents, agent teams, or
+delegated parallel workers unless the user explicitly approves the proposed
+count and scope after being told that doing so can increase usage. Ask again
+before expanding an approved scope.
+
 ## Source Of Truth
 
 - Start from the existing project instructions, design system, routes, components, tokens, global styles, assets, and UI conventions.

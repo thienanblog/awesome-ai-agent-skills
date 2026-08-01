@@ -7,6 +7,11 @@ description: Plan, add, repair, and run tests and verification for software chan
 
 Use this skill when testing or verification is a meaningful part of the task. Prefer project evidence over generic test advice, and verify behavior at the narrowest reliable level before broadening.
 
+Run this skill in the main conversation. Do not spawn subagents, agent teams, or
+delegated parallel workers unless the user explicitly approves the proposed
+count and scope after being told that doing so can increase usage. Ask again
+before expanding an approved scope.
+
 ## Operating Rules
 
 - Read project instructions, docs, existing test conventions, package scripts, CI config, and nearby tests before adding or changing tests.

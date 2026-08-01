@@ -18,6 +18,11 @@ Use this skill at the start of programming work. Treat it as an execution contra
 - Keep source of truth clear. Do not duplicate business rules, design rules, configuration, or project instructions across multiple places without a reason.
 - Keep files cohesive. Do not combine page layout, domain logic, data access, validation, styling, test helpers, and design primitives in one file when the project has clearer boundaries.
 - Do not move, delete, rename, or broadly restructure important files without user confirmation.
+- Run in the main conversation by default. Before spawning any subagent, agent
+  team, or delegated parallel worker, explain that it can increase usage and
+  ask the user to approve the proposed count and scope. Never infer approval
+  from task size, complexity, time pressure, internal planning, or a skill's
+  instructions. Ask again before expanding an approved scope.
 - Stop when the requested behavior works, proportionate checks pass, and no concrete requirement or observed risk justifies more work.
 - Ask only when the decision is risky, destructive, ambiguous after inspection, related to credentials, production, billing, database migrations, deployment, or major architecture.
 - Explain important technical decisions in plain language when the user may need the reasoning.
@@ -34,11 +39,14 @@ Before using an optional skill:
 
 Optional skills to check before use:
 
-- `run-reviewable-subtask-loop`: use for large plans, migrations, refactors, or
-  roadmaps that need right-sized, coherent coding/review/testing slices,
-  last-known-good checkpoints, dependent-suffix recovery, aggregate
-  verification, and one final review request. Fallback: use the general
-  workflow with explicit dependency and recovery boundaries.
+- `run-reviewable-subtask-loop`: do not use by default. During a
+  user-initiated brainstorming or planning session before coding, this skill
+  may be proposed as an optional delivery workflow for a large plan, migration,
+  refactor, or roadmap that genuinely needs multiple recoverable slices. Use it
+  only when the user explicitly requests it or explicitly accepts the proposal.
+  Do not propose, load, or use it for an ordinary coding request with clear
+  requirements and no prior user-requested brainstorming or implementation
+  discussion. If it is declined or unavailable, stay in the general workflow.
 - `documentation-guidelines`: use for feature, module, backend, API, workflow, and cross-repository documentation. Fallback: use the documentation rules below.
 - `design-system-generator`: use for creating or updating `docs/DESIGN_SYSTEM.md`. Fallback: create a practical design system document manually.
 - `agents-md-generator`: use for creating or updating `AGENTS.md`, `CLAUDE.md`, or equivalent project memory files. Fallback: create or update those files manually.
@@ -110,10 +118,13 @@ If confidence is low:
 
 Read `references/quality-skill-routing.md` when deciding whether to stay in this general workflow or switch to a specialized quality skill.
 
-- Use `run-reviewable-subtask-loop` for large multi-slice plans, migrations,
-  refactors, or roadmaps that need neither tiny nor over-broad subtasks, atomic
-  local checkpoints, dependent recovery, aggregate validation, and one final
-  review request.
+- Do not switch automatically to `run-reviewable-subtask-loop`. During a
+  user-initiated brainstorming or planning session before coding, you may
+  propose it as an optional workflow for a large multi-slice plan, migration,
+  refactor, or roadmap. Use it only after the user explicitly requests or
+  accepts it. Do not propose, load, or use it for a normal coding task whose
+  requirements are clear and that has no preceding user-requested brainstorm or
+  implementation discussion.
 - Use `testing-verification` for test planning, automated checks, UI screenshot verification, visual comparison, CI test failures, and acceptance criteria.
 - Use `debugging-workflow` for unknown failures, broken behavior, logs, stack traces, regressions, flaky tests, and root-cause isolation.
 - Use `performance-optimization` for measured slowness, query issues, rendering lag, memory/CPU pressure, caching, payload size, bundle size, and slow builds/tests.
@@ -140,6 +151,8 @@ Read `references/quality-skill-routing.md` when deciding whether to stay in this
 - For substantial tasks, create a short plan that names likely files, reusable surfaces, and verification strategy.
 - Keep the plan reversible and scoped.
 - For non-developers, explain the plan in plain language.
+- Do not treat this routine implementation plan as a user-initiated brainstorm
+  or as permission to activate `run-reviewable-subtask-loop`.
 
 ### 4. Implement
 

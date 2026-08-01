@@ -9,6 +9,11 @@ description: Design, verify, and refactor admin dashboard, internal dashboard, c
 
 Use this skill to build or evolve dashboard-style management interfaces with office-style structure, strong visual hierarchy, and reusable composition while keeping the result portable across frameworks and component libraries.
 
+Run this skill in the main conversation. Do not spawn subagents, agent teams, or
+delegated parallel workers unless the user explicitly approves the proposed
+count and scope after being told that doing so can increase usage. Ask again
+before expanding an approved scope.
+
 Activate this skill only for admin dashboards, internal dashboards, back-office consoles, reporting systems, customer/user management systems, CRM/ERP-style management pages, or similarly operational products where users repeatedly scan, filter, compare, edit, approve, or manage records.
 
 Do not activate this skill for general UI/UX polish, marketing pages, landing pages, portfolios, brand sites, editorial sites, ecommerce product pages, games, consumer app screens, or one-off visual redesigns unless the user explicitly says the work is for an admin, dashboard, internal tool, back-office, or management system.

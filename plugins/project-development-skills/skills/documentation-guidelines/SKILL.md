@@ -1,7 +1,6 @@
 ---
 name: documentation-guidelines
 description: Create, reorganize, or update documentation for monorepos or single-project repos using root docs indexes, unique repo/module/feature identifiers, repo-owned detailed docs, cross-repo relationship maps, machine-readable frontmatter, API contracts, workflows, runbooks, testing, and debugging guidance.
-context: fork
 ---
 
 # Documentation Guidelines
@@ -11,6 +10,11 @@ context: fork
 Produce documentation that is easy to locate, owned by the correct repo/module/feature, and safe to use as a source of truth. Use this skill for monorepos and single-project repos when creating, reorganizing, or updating architecture docs, module docs, feature docs, API contracts, workflows, runbooks, testing notes, or debugging guidance. Prefer searchable filenames with explicit suffixes over repeated `README.md` files for detailed module docs.
 
 Apply the workflow directly unless the repository has newer explicit agent instructions or a newer docs index that conflicts.
+
+Run this skill in the main conversation. Do not spawn subagents, agent teams, or
+delegated parallel workers unless the user explicitly approves the proposed
+count and scope after being told that doing so can increase usage. Ask again
+before expanding an approved scope.
 
 For detailed templates, read `references/documentation-guidelines.md`.
 
