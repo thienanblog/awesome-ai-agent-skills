@@ -14,6 +14,11 @@ This skill generates a project-specific **`DESIGN_SYSTEM.md`** that enforces con
 
 The design system must be **component-based**, portable, and practical for real implementation.
 
+Run this skill in the main conversation. Do not spawn subagents, agent teams, or
+delegated parallel workers unless the user explicitly approves the proposed
+count and scope after being told that doing so can increase usage. Ask again
+before expanding an approved scope.
+
 ## Interactive Workflow
 
 ### Required Questions

@@ -1,7 +1,6 @@
 ---
 name: vps-docker-traefik-deploy
 description: Plan and implement secure production deployments of Docker Compose applications on self-hosted VPS or cloud servers using Docker Engine, Docker Compose, Traefik, private registries, SSH tunnels, least-privilege users, persistent volumes, backups, DNS, and storage growth planning. Use when an AI agent needs to design, review, document, or execute a real deploy for websites, APIs, websockets, workers, databases, and object storage integrations on Ubuntu or Debian style Linux hosts.
-context: fork
 ---
 
 # VPS Docker Traefik Deploy
@@ -9,6 +8,11 @@ context: fork
 ## Overview
 
 Use this skill to turn an application stack into a real production deployment plan with secure host setup, reverse proxying, registry-based releases, private admin access, persistent storage, backups, and rollback.
+
+Run this skill in the main conversation. Do not spawn subagents, agent teams, or
+delegated parallel workers unless the user explicitly approves the proposed
+count and scope after being told that doing so can increase usage. Ask again
+before expanding an approved scope.
 
 Prefer Ubuntu LTS or Debian stable. Prefer immutable image tags. Prefer Traefik for public ingress and SSH tunnels for admin-only access.
 

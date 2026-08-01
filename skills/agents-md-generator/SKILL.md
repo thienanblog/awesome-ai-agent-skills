@@ -9,6 +9,11 @@ description: Generate or update AGENTS.md/CLAUDE.md files for AI coding agents t
 
 This skill helps you generate comprehensive instruction files (AGENTS.md with optional CLAUDE.md compatibility) that teach AI coding agents how to work effectively in your project. It combines automatic project scanning with interactive questions to create tailored guidelines.
 
+Run this skill in the main conversation. Do not spawn subagents, agent teams, or
+delegated parallel workers unless the user explicitly approves the proposed
+count and scope after being told that doing so can increase usage. Ask again
+before expanding an approved scope.
+
 **When to use this skill:**
 - Setting up a new project for AI-assisted development
 - Updating existing instruction files after project changes

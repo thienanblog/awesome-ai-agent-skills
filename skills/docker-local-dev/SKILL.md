@@ -1,7 +1,6 @@
 ---
 name: docker-local-dev
 description: Generate Docker Compose and Dockerfile configurations for local development through interactive Q&A. Supports single-app and monorepo PHP/Laravel, WordPress, Drupal, Joomla, Node.js, and Python stacks with live reload, dependency installer jobs, Nginx/reverse proxy routing, databases, Redis, queues, schedulers, and email testing. Use when designing local dev stacks that differ from optimized production images.
-context: fork
 ---
 
 # Docker Local Development Environment Generator
@@ -9,6 +8,11 @@ context: fork
 ## Overview
 
 This skill helps you create optimized Docker development environments for your projects. It generates `docker-compose.yml`, `Dockerfile`, and related configurations through an interactive, question-driven workflow.
+
+Run this skill in the main conversation. Do not spawn subagents, agent teams, or
+delegated parallel workers unless the user explicitly approves the proposed
+count and scope after being told that doing so can increase usage. Ask again
+before expanding an approved scope.
 
 **When to use this skill:**
 - Setting up a new Docker development environment

@@ -1,6 +1,6 @@
 ---
 name: run-reviewable-subtask-loop
-description: Split a large implementation plan, architecture migration, refactor, or feature roadmap into right-sized, coherent subtasks that are substantial enough to code, review, and test meaningfully yet narrow enough to roll back independently. Use when the user wants proportionate delivery boundaries, atomic last-known-good checkpoints, recovery by rebuilding an invalid dependent suffix, a resumable multi-slice loop, affected-surface aggregate testing with applicable automated E2E and manual browser review, minimal remote CI, one integration-to-base review request, or reuse of valid CI evidence when promoting an unchanged tree to the protected base.
+description: Deliver a large implementation plan, architecture migration, refactor, or feature roadmap as right-sized, coherent subtasks that are meaningful to code, review, test, and recover independently. Use only when the user explicitly requests this skill or workflow, or explicitly accepts it after an optional proposal during a user-initiated brainstorming or planning session before coding. Do not use for ordinary coding requests with clear requirements and no prior user-requested brainstorming or discussion. This skill does not authorize subagents; before any spawn, explain the usage impact and obtain explicit user approval for the proposed agent count and scope.
 ---
 
 # Run Reviewable Subtask Loop
@@ -10,6 +10,32 @@ integration branch. Do not use pull requests, merge requests, or equivalent
 review requests as the transport between subtasks. Open one aggregate review
 request only after the integrated tree is ready for the user's final review and
 any required remote CI.
+
+## Enforce the activation and delegation gate
+
+1. Apply this workflow only when the user explicitly invokes or requests it, or
+   explicitly accepts an optional proposal made during a user-initiated
+   brainstorming or planning session before coding.
+2. Treat brainstorming as user-initiated only when the user asked to brainstorm,
+   plan, explore, or discuss the implementation before coding. An agent's own
+   internal planning or a routine implementation plan does not qualify.
+3. Do not propose, load, or apply this workflow for an ordinary coding request
+   whose requirements are already clear and that has no preceding
+   user-requested brainstorming or implementation discussion. Use the
+   repository's normal development workflow instead.
+4. When this workflow is proposed during brainstorming, present it as optional
+   and wait for explicit acceptance before executing it. Silence, continued
+   discussion, or a general instruction to start coding is not acceptance. If
+   the user declines it, continue without this skill.
+5. Treat each subtask as a delivery and recovery boundary, not as a subagent or
+   delegated worker. This skill never grants permission to create subagents,
+   agent teams, or parallel delegated work.
+6. Perform every slice sequentially in the main conversation by default. Before
+   spawning any subagent, agent team, or delegated parallel worker, explain that
+   it can increase usage and ask the user to approve the proposed count and
+   scope. A current request that already explicitly approves that count and
+   scope is sufficient; a general instruction to complete the task is not. Ask
+   again before expanding the approved scope, and follow repository policy.
 
 ## Establish the contract
 

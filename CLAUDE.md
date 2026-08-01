@@ -120,14 +120,14 @@ Then run `npm run sync`. The generated `.claude-plugin/marketplace.json` looks l
   },
   "metadata": {
     "description": "Community-shared skills for AI coding agents",
-    "version": "1.19.0"
+    "version": "1.19.1"
   },
   "plugins": [
     {
       "name": "project-development-skills",
       "source": "./plugins/project-development-skills",
       "description": "A cohesive workflow bundle for project setup, source-of-truth development, reviewable multi-slice delivery, UI/UX concept implementation, testing, debugging, performance, documentation, design systems, and production deployment planning.",
-      "version": "1.19.0",
+      "version": "1.19.1",
       "author": {
         "name": "Ân Vũ",
         "email": "8651688+thienanblog@users.noreply.github.com"
@@ -147,7 +147,7 @@ The matching `plugins/project-development-skills/.claude-plugin/plugin.json`:
 ```json
 {
   "name": "project-development-skills",
-  "version": "1.19.0",
+  "version": "1.19.1",
   "description": "A cohesive workflow bundle for project setup, source-of-truth development, reviewable multi-slice delivery, UI/UX concept implementation, testing, debugging, performance, documentation, design systems, and production deployment planning.",
   "author": {
     "name": "Ân Vũ",
@@ -189,6 +189,11 @@ This repository uses GitHub Actions for automated validation and syncing:
   - Each skill folder has a valid `SKILL.md`
   - YAML frontmatter contains required `name` and `description` fields
   - YAML frontmatter does not contain `author`
+  - Skill frontmatter does not contain `context: fork` or `agent`, which would
+    execute the skill through a subagent without runtime user consent
+  - Every skill defaults to the main conversation, warns that delegation can
+    increase usage, requires approval for the proposed agent count and scope,
+    and asks again before expanding that approved scope
   - Every skill in `skills/` is assigned to exactly one plugin in `plugin-groups.json`, and each plugin has an `owner`, `displayName`, and `description`
   - Every generated file (both marketplaces, every `.claude-plugin/plugin.json` and `.codex-plugin/plugin.json`) byte-matches what `npm run sync` would write — this is what catches hand-edits and newer-only schema keys
   - Bundled skills under `plugins/<plugin-name>/skills/` match their canonical `skills/<skill-name>/` source
