@@ -1,531 +1,389 @@
 # Documentation Guidelines Reference
 
-Use this reference when creating or reorganizing documentation for a monorepo or single-project repository. The goal is to make documentation prompt-addressable: when a user names a repo, module, or feature, an AI agent can route to the correct source-of-truth docs without guessing.
+Use this reference when designing or reorganizing repository documentation. The
+objective is reliable routing with the lowest practical maintenance fan-out.
 
-## Core Model
+## Contents
 
-Root `docs/README.md` is the project documentation router. It maps natural-language prompt names to repo paths, module indexes, feature indexes, cross-repo relationships, and independent areas.
+- [Source-of-truth model](#source-of-truth-model)
+- [Recommended shapes](#recommended-shapes)
+- [Router templates](#router-templates)
+- [Canonical registry templates](#canonical-registry-templates)
+- [Owner document templates](#owner-document-templates)
+- [Impact examples](#impact-examples)
+- [Audit checklist](#audit-checklist)
 
-Detailed docs live with the owner:
+## Source-Of-Truth Model
 
-- In monorepos, detailed docs always live inside the owning repo, such as `apps/api/docs/...` or `services/worker/docs/...`.
-- In single-project repos, detailed docs live under root `docs/...`.
-- Root docs link, summarize, and coordinate. They do not duplicate implementation details owned by child repos.
+Use four distinct layers:
 
-## Recommended Folder Shapes
+| Layer | Owns | Must not own |
+| :--- | :--- | :--- |
+| Router | Links to canonical indexes and owner areas | Copied module/feature registries or implementation detail |
+| Registry | Stable entity identity and owner link | Feature behavior, task history, test transcripts |
+| Owner doc | Durable behavior or contract enforced by that owner | Full copies of another owner's rules |
+| Work evidence | Pull request, tests, CI, Git | Long-term product documentation |
+
+A progress hub owns only current state, a small priority list, and direct owner
+links. Pending scope normally belongs in the active task or issue. A tracked
+roadmap is optional and exists only for durable multi-milestone coordination.
+An optional delivery record owns a concise summary only for significant work.
+
+The default agent reading path is repository instructions, the progress hub
+when present, and one owner doc. Routers resolve ambiguity; maps, ADRs,
+runbooks, roadmaps, and delivery records are conditional context rather than
+mandatory pre-reading.
+
+## Recommended Shapes
 
 ### Monorepo
 
 ```text
 docs/
   README.md
-  naming-and-structure.md
+  project-progress.md
   relationship-map.md
-  runbooks/
-    README.md
   decisions/
-    README.md
+  runbooks/
 
-apps/api/
+apps/api/docs/
   README.md
-  docs/
-    README.md
-    modules.md
-    features.md
-    architecture/
-      README.md
-    runbooks/
-      README.md
-    modules/
-      order/
-        order-module.md
-        features/
-          approve-order-api-feature.md
-        workflows/
-          order-approval-workflow.md
-        runbooks/
-          debug-order-approval-runbook.md
-        order-testing.md
-    reference/
-      api-errors-reference.md
-
-apps/office-web/
-  README.md
-  docs/
-    README.md
-    modules.md
-    features.md
-    architecture/
-      README.md
-    runbooks/
-      README.md
-    modules/
-      order-management/
-        order-management-module.md
-        features/
-          approve-order-office-ui-feature.md
-        workflows/
-          order-approval-screen-workflow.md
-        order-management-testing.md
-```
-
-### Single Project
-
-```text
-docs/
-  README.md
-  naming-and-structure.md
   modules.md
   features.md
   architecture/
-    README.md
   modules/
     order/
       order-module.md
       features/
         approve-order-api-feature.md
       workflows/
-        order-approval-workflow.md
       runbooks/
-        debug-order-approval-runbook.md
-      order-testing.md
   reference/
-    api-errors-reference.md
-  runbooks/
-    README.md
 ```
 
-## File Naming Rules
+The same repo-local shape may be used for other apps. Do not add a root global
+module table when repo-level module indexes already exist.
 
-Use explicit suffixes for detailed docs so developers can find files quickly by name and do not need to open many repeated `README.md` files.
+### Single Project
 
-| Suffix | Use For | Example |
-| :--- | :--- | :--- |
-| `-module.md` | Module overview, ownership boundary, source paths, feature index | `order-module.md` |
-| `-feature.md` | One feature, workflow surface, or API contract | `approve-order-api-feature.md` |
-| `-workflow.md` | Multi-step business or UI flow larger than one feature doc | `order-approval-workflow.md` |
-| `-runbook.md` | Debugging, operations, maintenance, incident response | `debug-order-approval-runbook.md` |
-| `-reference.md` | Catalogs, legacy references, external mappings | `api-errors-reference.md` |
-| `-testing.md` | Test matrix, verification commands, test data rules | `order-testing.md` |
-| `-roadmap.md` | Plans, phases, milestones, rollout sequencing | `order-roadmap.md` |
+```text
+docs/
+  README.md
+  project-progress.md
+  modules.md
+  features.md
+  architecture/
+  modules/
+  runbooks/
+  reference/
+```
 
-Reserve `README.md` for root/repo entrypoints and intentional folder indexes such as `docs/README.md`, repo `docs/README.md`, `architecture/README.md`, and `runbooks/README.md`. Do not create `docs/modules/<module-id>/README.md` for new module docs when the project follows suffix naming.
+`features.md` is optional in either shape. Keep it only when it materially
+improves discovery.
 
-## Root `docs/README.md` Template
+## Router Templates
 
-````markdown
----
-name: Project Documentation Index
-description: Root documentation index for resolving repos, modules, features, ownership, and cross-repo relationships.
-version: 1.0.0
-last_updated: YYYY-MM-DD
-maintained_by: Engineering Team
-project_shape: monorepo
----
+### Root `docs/README.md`
 
-# Project Documentation Index
+```markdown
+# Project Documentation
 
-## How AI Agents Should Read This Project
+## Reading Workflow
 
-1. Match the user's prompt against the Repo Prompt Names table.
-2. Match the requested module against the Module Locator or repo-level module indexes.
-3. Match the requested feature against the repo-level feature indexes linked from this file.
-4. Read the owning repo docs index.
-5. Read the owning module docs.
-6. Read related docs marked as `Required` in the Relationship Map.
-7. Skip unrelated independent/tooling areas unless the prompt explicitly names them.
+1. Resolve the owning repository below.
+2. Open its module index.
+3. Read one owner document.
+4. Read relationship docs only when the change crosses an ownership boundary.
 
-## Repo Prompt Names
+## Repository Indexes
 
-| Prompt Name | Repo ID | Path | Type | Docs Index | Responsibility | Coordination Scope | Notes |
-| :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- |
-| API Repo | api | `apps/api` | Backend API | `apps/api/docs/README.md` | Owns API contracts, database rules, permissions, jobs, events | Required for web/mobile features that consume API contracts | Source of truth for order approval business rules |
-| Office Web Repo | office-web | `apps/office-web` | Frontend web app | `apps/office-web/docs/README.md` | Owns office UI workflows, route guards, client state, API consumption | Required when API changes affect office workflows | Consumes Order Module APIs |
-| Tooling Repo | tooling | `tools` | Internal tooling | `tools/docs/README.md` | Owns local scripts and developer utilities | None by default | No product runtime dependency |
+Include the Features column only for repositories that maintain a useful
+`features.md` index.
 
-## Repo Documentation Indexes
-
-| Repo Prompt Name | Repo ID | Module Index | Feature Index | Architecture Index | Runbooks | Notes |
-| :--- | :--- | :--- | :--- | :--- | :--- | :--- |
-| API Repo | api | `apps/api/docs/modules.md` | `apps/api/docs/features.md` | `apps/api/docs/architecture/README.md` | `apps/api/docs/runbooks/README.md` | Owns backend contracts |
-| Office Web Repo | office-web | `apps/office-web/docs/modules.md` | `apps/office-web/docs/features.md` | `apps/office-web/docs/architecture/README.md` | `apps/office-web/docs/runbooks/README.md` | Consumes API contracts |
-| Tooling Repo | tooling | `tools/docs/modules.md` | `tools/docs/features.md` | `tools/docs/architecture/README.md` | `tools/docs/runbooks/README.md` | Independent by default |
-
-## Module Locator
-
-| Repo Prompt Name | Module Name | Module ID | Owner Docs | Main Features | Related Areas | Coordination Required | Notes |
-| :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- |
-| API Repo | Order Module | order | `apps/api/docs/modules/order/order-module.md` | Order creation, approval, cancellation | Office Web Repo / Order Management Module | Yes | API contract owner |
-| Office Web Repo | Order Management Module | order-management | `apps/office-web/docs/modules/order-management/order-management-module.md` | Order list, order detail, approval UI | API Repo / Order Module | Yes | Consumer of API Repo order contracts |
-| Tooling Repo | Import Tools Module | import-tools | `tools/docs/modules/import-tools/import-tools-module.md` | CSV import helpers | None | No | Independent developer tooling |
-
-## Feature Indexes
-
-Root docs link to repo-level feature indexes instead of listing every feature.
-
-| Repo Prompt Name | Feature Index | Scope | Notes |
-| :--- | :--- | :--- | :--- |
-| API Repo | `apps/api/docs/features.md` | Backend/API features and API contract owners | Feature names and IDs must be globally unique |
-| Office Web Repo | `apps/office-web/docs/features.md` | Office web workflows and UI feature docs | Feature names and IDs must be globally unique |
-| Tooling Repo | `tools/docs/features.md` | Tooling features, scripts, and local automation | Independent unless explicitly related |
-
-## Cross-Repo Relationship Map
-
-| Source | Target | Level | Relationship | Contract Owner | Read When | Required Docs | Notes |
-| :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- |
-| Office Web Repo / Order Management Module | API Repo / Order Module | Required | Consumes REST API and error contracts | API Repo | Designing or changing order workflows | `apps/api/docs/modules/order/order-module.md` | UI must not duplicate API business rules |
-| API Repo / Order Module | Office Web Repo / Order Management Module | Recommended | Provides API behavior used by office workflows | API Repo | Changing payloads, statuses, permissions, errors | `apps/office-web/docs/modules/order-management/order-management-module.md` | Review consumer impact |
-| Tooling Repo / Import Tools Module | API Repo / Order Module | None | No runtime relationship | None | Only when prompt mentions import tools | None | Do not broaden scope automatically |
-
-## Independent Areas
-
-| Prompt Name | Path | Why Independent | Relationship Scope | When To Read |
+| Repo | Responsibility | Docs | Modules | Features (if used) |
 | :--- | :--- | :--- | :--- | :--- |
-| Tooling Repo | `tools` | Developer utilities only; no product runtime contract | None | Read only when prompt mentions tools, scripts, imports, or local developer workflow |
+| API | Backend contracts | `apps/api/docs/README.md` | `apps/api/docs/modules.md` | `apps/api/docs/features.md` |
+| Web | Client workflows | `apps/web/docs/README.md` | `apps/web/docs/modules.md` | `apps/web/docs/features.md` |
+
+## Shared Areas
+
+- [Progress](project-progress.md)
+- [Relationship map](relationship-map.md)
+- [Runbooks](runbooks/)
+- [Architecture decisions](decisions/)
 
 ## Update Rules
 
-- Add every new repo prompt name before using it in docs or prompts.
-- Add every new module to the root Module Locator and the owning repo `modules.md`.
-- Add every user-facing, API-facing, or workflow-critical feature to the owning repo `features.md`.
-- Keep canonical module names, module IDs, canonical feature names, and feature IDs unique across the whole project.
-- Update the Relationship Map when a feature consumes another repo's API, event, queue, storage, config, or shared package contract.
-- Mark independent areas explicitly instead of leaving relationships blank.
-````
+- Update this router only when a repository, canonical index, or shared area changes.
+- Do not copy module or feature rows here.
+- Apply the documentation impact gate before editing docs.
+```
 
-## Repo-Level `modules.md` Template
+### Repo `docs/README.md`
 
-````markdown
----
-name: API Repo Module Index
-description: Module index for API Repo.
-version: 1.0.0
-last_updated: YYYY-MM-DD
-maintained_by: Backend Team
-repo_prompt_name: API Repo
-repo_id: api
----
+```markdown
+# API Documentation
 
-# API Repo Module Index
+The API owns validation, authorization, persistence, and public contracts.
 
-| Module Name | Module ID | Owner Docs | Main Features | Related Areas | Coordination Required | Notes |
-| :--- | :--- | :--- | :--- | :--- | :--- | :--- |
-| Order Module | order | `modules/order/order-module.md` | Approve Order API | Office Web Repo / Order Management Module | Yes | API contract owner |
-````
+## Read Next
 
-## Repo-Level `features.md` Template
+- [Modules](modules.md)
+- [Features](features.md) (omit when this repository does not maintain a feature index)
+- [Architecture](architecture/)
+- [Runbooks](runbooks/)
 
-````markdown
----
-name: API Repo Feature Index
-description: Feature index for API Repo.
-version: 1.0.0
-last_updated: YYYY-MM-DD
-maintained_by: Backend Team
-repo_prompt_name: API Repo
-repo_id: api
----
+This router does not copy module or feature rows.
+```
 
-# API Repo Feature Index
+## Canonical Registry Templates
 
-| Feature Name | Feature ID | Module Name | Owner Doc | Status | Related Docs | Verification |
-| :--- | :--- | :--- | :--- | :--- | :--- | :--- |
-| Approve Order API | approve-order-api | Order Module | `modules/order/features/approve-order-api-feature.md` | Planned | `../../office-web/docs/modules/order-management/features/approve-order-office-ui-feature.md` | API tests, seed approval scenarios |
-````
+### `modules.md`
 
-## Module Doc Template
+```markdown
+# API Modules
 
-Place module docs at `docs/modules/<module-id>/<module-id>-module.md` inside the owning repo. Reserve `README.md` for root/repo entrypoints and intentional index folders.
+| Module | Module ID | Owner Doc | Responsibility | Required Relationships |
+| :--- | :--- | :--- | :--- | :--- |
+| Order Module | order | [Order module](modules/order/order-module.md) | Order state and API contracts | Web order workflow |
+```
 
-````markdown
+Update this file when the module is added, renamed, moved, archived, or
+removed, or when an indexed owner link, responsibility, or relationship
+changes. Do not update it for ordinary behavior changes not represented in the
+table.
+
+### Optional `features.md`
+
+```markdown
+# API Features
+
+| Feature | Feature ID | Module | Owner Doc | Status |
+| :--- | :--- | :--- | :--- | :--- |
+| Approve Order API | approve-order-api | Order Module | [Contract](modules/order/features/approve-order-api-feature.md) | Active |
+```
+
+Update this index when a feature is added, renamed, moved, archived, or
+removed, or when its indexed module, owner document, or status changes.
+
+Do not use this index if it only repeats a complete list already maintained in
+module docs or code-generated metadata.
+
+## Owner Document Templates
+
+### Module
+
+```markdown
 ---
 name: Order Module
-description: Backend order domain, API contracts, state transitions, jobs, and audit behavior.
-version: 1.0.0
-last_updated: YYYY-MM-DD
-maintained_by: Backend Team
-repo_prompt_name: API Repo
+description: Backend order ownership and stable contracts.
 repo_id: api
-module_name: Order Module
 module_id: order
-module_aliases:
-  - Orders
-related_docs:
-  - ../../features.md
-  - ../../../../office-web/docs/modules/order-management/order-management-module.md
+maintained_by: Backend Team
 ---
 
 # Order Module
 
 ## Purpose
 
-Describe what this module owns and why it exists.
+State the responsibility and business outcome.
 
 ## Ownership Boundary
 
 | Owned Here | Owned Elsewhere |
 | :--- | :--- |
-| Order API contracts, state transitions, persistence, audit rules | Office workflow rendering and local UI state |
+| State transitions, persistence, API rules | Web rendering and client state |
 
-## Prompt Names
+## Stable Source Paths
 
-| Type | Canonical | Aliases |
-| :--- | :--- | :--- |
-| Repo | API Repo | Backend API |
-| Module | Order Module | Orders |
-
-## Source Paths
-
-| Area | Paths | Notes |
-| :--- | :--- | :--- |
-| Routes | `routes/api.php` | Order endpoints |
-| Controllers | `app/Http/Controllers/OrderController.php` | API entrypoints |
-| Models | `app/Models/Order.php` | Order persistence |
-| Jobs | `app/Jobs/*Order*.php` | Async side effects |
+List only entry points future maintainers genuinely need.
 
 ## Public Contracts
 
-| Contract | Owner | Consumer | Doc |
-| :--- | :--- | :--- | :--- |
-| Order approval REST API | API Repo / Order Module | Office Web Repo / Order Management Module | `features/approve-order-api-feature.md` |
+Link to focused feature/contract docs.
 
-## Data Model
+## Operational Rules
 
-Use tables and Mermaid ERDs when they clarify relationships.
+Document migrations, jobs, cache, recovery, or environment requirements only
+when they form a durable contract.
 
-## Feature Index
+## Verification
 
-| Feature Name | Feature ID | Doc | Status |
-| :--- | :--- | :--- | :--- |
-| Approve Order API | approve-order-api | `features/approve-order-api-feature.md` | Planned |
+List stable commands or test suites, not one task's pass counts or raw output.
+```
 
-## Cross-Repo Relationships
+### Feature Or API Contract
 
-| Target | Level | Relationship | Required Docs | Notes |
-| :--- | :--- | :--- | :--- | :--- |
-| Office Web Repo / Order Management Module | Required | Consumes order approval contract | `../../../../office-web/docs/modules/order-management/order-management-module.md` | Review client impact when statuses, payloads, permissions, or errors change |
-
-## Local Development
-
-Document setup commands, seeders, migrations, environment assumptions, and data scenarios.
-
-## Testing
-
-Document focused unit, integration, contract, and E2E commands.
-
-## Debugging
-
-Document logs, tracing keys, common symptoms, and reproduction steps.
-
-## Known Constraints
-
-Document edge cases, historical decisions, migration risks, and compatibility limits.
-````
-
-## Feature Doc Template
-
-Place feature docs at `docs/modules/<module-id>/features/<feature-id>-feature.md` inside the owning repo.
-
-````markdown
+```markdown
 ---
 name: Approve Order API
-description: API contract and backend business rules for approving pending orders.
-version: 1.0.0
-last_updated: YYYY-MM-DD
-maintained_by: Backend Team
-repo_prompt_name: API Repo
+description: Contract for approving a pending order.
 repo_id: api
-module_name: Order Module
 module_id: order
-feature_name: Approve Order API
 feature_id: approve-order-api
-feature_aliases:
-  - Order Approval API
-related_docs:
-  - ../order-module.md
-  - ../../../features.md
-  - ../../../../../office-web/docs/modules/order-management/features/approve-order-office-ui-feature.md
+maintained_by: Backend Team
 ---
 
 # Approve Order API
 
-## Summary
+## Outcome And Scope
 
-Describe the feature and the business outcome in one paragraph.
+Describe what the contract guarantees and what it excludes.
 
-## Owner
+## Contract
 
-| Field | Value |
-| :--- | :--- |
-| Repo | API Repo |
-| Module | Order Module |
-| Feature | Approve Order API |
-| Maintainer | Backend Team |
+| Method | Path | Auth/Scope | Request | Response | Errors |
+| :--- | :--- | :--- | :--- | :--- | :--- |
+| POST | `/api/orders/{order}/approve` | `orders:approve` | Approval payload | Order resource | Stable error codes |
 
-## Status
+## Rules
 
-Planned, active, deprecated, or archived.
+Document validation, authorization, state transition, side effects, and
+compatibility that consumers cannot safely infer from code.
 
-## Scope
+## Consumers
 
-| Included | Excluded |
-| :--- | :--- |
-| Backend approval validation, state transition, audit, API response | Office UI layout and client-only rendering |
+Link to consumer workflows. Do not copy their UI details.
 
-## Actor Flow
+## Migration And Operations
 
-```mermaid
-flowchart TD
-  User["Office user"] --> Submit["Submit approval"]
-  Submit --> API["Approve order API"]
-  API --> Result["Order approved or rejected"]
+Include only when applicable.
 ```
 
-## System Flow
+### Consumer Workflow
 
-Document services, events, jobs, side effects, transactions, retries, and cache invalidation.
+```markdown
+# Order Approval Workflow
 
-## Contracts
+## Local Ownership
 
-| Method | Path | Guard/Scope | Request | Response | Errors | Notes |
-| :--- | :--- | :--- | :--- | :--- | :--- | :--- |
-| POST | `/api/orders/{order}/approve` | `orders:approve` | `ApproveOrderRequest` | `OrderResource` | `ERR_ORDER_LOCKED`, `ERR_INVALID_STATE` | Approves only pending orders |
+Own route, rendering, client state, accessibility, and interaction behavior.
 
-## Payloads And Responses
+## Consumed Contracts
 
-Provide canonical JSON examples for request, success response, validation failure, authorization failure, and business-rule failure.
-
-## Data Rules
-
-| Rule | API Behavior | Client Consumption |
+| Contract | Owner | Local usage |
 | :--- | :--- | :--- |
-| Order is not pending | API rejects approval with `ERR_INVALID_STATE` | Client must treat error code as source of truth |
+| Approve Order API | API / Order Module | Submit action and map stable errors |
 
-## Cross-Repo Impact
-
-| Consumer | Level | Required Docs | Impact |
-| :--- | :--- | :--- | :--- |
-| Office Web Repo / Order Management Module | Required | `../../../../../office-web/docs/modules/order-management/features/approve-order-office-ui-feature.md` | UI consumes status, permissions, and error codes |
-
-## Testing Plan
-
-| Test Type | Command | Scenarios |
-| :--- | :--- | :--- |
-| API integration | `php artisan test --filter=ApproveOrderTest` | Pending, locked, invalid state, permission denied |
-
-## Debugging Notes
-
-| Symptom | Where To Look | Notes |
-| :--- | :--- | :--- |
-| Approval rejected unexpectedly | API logs, audit entries, order state | Check state transition guard |
-
-## Rollout And Migration
-
-Document feature flags, migrations, backfills, compatibility, and rollback concerns.
-
-## Change History
-
-| Version | Date | Change |
-| :--- | :--- | :--- |
-| 1.0.0 | YYYY-MM-DD | Initial contract |
-````
-
-## Backend/API Contract Checklist
-
-Backend/API feature docs should include:
-
-- Purpose, scope, consumers, and ownership boundary.
-- Controllers, routes, requests, resources, models, services, jobs, providers, constants, and config.
-- Endpoint table with method, path, guard/scope, request, response, errors, and notes.
-- Required headers, payload examples, response examples, and error dictionary.
-- Permissions, token abilities, feature flags, rate limits, audit rules, and client consumption rules.
-- Data model, state transitions, events, queues, cache behavior, side effects, and external dependencies.
-- Local development, seed data, migrations, verification commands, troubleshooting hints, and test commands.
-
-## Client/Workflow Checklist
-
-Client/workflow docs should include:
-
-- Entry points, routes, screens, and workflow ownership.
-- API or realtime contracts consumed, linked to owner docs.
-- Local state/storage behavior and client-only constraints.
-- UX and rendering rules without duplicating backend business rules.
-- Compatibility notes, rollout notes, verification commands, and debugging notes.
-
-Client docs should use a consumption table instead of copying backend rules:
-
-| Consumed Contract | Owner | Local Usage | Required Client Behavior |
-| :--- | :--- | :--- | :--- |
-| `POST /api/orders/{order}/approve` | API Repo / Order Module | Submit approval action | Use API error codes as source of truth for blocked states |
-
-## Relationship Levels
-
-| Level | Meaning | AI Behavior |
-| :--- | :--- | :--- |
-| `Required` | Change may break another repo, contract, workflow, or test surface | Read before proposing or editing |
-| `Recommended` | Related context may affect UX, rollout, tests, or integration quality | Read for design, contract, workflow, or user-facing work |
-| `Optional` | Useful background only; not blocking | Mention as context and read only if the task needs it |
-| `None` | No expected coordination | Do not broaden scope unless the prompt explicitly asks |
-
-Use `Optional` only for background context. If a related doc can change contract behavior, rollout, tests, or user-facing behavior, use `Recommended` or `Required`.
-
-## AI Prompt Resolution Workflow
-
-When a user asks for design, implementation, debugging, or testing work:
-
-1. Read root `docs/README.md`.
-2. Resolve repo prompt name from the user prompt.
-3. Resolve module name or feature name. Canonical names and IDs are project-wide unique, so a named feature should identify one owner doc.
-4. If the prompt names both repo and module, trust that routing unless docs show ambiguity.
-5. Read the owning repo docs index.
-6. If the prompt only names a feature, use repo-level feature indexes linked from root `docs/README.md` to find its owner doc.
-7. Read the owning module `*-module.md`.
-8. Read existing feature docs if the feature already exists.
-9. Read relationship docs marked `Required`.
-10. For design work, also read testing/debug/runbook docs if listed by the module.
-11. If the prompt is ambiguous after reading indexes, ask one targeted question instead of guessing.
-
-Example prompt:
-
-```text
-I want to build order approval in API Repo, Order Module. Analyze and design the feature.
+Link to the backend contract instead of copying its validation and permission
+rules.
 ```
 
-Expected reading path:
+### Runbook
 
-| Step | File |
+```markdown
+# Order Recovery Runbook
+
+## Preconditions
+
+State target environment, authorization, backups, and non-destructive default.
+
+## Procedure
+
+Provide exact commands with expected safe outcomes.
+
+## Verification
+
+State how to prove recovery.
+
+## Rollback
+
+Provide a recoverable path and escalation boundary.
+```
+
+## Frontmatter Guidance
+
+Use only fields consumed by routing or automation. Avoid mechanical metadata.
+
+Recommended identity fields:
+
+```yaml
+---
+name: Human-readable title
+description: One-sentence owner and scope.
+repo_id: api
+module_id: order
+maintained_by: Backend Team
+---
+```
+
+Add `feature_id`, `status`, or `related_docs` only when they are useful.
+Do not add `version` or `last_updated` unless the document represents a
+real versioned contract or time-bounded information.
+
+## Impact Examples
+
+| Task | Expected docs fan-out |
 | :--- | :--- |
-| Resolve repo/module | `docs/README.md` |
-| API repo docs | `apps/api/docs/README.md` |
-| API feature index | `apps/api/docs/features.md` |
-| Order module docs | `apps/api/docs/modules/order/order-module.md` |
-| Existing order approval docs | `apps/api/docs/modules/order/features/approve-order-api-feature.md` if present |
-| Related office workflow | `apps/office-web/docs/modules/order-management/order-management-module.md` if Relationship Map says `Required` |
-| Debug/testing references | `apps/api/docs/modules/order/order-testing.md`, `apps/api/docs/modules/order/runbooks/debug-order-approval-runbook.md` if present |
+| Rename a private helper | 0 |
+| Add regression test for documented behavior | 0 |
+| Fix implementation to match documented validation | 0 |
+| Change one Customer workflow | 1 owner doc |
+| Add a public API field used by one client | API contract plus client doc only if local behavior changes |
+| Add a new module | Canonical module registry plus module owner doc; router only if its link structure changes |
+| Change a shared token contract | One design-system owner plus affected local note only when ownership changes |
+| Change migration/deploy procedure | Owning runbook |
+| Complete a small bug fix | No delivery record |
+| Complete a cross-app migration or production release | Optional significant delivery record |
 
-## Update Checklist
+## Audit Checklist
 
-When adding a new repo, module, feature, or cross-repo behavior:
+### Redundancy
 
-1. Update root `docs/README.md`.
-2. Update the owning repo `docs/README.md`.
-3. Update the owning repo `modules.md` or `features.md`.
-4. Update or create the owning module `*-module.md`.
-5. Create or update feature docs.
-6. Confirm canonical module and feature names/IDs are unique across the project.
-7. Add cross-repo relationships if contracts, workflows, events, jobs, shared packages, or data dependencies cross repo boundaries.
-8. Mark independent areas as `None` when they do not coordinate with product runtime behavior.
-9. Add testing and debugging notes close to the owning module/feature docs.
-10. Search for stale old paths, old prompt names, old module names, and old feature names.
-11. Verify every linked file exists.
-12. Confirm detailed docs use explicit suffix filenames: `*-module.md`, `*-feature.md`, `*-workflow.md`, `*-runbook.md`, `*-reference.md`, `*-testing.md`, or `*-roadmap.md`.
+- Does a root router copy rows already in repo indexes?
+- Does a repo README copy `modules.md` or `features.md`?
+- Does a naming guide list live module IDs already owned by a registry?
+- Does a consumer duplicate backend validation, permissions, or error rules?
+- Does a feature index contain implementation notes that belong in an owner doc?
+- Do notes and progress hubs both maintain current status?
+- Do completed plans duplicate PR and CI evidence?
+- Do archives or redirects exist only to preserve information already present
+  in Git history?
 
-## Markdown Style
+### Churn
 
-- Use frontmatter plus Markdown consistently.
-- Use tables for repo names, module indexes, feature indexes, relationships, endpoints, business rules, route maps, error dictionaries, testing matrices, and debugging symptom maps.
-- Use Mermaid for actor flows, system flows, state machines, and ERDs when helpful.
-- Keep Mermaid labels short. Wrap labels with punctuation in quotes.
-- Keep docs concise but complete enough for a future engineer to avoid guessing.
-- Delete obsolete text and stale references.
-- Link to source-of-truth docs instead of duplicating rules across consumers.
+- Which Markdown files change in most pull requests?
+- Are `version` and `last_updated` bumped without contract meaning?
+- Is a delivery record required for every task?
+- Is a root design system updated for app-local implementation details?
+- Does one ordinary code change require more than two docs edits?
+
+### Consolidation
+
+1. Name one owner for every duplicated fact.
+2. Replace copied tables and summaries with links.
+3. Keep one module registry per repo.
+4. Make feature registries optional or generated.
+5. Restrict progress updates to milestones.
+6. Move durable decisions from completed plans or handoff notes into their
+   owner docs or ADRs.
+7. Delete obsolete plans, notes, redirects, and transcripts when Git history
+   is sufficient; retain an archive only for a stated non-Git requirement.
+8. Keep exact task evidence in PRs and CI.
+9. Validate Markdown links and frontmatter references after consolidation.
+
+### Cleanup Decision
+
+| Document | Default action |
+| :--- | :--- |
+| Current owner contract or runbook | Keep and correct |
+| Router that uniquely resolves ownership | Keep, but minimize |
+| Active progress hub | Keep current state and a small priority list only |
+| Multi-milestone roadmap with active owner | Keep until its stated removal condition |
+| Completed or abandoned plan | Move durable decisions, remove references, delete |
+| Temporary handoff/context note | Absorb durable facts, then delete |
+| Monolithic delivery transcript | Delete when Git/PR history is sufficient |
+| Archive required for audit, legal, operations, or migration | Retain outside the default reading path and state why |
+
+## Verification Commands
+
+Use repository-provided checks first. Useful generic checks include:
+
+```sh
+rg --files -g '*.md'
+rg -n 'old-name|old-path|duplicate-id' .
+git diff --check
+```
+
+When a link checker exists, run it on the affected documentation paths. Do not
+introduce a new documentation tool solely for a one-time small edit.
