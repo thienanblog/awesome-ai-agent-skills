@@ -1,287 +1,273 @@
 ---
 name: documentation-guidelines
-description: Create, reorganize, or update documentation for monorepos or single-project repos using root docs indexes, unique repo/module/feature identifiers, repo-owned detailed docs, cross-repo relationship maps, machine-readable frontmatter, API contracts, workflows, runbooks, testing, and debugging guidance.
+description: Create, reorganize, audit, clean up, or update proportionate documentation for monorepos and single-project repositories. Use for documentation architecture, source-of-truth ownership, minimal routing indexes, module or feature docs, API contracts, workflows, runbooks, optional roadmaps and delivery records, documentation-churn reduction, and removing obsolete plans, notes, archives, or stale references that pollute agent context.
 ---
 
 # Documentation Guidelines
 
-## Overview
+## Goal
 
-Produce documentation that is easy to locate, owned by the correct repo/module/feature, and safe to use as a source of truth. Use this skill for monorepos and single-project repos when creating, reorganizing, or updating architecture docs, module docs, feature docs, API contracts, workflows, runbooks, testing notes, or debugging guidance. Prefer searchable filenames with explicit suffixes over repeated `README.md` files for detailed module docs.
+Keep documentation discoverable, owned, and proportionate. Update a document
+only when the durable source of truth it owns materially changes. Git, pull
+requests, tests, and CI already own task-level history and evidence.
 
-Apply the workflow directly unless the repository has newer explicit agent instructions or a newer docs index that conflicts.
+Repository instructions override this skill when they are newer or more
+specific.
 
-Run this skill in the main conversation. Do not spawn subagents, agent teams, or
-delegated parallel workers unless the user explicitly approves the proposed
-count and scope after being told that doing so can increase usage. Ask again
-before expanding an approved scope.
+Run this skill in the main conversation. Do not spawn subagents or delegated
+workers unless the user is told that delegation can increase usage and
+explicitly approves the proposed count and scope. Ask again before expanding
+an approved scope.
 
-For detailed templates, read `references/documentation-guidelines.md`.
+Read `references/documentation-guidelines.md` when creating a documentation
+architecture, using templates, or performing a broad reorganization.
 
-## Non-Negotiable Reading Rule
+## Documentation Impact Gate
 
-Before summarizing, moving, deleting, or editing documentation:
+Decide whether docs need to change before editing them.
 
-1. Read the complete target file, not just search hits.
-2. If root `docs/README.md` exists, read it first. It is the project routing index.
-3. Read the owning repo `README.md`, local agent guide, and repo `docs/README.md` when they exist.
-4. Read repo-level `modules.md` and `features.md` when resolving a module or feature.
-5. Read the owning module doc at `docs/modules/<module-id>/<module-id>-module.md` when it exists. If a project still uses legacy `docs/modules/<module-id>/README.md`, read it and consider migrating it when editing.
-6. Read all relationship docs marked `Required`.
-7. Do not infer business logic from filenames, folder names, translated labels, role display names, or stale references.
-8. If two docs appear duplicated, read both completely and identify the source-of-truth owner before deleting or merging.
+| Change | Default documentation action |
+| :--- | :--- |
+| Internal refactor, test-only change, typo, formatting, dependency refresh with no workflow change | No docs update |
+| Bug fix that restores already-documented behavior | No docs update |
+| Material user-visible behavior or module workflow change | Update one canonical owner doc |
+| Public API, schema, event, permission, validation, or cross-repo contract change | Update the contract owner and any affected relationship-map entry; update a consumer doc only for consumer-specific behavior |
+| Setup, command, environment, migration, seed, deployment, recovery, or operational change | Update the owning runbook/reference |
+| Stable cross-project convention or architecture decision | Update the owning guide or ADR |
+| Active planned scope, decision, status, or next slice changes | Update the active task or issue; update a durable roadmap only when the repository intentionally uses one |
+| Add, rename, move, archive, or remove a repo/module/feature | Update its one canonical registry and affected router links |
+| Significant release, migration, production change, cross-app feature, or explicit handoff | Add a delivery record only if the repository uses them |
+| Obsolete plan, handoff note, delivery transcript, redirect, or archive | Move any still-valid fact to its owner, remove stale references, then delete the obsolete file when Git history is sufficient |
 
-## Project Shape
+Do not create a docs edit merely to prove that docs were reviewed. When no
+durable source of truth changed, report that no documentation update was
+needed.
+
+## Reading Rule
+
+Use the smallest default context path: repository instructions, one current
+progress hub when present, and one owner document. Open a router only when the
+owner is unclear. Open maps, ADRs, references, runbooks, delivery records, and
+roadmaps only when the task specifically requires their contracts.
+
+Before editing, moving, merging, or deleting documentation:
+
+1. Read every target file completely.
+2. Read the nearest routing index needed to identify the owner.
+3. Read the canonical owner doc and relationships that can materially affect
+   the task.
+4. Read consumer docs only when their local behavior may change.
+5. If two docs appear duplicated, read both and identify the owner before
+   consolidating them.
+6. Do not recursively follow every link or require every root, repo, module,
+   and feature index for a small,
+   already-routed task.
+7. Do not infer business rules from filenames, folder names, translated labels,
+   or stale summaries.
+8. If routing remains ambiguous after reading the available indexes, ask one
+   targeted question before editing instead of guessing.
+
+## Documentation Shape
 
 ### Monorepo
-
-A repo is a monorepo when it has multiple independent apps/services/packages or deployable runtimes, such as `apps/*`, `services/*`, or `packages/*`.
-
-Use this documentation shape:
 
 ```text
 docs/
   README.md
-  naming-and-structure.md
+  project-progress.md
   relationship-map.md
-  runbooks/
   decisions/
+  runbooks/
 
 apps/<repo>/
-  README.md
   docs/
     README.md
     modules.md
     features.md
     architecture/
     modules/
-      order/
-        order-module.md
+      <module-id>/
+        <module-id>-module.md
         features/
-          approve-order-api-feature.md
+          <feature-id>-feature.md
         workflows/
-          order-approval-workflow.md
         runbooks/
-          debug-order-approval-runbook.md
-        order-testing.md
     reference/
-    runbooks/
-    memories/
-    archives/
 ```
 
-Root `docs/` is a routing and coordination area. Detailed monorepo docs always live inside the owning repository, such as `apps/api/docs/...`, not under root `docs/<repo-id>/...`.
+Root `docs/README.md` is a router. It links to repository indexes,
+cross-repository relationships, root-owned decisions, and shared runbooks. It
+must not copy every module or feature row.
 
-Root `docs/README.md` must link to each repo docs index, repo-level `modules.md`, and repo-level `features.md`. It must not copy every feature into a full global feature list.
+Each repo `docs/README.md` is also a router. It links to its canonical
+`modules.md`, optional `features.md`, architecture, references, and
+runbooks. It must not duplicate the module table.
+
+`modules.md` is the canonical module registry for the owning repo.
+`features.md` is optional; use it only when feature-level discovery provides
+real value. Do not maintain a second registry in a README or naming guide.
+
+Detailed docs live with the enforcement owner. A root-owned business doc is
+appropriate only when the root project genuinely owns that cross-repo
+contract, not merely to centralize information.
 
 ### Single Project
 
-A single-project repo may keep all docs under root `docs/`, but still uses the same index model:
+Use the same ownership model under root `docs/`. Keep one `modules.md` and,
+when useful, one `features.md`; do not repeat their rows in `docs/README.md`.
 
-```text
-docs/
-  README.md
-  naming-and-structure.md
-  modules.md
-  features.md
-  architecture/
-  modules/
-    order/
-      order-module.md
-      features/
-        approve-order-api-feature.md
-      workflows/
-        order-approval-workflow.md
-      runbooks/
-        debug-order-approval-runbook.md
-      order-testing.md
-  reference/
-  runbooks/
-  memories/
-  archives/
-```
+## Ownership
 
-Use one repo prompt name for routing, such as `Main Repo`, `API Repo`, or a domain-specific project name.
-
-## Routing Index Requirements
-
-Root `docs/README.md` is the first file an AI agent should use to resolve natural-language prompts. It must include:
-
-- Project shape: `monorepo` or `single-project`.
-- Repo prompt names and repo IDs.
-- Links to each repo docs index, `modules.md`, and `features.md`.
-- A root Module Locator for quick module resolution.
-- Cross-repo Relationship Map.
-- Independent/tooling areas.
-- AI reading workflow and update rules.
-
-Repo-level `modules.md` lists modules owned by that repo. Repo-level `features.md` lists features owned by that repo. Detailed module docs should use searchable suffix filenames such as `docs/modules/<module-id>/<module-id>-module.md`, not repeated module `README.md` files, unless a project explicitly requires folder landing pages.
-
-## File Naming Rules
-
-Use explicit suffixes for detailed docs so developers can find files quickly by name:
-
-| Suffix | Use For | Example |
-| :--- | :--- | :--- |
-| `-module.md` | Module overview, ownership boundary, source paths, feature index | `order-module.md` |
-| `-feature.md` | One feature, workflow surface, or API contract | `approve-order-api-feature.md` |
-| `-workflow.md` | Multi-step business or UI flow larger than one feature doc | `order-approval-workflow.md` |
-| `-runbook.md` | Debugging, operations, maintenance, incident response | `debug-order-approval-runbook.md` |
-| `-reference.md` | Catalogs, legacy references, external mappings | `api-errors-reference.md` |
-| `-testing.md` | Test matrix, verification commands, test data rules | `order-testing.md` |
-| `-roadmap.md` | Plans, phases, milestones, rollout sequencing | `order-roadmap.md` |
-
-Reserve `README.md` for root/repo entrypoints and intentional index folders. Do not create `docs/modules/<module-id>/README.md` for new module docs when the project follows suffix naming.
-
-## Global Uniqueness Rules
-
-These identifiers must be unique across the whole project:
-
-| Identifier | Example | Purpose |
-| :--- | :--- | :--- |
-| Repo prompt name | `API Repo` | Natural-language routing |
-| Repo ID | `api` | Stable machine-readable repo key |
-| Canonical module name | `Order Module` | Natural-language module routing |
-| Module ID | `order` | Stable machine-readable module key |
-| Canonical feature name | `Approve Order API` | Natural-language feature routing |
-| Feature ID | `approve-order-api` | Stable machine-readable feature key |
-
-When the same business concept appears in multiple repos, include owner or surface in the canonical name, such as `Approve Order API` and `Approve Order Office UI`.
-
-Aliases are allowed only when each alias maps to exactly one canonical repo, module, or feature. Remove or narrow ambiguous aliases.
-
-## Relationship Levels
-
-Use only these values in relationship maps:
-
-| Level | Meaning | AI Behavior |
-| :--- | :--- | :--- |
-| `Required` | Change may break another repo, contract, workflow, or test surface | Read before proposing or editing |
-| `Recommended` | Related context may affect UX, rollout, tests, or integration quality | Read for design, contract, workflow, or user-facing work |
-| `Optional` | Useful background only; not blocking | Mention as context and read only if the task needs it |
-| `None` | No expected coordination | Do not broaden scope unless the prompt explicitly asks |
-
-Independent/tooling repos must be marked `None` when they have no product runtime or contract dependency.
-
-## Ownership Rules
-
-Place documentation by enforcement owner:
-
-| Information Type | Source of Truth |
+| Information | Canonical owner |
 | :--- | :--- |
-| API payloads, responses, errors, permissions, validation, database rules | Owning backend/API module feature docs |
-| UI routes, client state, rendering behavior, form flow | Owning client module feature docs |
-| Background jobs, queues, schedules, retries | Owning worker/service module docs |
-| Shared package public APIs | Owning package docs |
-| Cross-repo dependency | Root relationship map plus owner docs |
-| Local scripts and developer tooling | Tooling repo docs |
+| API payloads, errors, permissions, validation, database rules | Backend/API contract owner |
+| UI routes, rendering, client state, form flow | Owning client module |
+| Jobs, queues, schedules, retries | Owning worker/service |
+| Shared package public APIs | Owning package |
+| Cross-repo dependency | Contract owner plus an affected relationship-map entry |
+| Setup, scripts, deployment, recovery | Owning runbook/tooling area |
+| Current priorities | One progress hub |
+| Pending work | Active plan or issue tracker |
+| Exact task implementation, review, commands, screenshots, CI output | Pull request, tests, CI, and Git |
+| Significant historical delivery summary | Optional delivery record |
 
-Consumer docs may summarize how they consume a contract, but must link to the owner doc instead of copying the full business rule.
+Consumer docs link to the owner and document only local consumption behavior.
+Do not copy complete backend rules into clients.
 
-## Workflow
+## Index Rules
 
-When creating or updating docs:
+- Keep exactly one registry for each entity type.
+- Update an index when an indexed entity or indexed field changes: add, rename,
+  move, archive, remove, owner link, responsibility, relationship, or status.
+- Root and repo READMEs route to canonical indexes instead of copying rows.
+- Prefer links over synchronized summaries.
+- If a feature index becomes an exhaustive copy of module docs, remove it or
+  generate it.
+- Delete obsolete redirects, task notes, completed plans, and historical
+  transcripts after preserving any durable owner facts. Keep an archive only
+  for a stated operational, audit, legal, or migration need; Git history is
+  normally sufficient.
+- Generate derived catalogs when practical; do not hand-maintain the same rows
+  in multiple files.
 
-1. Read root `docs/README.md` when present.
-2. Resolve the repo prompt name, module name, and feature name from the user prompt.
-3. If only a feature is named, use repo-level feature indexes linked from root `docs/README.md` to find its owner.
-4. Read the owning repo docs index, repo `modules.md`, repo `features.md`, owning module `*-module.md`, and existing feature docs.
-5. Read relationship docs marked `Required`; read `Recommended` docs for design, contract, workflow, and user-facing changes.
-6. Decide whether the work is an index update, module doc, feature doc, API contract, workflow, runbook, memory/convention, archive/move, or cross-repo relationship update.
-7. Create or update docs in the owning docs folder. Remove obsolete content instead of appending contradictory sections.
-8. Update root and repo indexes when adding, renaming, moving, or archiving repos/modules/features.
-9. Search for stale paths, old names, old IDs, and removed terms.
-10. Verify links resolve relative to the file location.
+## Naming
 
-If routing remains ambiguous after reading indexes, ask one targeted question instead of guessing.
+Use searchable suffixes for detailed docs:
+
+| Suffix | Purpose |
+| :--- | :--- |
+| `-module.md` | Module ownership and stable boundaries |
+| `-feature.md` | Material feature or contract |
+| `-workflow.md` | Multi-step business or UI flow |
+| `-runbook.md` | Operations, maintenance, incident, or debugging procedure |
+| `-reference.md` | Stable catalog, mapping, or compatibility reference |
+| `-testing.md` | Durable test strategy or environment rules |
+| `-roadmap.md` | Planned phases and milestones |
+| `-adr.md` | Architecture decision |
+
+Reserve `README.md` for intentional entrypoints and routers.
 
 ## Frontmatter
 
-Every new or materially rewritten Markdown doc must start with YAML frontmatter:
+Frontmatter is optional unless the repository uses it for routing, automation,
+or a genuinely versioned contract.
+
+Use stable identity fields when machine routing needs them:
 
 ```yaml
 ---
-name: Human Readable Title
-description: One sentence describing scope and owner.
-version: 1.0.0
-last_updated: YYYY-MM-DD
-maintained_by: Team Or Owner
+name: Order Module
+description: Backend order ownership and contracts.
+repo_id: api
+module_id: order
+maintained_by: Backend Team
 ---
 ```
 
-Module docs must also include routing fields:
+Do not require `version` or `last_updated` for ordinary Markdown. Git owns
+history. Use semantic versions only for real external or machine-consumed
+contracts, and dates only when temporal validity matters.
 
-```yaml
-repo_prompt_name: API Repo
-repo_id: api
-module_name: Order Module
-module_id: order
-module_aliases:
-  - Orders
-related_docs:
-  - ../../features.md
-```
+## Plans, Progress, And Delivery
 
-Feature docs must also include feature routing fields:
+- A progress hub contains current state, a small current priority list, and
+  owner routes. Update it by milestone, not by task.
+- Keep ordinary task planning in the active task, issue, or pull request.
+  Create a tracked roadmap only for durable multi-milestone coordination with
+  a named owner, active status, and removal/archive condition.
+- Delete completed or abandoned plans after moving still-valid decisions into
+  owner docs or ADRs. Do not retain them merely because they once existed.
+- Treat handoff notes and context snapshots as temporary. Delete them when the
+  receiving owner docs and current-state hub contain the durable facts.
+- Delivery records are optional. Use them for significant releases,
+  migrations, production/operations changes, cross-app contracts, large
+  features, or explicitly requested handoffs.
+- Do not require a delivery record for every bug fix, refactor, test, or small
+  task.
+- Do not keep a monolithic chronological delivery transcript in the default
+  documentation tree. Use Git and pull requests for detailed history.
+- Keep exact commands, raw output, screenshots, review discussion, and CI
+  evidence in the pull request or test system.
+- Do not add SQLite solely to track documentation deliveries. If structured
+  reporting becomes necessary, generate an untracked cache from Git-tracked
+  sources.
 
-```yaml
-repo_prompt_name: API Repo
-repo_id: api
-module_name: Order Module
-module_id: order
-feature_name: Approve Order API
-feature_id: approve-order-api
-feature_aliases:
-  - Order Approval API
-related_docs:
-  - ../order-module.md
-  - ../../../features.md
-```
+## Workflow
 
-Preserve existing version/history when migrating docs. Update `last_updated` and version when content changes materially.
+1. Run the documentation impact gate.
+2. Identify the one enforcement owner for each changed fact.
+3. Read the target and only the routing/relationship context needed to edit it
+   safely.
+4. Update the smallest set of canonical docs that would otherwise be wrong.
+5. Update indexes when an indexed entity or indexed field changes; do not churn
+   them for behavior that the table does not represent.
+6. Update relationship-map entries when a cross-repo dependency or required
+   integration context changes.
+7. Remove contradictory or duplicated text instead of appending another
+   summary.
+8. For cleanup, move only still-valid durable facts to their canonical owner,
+   then delete obsolete files instead of replacing them with archives by
+   default.
+9. Search for stale paths, names, IDs, Markdown links, and frontmatter
+   references affected by the change.
+10. Verify links and any repository-specific documentation checks.
+11. Report why docs changed, or why no docs update was needed.
 
-## Required Content
+## Content Guidance
 
-For backend/API contract docs, include when applicable:
+For an API contract, include only applicable durable information: purpose,
+ownership, endpoint or event shape, authentication, authorization, validation,
+errors, scoping, state transitions, side effects, compatibility, migration, and
+consumer links.
 
-- Purpose, scope, consumers, and ownership boundary.
-- Controllers/routes, requests, resources, models, services, jobs, providers, constants, and config.
-- Endpoint table, headers, payload examples, response examples, and error dictionary.
-- Permissions, token abilities, feature flags, rate limits, audit rules, and client consumption rules.
-- Data model, state transitions, events, queues, cache behavior, side effects, and external dependencies.
-- Local development, seed data, migrations, verification commands, troubleshooting hints, and test commands.
+For a client workflow, include only applicable durable information: entry
+points, route/screen ownership, consumed contracts, local state, client-only
+rules, accessibility, rollout, and troubleshooting.
 
-For client/workflow docs, include when applicable:
+For a runbook, optimize for safe execution: prerequisites, exact commands,
+target environment, non-destructive defaults, verification, rollback, and
+known failure modes.
 
-- Entry points, routes, screens, and workflow ownership.
-- API or realtime contracts consumed, linked to owner docs.
-- Local state/storage behavior and client-only constraints.
-- UX/rendering rules without duplicating backend business rules.
-- Compatibility, rollout, verification commands, and debugging notes.
-
-## Style Rules
-
-- Use frontmatter plus Markdown consistently.
-- Use tables for repo names, module indexes, feature indexes, relationships, endpoints, business rules, route maps, error dictionaries, testing matrices, and debugging symptom maps.
-- Use Mermaid for actor flows, system flows, state machines, and ERDs when helpful.
-- Keep Mermaid labels short. Wrap labels with punctuation in quotes.
-- Keep docs concise but complete enough for a future engineer to avoid guessing.
-- Delete obsolete text and stale references.
-- Link to source-of-truth docs instead of duplicating rules across consumers.
+Do not copy source inventories, test counts, or implementation details that are
+easier and more accurate to discover from code unless they are essential to a
+stable operational contract.
 
 ## Verification
 
-Before finishing:
+Before finishing, verify only what the change affects:
 
-- Confirm new or moved docs are discoverable from root `docs/README.md` and the owning repo indexes.
-- Confirm detailed docs use the project's required suffix naming, such as `*-module.md`, `*-feature.md`, `*-workflow.md`, `*-runbook.md`, `*-reference.md`, `*-testing.md`, and `*-roadmap.md`.
-- Confirm root docs do not contain detailed app/service contracts in a monorepo.
-- Confirm repo/module/feature names and IDs are unique.
-- Confirm independent/tooling areas have `None` relationship scope when appropriate.
-- Confirm new docs have required frontmatter.
-- Confirm links resolve relative to the file location.
-- Search for stale paths, renamed files, old prompt names, old module names, and old feature names.
+- Every new or moved doc is reachable from its canonical router or index.
+- The default reading path reaches one owner without loading unrelated history.
+- No entity was added to multiple manually maintained registries.
+- Owner and consumer docs do not duplicate the same contract.
+- Links, renamed paths, identifiers, and relationship-map entries remain valid.
+- Retained archives have a concrete non-Git purpose and are outside the default
+  reading path.
+- Frontmatter exists only when required by repository policy or automation.
+- The final documentation fan-out is proportionate to the changed source of
+  truth.
 
 ## Resources
 
-- `references/documentation-guidelines.md`: Detailed templates for root indexes, repo-level module/feature indexes, module docs, feature docs, API contracts, client workflows, testing, debugging, and cross-repo relationship maps.
+- `references/documentation-guidelines.md`: architecture examples, concise
+  templates, and an audit checklist for reducing documentation churn.
