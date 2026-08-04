@@ -161,7 +161,7 @@ Use $run-reviewable-subtask-loop to split this migration into right-sized, coher
 <!-- SKILLS_TABLE_START -->
 | Skill | Description |
 |-------|-------------|
-| [agents-md-generator](./skills/agents-md-generator) | Generate or update AGENTS.md/CLAUDE.md files for AI coding agents through auto-scanning project files combined with interactive Q&A. Supports multiple tech stacks, development environments, source-of-truth rules, reuse-first implementation guidance, testing/debugging/performance quality gates, UI visual QA guidance, and preserves customizations when updating. |
+| [agents-md-generator](./skills/agents-md-generator) | Create, audit, compact, or update repository instruction files such as AGENTS.md, nested AGENTS.md, AGENTS.override.md, and optional CLAUDE.md compatibility files. Use when an agent should deterministically scan instruction sources, project manifests, declared commands, CI, documentation, and tool-specific precedence before producing concise project guidance instead of a large generic repository manual. |
 | [debugging-workflow](./skills/debugging-workflow) | Reproduce, isolate, and fix software bugs without guessing. Use when the user reports errors, stack traces, crashes, regressions, logs, broken behavior with unknown cause, flaky behavior, incorrect business logic, UI bugs, integration failures, failing tests or CI failures with unclear root cause, or asks to debug, investigate, diagnose, or find the root cause of a problem. |
 | [design-system-generator](./skills/design-system-generator) | Generate or update a project-specific DESIGN_SYSTEM.md that enforces consistent UI/UX across SPAs, traditional server-rendered sites, and hybrid systems. Use for design tokens, reusable component rules, UI source-of-truth conventions, animation/transition/custom class rules, accessibility gates, visual QA, Playwright screenshot guidance, and production asset/manifest requirements. |
 | [docker-local-dev](./skills/docker-local-dev) | Generate Docker Compose and Dockerfile configurations for local development through interactive Q&A. Supports single-app and monorepo PHP/Laravel, WordPress, Drupal, Joomla, Node.js, and Python stacks with live reload, dependency installer jobs, Nginx/reverse proxy routing, databases, Redis, queues, schedulers, and email testing. Use when designing local dev stacks that differ from optimized production images. |
@@ -212,6 +212,7 @@ We welcome contributions! Here's a quick start:
    npm install
    npm run sync
    npm run validate
+   npm run test:agent-context
    ```
 6. Submit a pull request
 
@@ -221,7 +222,8 @@ See **[CONTRIBUTING.md](./CONTRIBUTING.md)** for detailed guidelines, validation
 
 - `plugin-groups.json` is the source of truth for plugin membership.
 - `npm run sync` regenerates `.claude-plugin/marketplace.json`, `.agents/plugins/marketplace.json`, `plugins/**`, and the generated tables in `README.md`.
-- `npm run validate` checks skill metadata and plugin assignments, rejects subagent-execution frontmatter such as `context: fork` or `agent`, requires the runtime subagent-consent gate in every skill, then regenerates every marketplace and plugin manifest and diffs it against what is committed.
+- `npm run validate` checks skill metadata, plugin assignments, release-version parity, generated manifests, and complete bundled-skill parity with canonical sources.
+- `npm run test:agent-context` runs regression coverage for deterministic framework/tool discovery, precedence, symlink safety, and native fallback depth.
 - Bump `version` in `package.json` before syncing a release; it is stamped into every plugin entry, and users only receive an update when it changes.
 - Pull request CI reruns `npm run sync` and fails if generated files are out of date.
 

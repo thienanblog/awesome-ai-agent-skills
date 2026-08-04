@@ -1,805 +1,180 @@
 ---
 name: agents-md-generator
-description: Generate or update AGENTS.md/CLAUDE.md files for AI coding agents through auto-scanning project files combined with interactive Q&A. Supports multiple tech stacks, development environments, source-of-truth rules, reuse-first implementation guidance, testing/debugging/performance quality gates, UI visual QA guidance, and preserves customizations when updating.
+description: Create, audit, compact, or update repository instruction files such as AGENTS.md, nested AGENTS.md, AGENTS.override.md, and optional CLAUDE.md compatibility files. Use when an agent should deterministically scan instruction sources, project manifests, declared commands, CI, documentation, and tool-specific precedence before producing concise project guidance instead of a large generic repository manual.
 ---
 
-# AGENTS.md / CLAUDE.md Generator
+# AGENTS.md Generator
 
-## Overview
+Create a small, project-specific instruction layer that agents can load on every task. Treat context as a limited budget: include durable rules that materially change agent behavior, and leave general engineering knowledge or detailed documentation out.
 
-This skill helps you generate comprehensive instruction files (AGENTS.md with optional CLAUDE.md compatibility) that teach AI coding agents how to work effectively in your project. It combines automatic project scanning with interactive questions to create tailored guidelines.
+Run this skill in the main conversation. Do not use subagents unless the user explicitly approves the proposed agent count and scope after being warned that delegation can increase usage. Ask again before expanding an approved scope.
 
-Run this skill in the main conversation. Do not spawn subagents, agent teams, or
-delegated parallel workers unless the user explicitly approves the proposed
-count and scope after being told that doing so can increase usage. Ask again
-before expanding an approved scope.
+## Core contract
 
-**When to use this skill:**
-- Setting up a new project for AI-assisted development
-- Updating existing instruction files after project changes
-- Standardizing AI agent behavior across team members
-- Migrating from one AI tool to another
+- Prefer `AGENTS.md` as the shared repository instruction file.
+- Generate only files the user requested. Ask before adding a compatibility file for another tool.
+- Keep the root file broadly applicable. Put subtree-specific rules in nested instruction files only when the target tool supports them.
+- Record verified facts, not assumptions or generic best practices.
+- Link to detailed project documentation with a task-specific read condition instead of copying it.
+- Never store secrets, credentials, private prompts, conversation transcripts, or the user's verbatim request.
+- Do not add tool configuration directories to `.gitignore` wholesale. Some contain intentionally versioned project configuration.
+- Do not modify global instruction files or user configuration while generating repository instructions.
 
-## Key Principle
+## Output budget
 
-**Do not duplicate specialized skills.** If a request falls into a specialized domain (e.g., Design System), delegate to the specialized skill when available.
+Use these defaults unless the repository already has a stricter convention:
 
-**Use `AGENTS.md` as the shared project manual.** `AGENTS.md` is plain Markdown with no required fields. Cover the details an agent needs to work effectively: project overview, build and test commands, code style, testing expectations, security notes, PR/commit rules, and deployment gotchas.
+- Root `AGENTS.md`: target 80-150 lines and at most 12 KiB.
+- Root hard review threshold: 200 lines or 16 KiB.
+- Nested instruction file: target at most 80 lines and include only differences from the parent scope.
+- `CLAUDE.md` compatibility file: normally one import line plus explicitly requested Claude-specific rules.
 
-**Encode source-of-truth and reuse-first rules.** Generated project instructions should tell agents to read local docs/config/source before coding, verify same-name files by path and imports, reuse existing components/services/helpers/tokens before creating new ones, and keep files cohesive instead of adding large mixed-concern files.
+If a generated or merged root file crosses either hard threshold, compact it before writing. Never justify an oversized file by raising Codex's `project_doc_max_bytes`; that setting is an escape hatch, not the default design.
 
-**Delegate quality depth to specialized skills when available.** Do not turn this skill into a full testing, debugging, or performance guide. Generated instructions should point agents to project docs and, when installed, `testing-verification`, `debugging-workflow`, and `performance-optimization` for deep work.
+## Workflow
 
-**Handle `AGENTS.override.md` as a Codex-specific override, not the default.** Codex checks `AGENTS.override.md` before `AGENTS.md` at both global and project-directory scopes, and includes at most one instruction file per directory. If both files exist in the same directory, Codex uses `AGENTS.override.md` and ignores that directory's `AGENTS.md`. Create or update `AGENTS.override.md` only when the user explicitly wants a Codex-specific or nested-directory override.
+### 1. Locate the instruction chain
 
-**Respect Codex instruction discovery.** Codex builds its instruction chain once per run/session: global instructions first, then project files from repository root down to the current working directory. The global Codex directory defaults to `~/.codex` and can be changed with `CODEX_HOME`. Files closer to the current directory appear later and override earlier guidance. Codex skips empty files and stops adding files when the combined size reaches `project_doc_max_bytes` (32 KiB by default). If `~/.codex/config.toml` defines `project_doc_fallback_filenames`, Codex checks those names after `AGENTS.override.md` and `AGENTS.md`.
+Resolve bundled resources relative to the directory containing this `SKILL.md`; never assume the skill exists under the target repository's `skills/` directory.
 
-**Use `CLAUDE.md` only as Claude Code compatibility by default.** Claude Code reads `CLAUDE.md`, not `AGENTS.md` directly, so a shared setup needs a `CLAUDE.md` file that imports `AGENTS.md`.
+Run the deterministic detector before manual exploration:
 
-## Quick Start
-
-To generate a new AGENTS.md file:
-1. Navigate to your project root
-2. Tell the AI agent: "Use the agents-md-generator skill to create an AGENTS.md file"
-3. Answer the interactive questions about your project
-4. Review and customize the generated file
-
-### Answering Questions (Convenient Formats)
-
-When this skill asks numbered questions with lettered options, users can answer in any style:
-
-- Short form (fast): `1a 2b 3c`
-- Mixed form: `1a 2b 3c 4b (also scan packages/*) 5d`
-- Full sentences: “Use medium scan depth and Docker Compose; service name is app.”
-
-Short form is never required; it is only provided for convenience.
-
-### Generation Modes
-
-**Interactive Mode (Default):**
-- Guides you through each phase with questions
-- Best for first-time setup or complex projects
-- Maximum customization
-
-**Quick Mode:**
-- Tell the AI: "Generate AGENTS.md in quick mode"
-- Skips all questions, uses auto-detection only
-- Best for experienced users or simple projects
-- Uses Medium scan depth by default
-- Generates all standard sections based on detection
-
-## Interactive Workflow
-
-### Phase 1: Initialization & Discovery
-
-**Check for existing files:**
-1. Look for `CLAUDE.md`, `AGENTS.md`, and `AGENTS.override.md` in the project root.
-2. If `AGENTS.md` exists, ask user: "I found an existing AGENTS.md. Would you like to:"
-   1. Update it (merge new content while preserving customizations)
-   2. Replace it (generate fresh, backup existing)
-   3. Cancel
-   - Reply examples (optional): `1` or `update`; `2` or `replace`; `3` or `cancel`
-3. If `CLAUDE.md` exists but `AGENTS.md` does not, ask user before changing it:
-   1. Migrate to `AGENTS.md` as the primary file and replace `CLAUDE.md` with a compatibility reference to `AGENTS.md`
-   2. Keep `CLAUDE.md` and `AGENTS.md` side by side with separate instructions for different AI agents
-   3. Cancel
-   - Reply examples (optional): `1` or `migrate`; `2` or `keep both`; `3` or `cancel`
-4. If both `AGENTS.md` and `CLAUDE.md` exist, ask whether `AGENTS.md` should become the single source of truth with `CLAUDE.md` referencing it, or whether the user intentionally wants both files to remain independent.
-5. If `AGENTS.override.md` exists, explain that Codex gives it priority over `AGENTS.md` in that directory. Ask whether to update the override, merge it back into `AGENTS.md`, or leave it as a Codex-specific override.
-
-**Determine primary file:**
-- Default: `AGENTS.md` as primary source of truth.
-- `AGENTS.override.md` is not the primary file. Use it only for Codex-specific overrides, temporary overrides, or nested directory rules that should supersede broader `AGENTS.md` guidance for Codex.
-- `CLAUDE.md` is a secondary compatibility file for Claude Code, because Claude Code reads `CLAUDE.md` rather than `AGENTS.md` directly. Do not use symbolic links; some AI agents may read both files and duplicate context.
-- When sharing the same instructions with Claude Code, make `CLAUDE.md` a normal text file whose first line is:
-  ```markdown
-  @AGENTS.md
-  ```
-- Additional Claude-specific instructions may be added below the import only when the user explicitly wants them.
-- If the project already has a meaningful `CLAUDE.md`, ask the user before replacing it. The user may prefer to keep both files with different guidance for different AI tools.
-
-### Phase 1b: Agent Tooling & System Prompt Alignment (Scripted)
-
-**Goal:** Detect AI tool instruction files, global system prompts, and MCP configs using scripts (not AI scanning) to save tokens and avoid missing overrides.
-
-**Run the detection script (best effort):**
-- bash/zsh: `bash skills/agents-md-generator/scripts/detect-agent-context --root .`
-- Windows cmd: `skills\agents-md-generator\scripts\detect-agent-context.cmd --root .`
-
-The script should report:
-- Project instruction files for AI tools (Copilot, Cursor, Cline, Kilo Code, Roo Code, OpenCode, Codex, Claude Code)
-- Global instruction files (e.g., `~/.claude/CLAUDE.md`, `~/.codex/AGENTS.override.md`, `~/.codex/AGENTS.md`, `~/.codex/config.toml`, `~/.roo/rules/`, `~/.kilocode/rules/`)
-- MCP config files and server names (from `.mcp.json`, `.roo/mcp.json`, `mcp_settings.json`, plus any `--mcp-path` entries)
-
-**If script is unavailable:**
-- Do a minimal manual check using the paths listed in `references/tech-stack-detection.md` under **AI Agent Tooling Detection**.
-
-**Warn the user about overrides:**
-- If `~/.claude/CLAUDE.md` or other global instruction files exist, explicitly warn that they can override project prompts.
-- Ask the user to review or adjust those system prompts to avoid conflicts with this repo.
-
-**Ask the user to confirm tool usage:**
-```
-I detected these AI tool instruction sources:
-- .github/copilot-instructions.md (GitHub Copilot)
-- .cursorrules (Cursor)
-- .clinerules or .clinerules/ (Cline)
-- .kilocoderules / .kilo/ / .kilocodemodes (Kilo Code)
-- .roo/rules/ / .roo/rules-* / .roorules* (Roo Code)
-- opencode.jsonc (OpenCode)
-- AGENTS.override.md / AGENTS.md (Codex project instructions)
-- ~/.codex/AGENTS.override.md / ~/.codex/AGENTS.md / ~/.codex/config.toml (Codex global instructions and config)
-- .claude/CLAUDE.md or ~/.claude/CLAUDE.md (Claude Code)
-
-Which of these do you actively use for this project, and should we align or ignore any of them?
+```bash
+"<skill-directory>/scripts/detect-agent-context" --root "<repository-root>" --format json
 ```
 
-**If MCP servers are detected:**
-- Ask whether they should be used in this project.
-- Capture a short purpose/usage note for each server.
+On Windows, run `"<skill-directory>\\scripts\\detect-agent-context.cmd"` with the same arguments. The launchers prefer the full Python detector and fall back to a native Bash or PowerShell text report when Python is unavailable. Use text output for a human-readable report. Add `--include-global` only when user-level instruction conflicts matter and reading those paths is permitted. Add repeatable `--config-path` values for nonstandard agent or MCP config locations. The detector reads only selected public manifests and reports paths for instruction/config files; it never reads environment files, credentials, arbitrary source files, or instruction contents.
 
-### Phase 1c: Skill Library Duplicate Scan (Scripted)
+Treat the report as an evidence index, not final authority. Verify commands and project rules in their cited source before writing them into persistent instructions. Framework and tool signals come from declared dependencies or explicit marker files; do not infer architecture from them.
 
-If a `skills/` folder exists, run the duplicate scan script to avoid copy-pasted skills:
-- bash/zsh: `bash skills/agents-md-generator/scripts/scan-skill-duplicates --skills-dir skills`
-- Windows cmd: `skills\agents-md-generator\scripts\scan-skill-duplicates.cmd --skills-dir skills`
+The detector indexes these relevant instruction sources:
 
-If duplicates are detected:
-- Recommend choosing one canonical folder under `skills/` and merging any unique content into it.
-- Do not recommend symbolic links for duplicate skill folders; agent scanners may count both paths as separate context.
-- If a duplicate only exists under `plugins/<plugin-name>/skills/`, treat it as a generated package copy. Edit the source under `skills/` and run `npm run sync`.
+- Root and nested `AGENTS.md` and `AGENTS.override.md` files.
+- `CLAUDE.md`, `CLAUDE.local.md`, and `.claude/rules/` when Claude Code compatibility matters.
+- `.github/copilot-instructions.md` and `.github/instructions/` when GitHub Copilot compatibility matters.
+- `.cursor/rules/` and legacy `.cursorrules` when Cursor compatibility matters.
+- Project-scoped agent configuration such as `.codex/config.toml` when present.
+- Other tool-specific files only when the project uses that tool.
 
-### Phase 2: Scan Depth Selection
+Read [references/tool-compatibility.md](references/tool-compatibility.md) when multiple agent tools are present or compatibility behavior affects the requested output.
 
-**Ask the user:**
-```
-What scan depth should I use to analyze your project?
+Determine which file actually applies at the current working directory. In Codex, `AGENTS.override.md` wins over `AGENTS.md` in the same directory, only one file is loaded per directory, and files closer to the working directory appear later in the instruction chain.
 
-1. Quick (approximately 30 seconds)
-   Scans: package.json, composer.json, docker-compose.yml, pyproject.toml,
-          Gemfile, go.mod, Cargo.toml, and other root config files
-   Best for: When you know your stack well and want fast generation
+### 2. Discover repository facts
 
-2. Medium (approximately 1-2 minutes) [RECOMMENDED]
-   Scans: Root configs + src/, app/, lib/, config/, routes/, components/,
-          pages/, views/, controllers/, models/, services/
-   Best for: Most projects - good balance of accuracy and speed
+Read local sources before asking questions:
 
-3. Deep (approximately 3-5 minutes)
-   Scans: Entire project tree including tests/, docs/, scripts/, all
-          subdirectories, hidden configs, and build artifacts
-   Best for: Complex projects, monorepos, or unfamiliar codebases
+1. Existing instruction files and repository documentation.
+2. Package manifests, lockfiles, runtime/version files, container or devcontainer configuration.
+3. CI workflows and scripts that define the real lint, test, type-check, build, and validation commands.
+4. Top-level source layout and the nearest representative modules.
+5. Tests, fixtures, code-generation rules, deployment notes, and security policies when relevant.
 
-Reply examples:
-- Short: `2` (or `1` / `3`)
-- With extra notes: `2 (also scan packages/*)`
-```
+Use the smallest scan that can establish reliable facts. Do not offer time-based “quick/medium/deep” menus. Ask a concise question only when an unresolved choice would materially change the output, such as the intended runtime environment or whether a second agent tool must be supported.
 
-**Scan actions per depth:**
+Read [references/discovery.md](references/discovery.md) for detector output guidance, the evidence checklist, and confidence rules.
 
-| Depth | Files Scanned | Directories Explored |
-|-------|---------------|---------------------|
-| Quick | Root configs only | None (root level) |
-| Medium | Configs + source headers | src/, app/, lib/, config/, routes/ |
-| Deep | All files | Full tree traversal |
+### 3. Decide what belongs in persistent instructions
 
-### Phase 3: Environment Detection
+Include a rule only if all are true:
 
-**Ask the user:**
-```
-What development environment does this project use?
+1. It is durable across many tasks.
+2. It is not obvious from a nearby standard config or common model knowledge.
+3. It changes what the agent should do, avoid, read, or verify.
+4. It can be written concretely enough to check.
 
-1. Docker Compose
-   - Commands run via: docker compose exec <service> <command>
-   - Example: docker compose exec app php artisan migrate
+Good content:
 
-2. Laravel Sail
-   - Commands run via: ./vendor/bin/sail <command>
-   - Example: ./vendor/bin/sail artisan migrate
+- Exact environment and commands when choosing the wrong command would fail or alter state.
+- The authoritative docs, schemas, generated files, or modules for a business area.
+- Non-obvious architecture boundaries and reuse requirements.
+- Repository-specific Git, testing, security, deployment, or approval rules.
+- Known generated files that must not be edited directly.
+- Platform limitations or checks that cannot be inferred from the manifest.
 
-3. Native/Host Machine
-   - Commands run directly on your machine
-   - Example: php artisan migrate
+Exclude:
 
-4. Dev Containers / Codespaces
-   - Commands run inside the container environment
+- Role personas such as “You are a senior engineer.”
+- Generic workflows, programming advice, framework tutorials, or exhaustive folder inventories.
+- Tool-detection reports, MCP server inventories, home-directory paths, or global prompt summaries.
+- Full design-system, testing, debugging, performance, deployment, or API documentation.
+- Status logs, roadmaps, completed work, original prompts, or task memory.
+- Rules already enforced automatically by formatters or CI unless the agent must run a specific command.
 
-5. Other (please describe)
-   - Specify your custom environment setup
+### 4. Choose the file layout
 
-Reply examples:
-- Short: `1` (or `2` / `3` / `4` / `5`)
-- Detailed: `1; main service is app; node runs in node service`
-```
+Default to one root `AGENTS.md`.
 
-**Follow-up questions based on selection:**
-- Docker: "What is the main service name? (e.g., app, web, php)"
-- Docker: "Do you have separate services for different runtimes? (e.g., app for PHP, node for JS)"
-- Native: "Do you use any version managers? (nvm, rbenv, pyenv, etc.)"
+Add a nested `AGENTS.md` when a subproject has meaningfully different commands or conventions and the target tools load nested files. Add a nested `AGENTS.override.md` only when Codex should ignore the sibling `AGENTS.md` for that directory. Keep common rules at the root and write only the delta in nested files.
 
-### Phase 4: Auto-Detection + Confirmation
-
-**Scan the project based on selected depth and detect:**
-
-1. **Backend Framework:**
-   - Laravel (composer.json + artisan)
-   - Express/Node (package.json + server files)
-   - Django/Flask (requirements.txt + manage.py/app.py)
-   - Rails (Gemfile + config/routes.rb)
-   - Spring Boot (pom.xml/build.gradle + @SpringBootApplication)
-
-2. **Frontend Framework:**
-   - Vue.js (package.json + .vue files)
-   - React (package.json + .jsx/.tsx files)
-   - Angular (angular.json)
-   - Svelte (svelte.config.js)
-   - Next.js/Nuxt.js (next.config.js/nuxt.config.ts)
-
-3. **Package Manager:**
-   - npm/yarn/pnpm/bun (package-lock.json/yarn.lock/pnpm-lock.yaml/bun.lockb)
-   - Composer (composer.lock)
-   - pip/poetry (requirements.txt/poetry.lock)
-
-4. **Testing Framework:**
-   - PHPUnit (phpunit.xml)
-   - Pest (pestphp/pest in composer.json)
-   - Jest (jest.config.js)
-   - Vitest (vitest.config.ts)
-   - pytest (pytest.ini/conftest.py)
-
-5. **Code Style/Linting:**
-   - Laravel Pint (pint.json)
-   - ESLint (.eslintrc.*)
-   - Prettier (.prettierrc.*)
-   - PHP CS Fixer (.php-cs-fixer.php)
-
-6. **Database:**
-   - MySQL/MariaDB (config references)
-   - PostgreSQL (config references)
-   - SQLite (database/*.sqlite)
-   - MongoDB (mongoose in package.json)
-
-7. **AI Agent Tooling (scripted detection):**
-   - GitHub Copilot (`.github/copilot-instructions.md`)
-   - Cursor (`.cursorrules`)
-   - Cline (`.clinerules` or `.clinerules/`)
-   - Kilo Code (`.kilocoderules`, `.kilo/`, `.kilocodemodes`, `.kilocode/config.json`)
-   - Roo Code (`.roo/rules/`, `.roo/rules-*`, `.roorules*`, `.roo/mcp.json`, `mcp_settings.json`)
-   - OpenCode (`opencode.jsonc`, `OPENCODE_CONFIG`)
-   - Codex (`AGENTS.override.md`, `AGENTS.md`, `~/.codex/AGENTS.override.md`, `~/.codex/AGENTS.md`, `~/.codex/config.toml`)
-   - Claude Code (`.claude/CLAUDE.md`, `~/.claude/CLAUDE.md`, `.mcp.json`)
-
-**Present findings to user:**
-```
-I detected the following tech stack:
-
-Backend:
-  - Laravel 11 (high confidence)
-  - PHP 8.3 (from composer.json)
-
-Frontend:
-  - Vue.js 3 with Composition API (high confidence)
-  - TailwindCSS v3 (from package.json)
-
-Testing:
-  - Pest PHP (from composer.json)
-  - Vitest (from package.json)
-
-Code Style:
-  - Laravel Pint (pint.json found)
-  - ESLint + Prettier (configs found)
-
-Environment:
-  - Docker Compose detected (docker-compose.yml)
-  - Services: app, mysql, redis
-
-Is this correct? Would you like to add or modify anything?
-```
-
-### Phase 4b: Optional Sections (Interactive Mode Only)
-
-**Ask the user about optional sections:**
-```
-Would you like to include any of these optional sections?
-
-1. CI/CD Configuration
-   - Detect: GitHub Actions, GitLab CI, CircleCI, Jenkins
-   - Include: Pipeline commands, deployment notes
-
-2. Git Workflow Guidelines
-   - Include: Branch naming, commit message format, PR guidelines
-   - Detect: .github/PULL_REQUEST_TEMPLATE.md, commitlint config
-
-3. Security Guidelines
-   - Include: Env file handling, secrets management, input validation
-   - Best practices for the detected stack
-
-4. API Documentation
-   - Detect: OpenAPI/Swagger specs, Postman collections
-   - Include: Documentation conventions and tooling
-
-5. Mobile App Guidelines (if detected)
-   - React Native / Flutter specific patterns
-   - Platform-specific considerations
-
-6. Monorepo Guidelines (if detected)
-   - Nx / Turborepo / Lerna workspace patterns
-   - Package management and dependencies
-
-7. System Prompt Alignment (if detected)
-   - Document global or editor-level prompts that can override project rules
-   - Remind contributors to review and align prompts
-
-8. MCP Servers & Tooling (if detected)
-   - List MCP servers and when to use them
-   - Include required environment variables or access notes
-
-9. Project Progress Memory (PROGRESS.md)
-   - Ask if the team wants `PROGRESS.md` for continuity across tasks
-   - Require an `Original Prompt` section so future runs can compare intent vs current status
-
-Select the sections you need (comma-separated numbers, or 'none' to skip):
-
-Reply examples:
-- Short: `none`
-- Multiple: `1,3,4`
-- With extra notes: `2,3,7 (also include branch naming rules)`
-```
-
-**Note:** In Quick Mode, these optional sections are skipped unless auto-detected with high confidence.
-
-### Phase 5: Section Generation
-
-Generate the following sections based on detected stack and user input:
-
-#### Section 1: Header & Role
-```markdown
-# AI Agent Guidelines & Repository Manual
-
-**Role:** You are an expert Senior [DETECTED_ROLE] and Technical Lead.
-You are responsible for the entire lifecycle of a task: understanding,
-planning, [STACK_SPECIFIC_RESPONSIBILITIES].
-```
-
-**Role detection rules:**
-- Laravel only → "Laravel Backend Engineer"
-- Vue/React only → "[Framework] Frontend Engineer"
-- Laravel + Vue/React → "Full-Stack Developer"
-- Node.js backend → "Node.js Backend Engineer"
-- Generic → "Software Engineer"
-
-#### Section 2: Auto-Pilot Workflow
-
-Generate the 6-step workflow cycle:
-1. **Discovery & Context** - What to read first, where to find docs, how to identify source of truth
-2. **Plan** - How to break down tasks, constraints to check
-3. **Documentation** - When to update docs, what format to use
-4. **Implementation** - Coding standards, reuse-first rules, file boundaries, patterns to follow
-5. **Verification & Refinement** - Testing, linting, manual checks, browser screenshots for UI
-6. **Self-Review** - Checklist of common mistakes to avoid
-
-Each step includes stack-specific instructions from templates.
-
-#### Section 3: Documentation & Knowledge Base
-
-List paths to important documentation:
-```markdown
-## Documentation & Knowledge Base
-
-You are expected to read and adhere to these single sources of truth:
-
-* **[Doc Type]**: `[path/to/doc.md]` ([Brief description])
-```
-
-**Auto-detect common paths:**
-- `docs/`, `documentation/`
-- `README.md`, `CONTRIBUTING.md`
-- `docs/api/`, `docs/architecture/`
-- `docs/DESIGN_SYSTEM.md`, `docs/testing*`, `docs/debugging*`, `docs/performance*`, feature docs, runbooks
-- **Important**: Do not list `CLAUDE.md` or `AGENTS.md` in this section. These files are already loaded by AI tools, and self-references waste context.
-- For new docs, prefer YAML frontmatter + Markdown body (headings, tables, examples) so metadata and content stay consistent.
-
-#### Section 4: Project Structure & Architecture
-
-Map the folder structure with purposes:
-```markdown
-## Project Structure & Architecture
-
-* **`[folder/]`**: [Purpose description]
-```
-
-**Common patterns to detect:**
-- MVC structure (controllers, models, views)
-- Feature-based modules
-- Domain-driven design
-- Component-based frontend
-
-#### Section 5: Development Environment
-
-Based on Phase 3 selection:
-```markdown
-## Development Environment
-
-### Container Commands (if Docker)
-* App container: `docker compose exec [service] <command>`
-
-### Host Commands
-* Git, file operations, IDE commands
-
-### Key Commands
-* Format: `[detected formatter command]`
-* Test: `[detected test command]`
-* Build: `[detected build command]`
-```
-
-#### Section 6: Coding Standards
-
-Based on detected stack:
-```markdown
-## Coding Standards (The "Gold Standard")
-
-* **Language**: [Language] [Version]
-* **Framework**: [Framework] [Version]
-* **Code Style**: [Style guide/tool]
-* **Strictness**: [Type hints, strict mode, etc.]
-```
-
-**Include anti-patterns section if applicable:**
-```markdown
-### Critical Anti-Patterns
-- [Stack-specific anti-patterns to avoid]
-- Creating new components/services/helpers/tokens before checking existing project equivalents
-- Adding large mixed-concern files that combine UI, data access, validation, business logic, and styling
-- Replacing project-specific business rules with generic assumptions
-```
-
-#### Section 7: Domain Specifics (Optional)
-
-If the project has specific domain rules detected:
-```markdown
-## Domain Specifics & Non-Negotiables
-
-* **[Rule Category]**: [Rule description]
-```
-
-**Common domain patterns:**
-- Multi-tenant applications
-- Permission/role systems
-- Localization requirements
-- Real-time features
-
-#### Section 8: CI/CD Configuration (Optional)
-
-If user selected or auto-detected:
-```markdown
-## CI/CD & Deployment
-
-### Detected Pipelines
-* **GitHub Actions**: `.github/workflows/`
-* **GitLab CI**: `.gitlab-ci.yml`
-
-### Pipeline Commands
-* Run tests: `[detected command]`
-* Build: `[detected command]`
-* Deploy: `[detected command]`
-
-### Deployment Notes
-* [Environment-specific notes]
-```
-
-#### Section 9: Git Workflow (Optional)
-
-If user selected:
-```markdown
-## Git Workflow
-
-### Branch Naming
-* Feature: `feature/<ticket>-<description>`
-* Bugfix: `fix/<ticket>-<description>`
-* Hotfix: `hotfix/<description>`
-
-### Commit Message Format
-```
-type(scope): description
-
-[optional body]
-```
-Types: `feat`, `fix`, `docs`, `style`, `refactor`, `test`, `chore`
-
-### Pull Request Guidelines
-* Reference ticket/issue in description
-* Ensure tests pass before requesting review
-* Keep PRs focused and reasonably sized
-```
-
-#### Section 10: Security Guidelines (Optional)
-
-If user selected:
-```markdown
-## Security Guidelines
-
-### Environment Variables
-* Never commit `.env` files (only `.env.example`)
-* Use secrets management for production
-* Rotate credentials regularly
-
-### Input Validation
-* Validate all user input at boundaries
-* Sanitize data before database queries
-* Use parameterized queries (ORM handles this)
-
-### Authentication & Authorization
-* [Stack-specific auth patterns]
-* Always verify permissions before actions
-```
-
-#### Section 11: API Documentation (Optional)
-
-If detected or user selected:
-```markdown
-## API Documentation
-
-### Documentation Location
-* OpenAPI Spec: `[path/to/openapi.yaml]`
-* Postman Collection: `[path/to/collection.json]`
-
-### Documentation Standards
-* Keep API docs in sync with implementation
-* Document all endpoints, request/response schemas
-* Include example requests and responses
-```
-
-#### Section 12: Mobile Guidelines (Optional)
-
-If React Native or Flutter detected:
-```markdown
-## Mobile Development
-
-### Platform Considerations
-* Test on both iOS and Android
-* Handle platform-specific UI patterns
-* Consider offline functionality
-
-### Build Commands
-* iOS: `[build command]`
-* Android: `[build command]`
-```
-
-#### Section 13: Monorepo Guidelines (Optional)
-
-If monorepo detected:
-```markdown
-## Monorepo Structure
-
-### Workspace Management
-* Package manager: [pnpm/yarn/npm workspaces]
-* Build tool: [Nx/Turborepo/Lerna]
-
-### Package Dependencies
-* Use workspace protocol for internal packages
-* Keep shared dependencies at root level
-
-### Commands
-* Build all: `[command]`
-* Build affected: `[command]`
-* Test affected: `[command]`
-```
-
-#### Section 14: System Prompt Alignment (Optional)
-
-If global or editor-level prompts were detected or the user requests it:
-```markdown
-## System Prompt Alignment
-
-These prompts can override project instructions. Review and align them with this file:
-
-* **Claude Code Global Prompt**: `~/.claude/CLAUDE.md` (review for conflicts)
-* **GitHub Copilot**: `.github/copilot-instructions.md` (project scope)
-* **Cursor Rules**: `.cursorrules`
-* **Cline Rules**: `.clinerules` or `.clinerules/`
-* **Kilo Code Rules**: `.kilocoderules` / `.kilo/` / `.kilocodemodes`
-* **Roo Code Rules**: `.roo/rules/` / `.roo/rules-*` / `.roorules*`
-* **OpenCode Config**: `opencode.jsonc`
-* **Codex Project Instructions**: `AGENTS.override.md` / `AGENTS.md`
-* **Codex Global Instructions**: `~/.codex/AGENTS.override.md` / `~/.codex/AGENTS.md`
-* **Codex Config**: `~/.codex/config.toml`
-
-If any of these conflict with this file, update the global/system prompts first.
-
-### Local AI Tool Folders & Git Hygiene
-Remind contributors to keep local AI tool data out of Git:
-
-* Add local folders like `.codex/` and `.claude/` to `.gitignore` because they may contain sensitive prompts, logs, or secrets.
-* Put shareable skill packs in `.agents/skills/` so teams can version and share them safely.
-```
-
-#### Section 15: MCP Servers & Tooling (Optional)
-
-If MCP servers are detected and user opts in:
-```markdown
-## MCP Servers & Tooling
-
-Use these MCP servers when the task matches their capability:
-
-* **[server-name]**: [Purpose, when to use it, required env vars]
-
-If a server is not needed for this project, disable it in the MCP config.
-```
-
-#### Section 16: Project Progress Memory (PROGRESS.md) (Optional)
-
-If the user wants project progress tracking:
-```markdown
-## Project Progress Tracking
-
-Use one lightweight progress file that all agents can continue from:
-
-* **Progress**: `PROGRESS.md` (current focus + recent completions)
-* **Required field**: `Original Prompt` (copy exact user request that started the task)
-
-At the start of every task, read `PROGRESS.md` first, compare with the active request, and continue unfinished work before starting unrelated changes.
-
-If a memory MCP server is used instead, keep `PROGRESS.md` minimal or omit it.
-```
-
-### Phase 6: File Creation/Update
-
-**For new files:**
-1. Write `AGENTS.md` with generated content.
-2. Create `CLAUDE.md` as a normal text file for Claude Code compatibility. The first line must be:
-   ```markdown
-   @AGENTS.md
-   ```
-3. Do not create a symbolic link between `CLAUDE.md` and `AGENTS.md`. Claude Code supports symlinks, but this skill intentionally uses the `@AGENTS.md` import to avoid duplicate-context behavior in other agents.
-4. If the user wants Claude-specific rules, add them below the `@AGENTS.md` import under a `## Claude Code` heading.
-5. Do not create `AGENTS.override.md` by default. Create it only when the user asks for Codex-specific override behavior.
-
-**If `AGENTS.override.md` exists or is requested:**
-1. Treat it as a Codex-only override with higher precedence than `AGENTS.md` in the same directory.
-2. If it exists beside `AGENTS.md`, warn that Codex ignores that directory's `AGENTS.md` and reads the override instead.
-3. For specialized subprojects, place `AGENTS.override.md` as close as possible to the files it should govern.
-4. Keep override content narrow; common instructions should remain in `AGENTS.md`.
-5. If the project uses `project_doc_fallback_filenames`, mention that fallback files are checked only after `AGENTS.override.md` and `AGENTS.md`.
-
-**If an existing `CLAUDE.md` is present without `AGENTS.md`:**
-1. Ask the user whether to migrate or keep both files.
-2. If migrating:
-   - Back up the existing `CLAUDE.md`.
-   - Move or merge its useful guidance into `AGENTS.md`.
-   - Replace `CLAUDE.md` with a normal text file starting with `@AGENTS.md`.
-3. If keeping both:
-   - Treat `AGENTS.md` and `CLAUDE.md` as intentionally separate instruction files.
-   - Ask which guidance belongs in each file before editing.
-
-**For updates (merge mode):**
-1. Parse the primary existing file (`AGENTS.md` by default) into sections (split by `## ` headers)
-2. Compare auto-detected findings against existing guidance; if they conflict, ask the user whether to keep existing content, replace it, or merge.
-3. For each section:
-   - If exists in both: Show diff and ask user preference
-   - If only in existing: Preserve (user customization)
-   - If only in new: Add with note
-4. Generate merged file
-5. Show summary of changes
-6. Ensure the generated `AGENTS.md` content does not instruct the agent to read `CLAUDE.md` or `AGENTS.md`, since those files are already loaded by AI tools.
-
-## Design System Delegation (Skill Reuse Policy)
-
-This skill is intentionally **not** a full Design System engine. When the user requests any of the following:
-- "design system", "UI consistency", "style guide"
-- "colors/typography/tokens"
-- "component library rules"
-- "generate DESIGN_SYSTEM.md"
-
-Then this skill must:
-
-### If `design-system-generator` skill is available:
-1. **Delegate** generation of `DESIGN_SYSTEM.md` to `design-system-generator`
-2. Then update `AGENTS.md`/`CLAUDE.md` to reference `DESIGN_SYSTEM.md` with this block:
+Create `CLAUDE.md` only when the user asks for Claude Code support. For a shared instruction source, use:
 
 ```markdown
-## Design System
-All UI components and pages must follow `DESIGN_SYSTEM.md`:
-- Use design tokens (no hardcoded colors/sizes).
-- Reuse shared components, wrappers, utilities, and motion rules before creating new ones.
-- Implement component states (hover/focus/disabled/loading/error).
-- For UI changes, capture the target element/region before full-page screenshots.
-- Meet accessibility and performance requirements.
+@AGENTS.md
 ```
 
-### If `design-system-generator` is NOT available:
-1. **Suggest installing** `design-system-generator` from:
-   - https://github.com/thienanblog/awesome-ai-agent-skills (project-development-skills plugin)
-2. Produce only:
-   - `AGENTS.md`/`CLAUDE.md` patch referencing `DESIGN_SYSTEM.md`
-   - Optional **minimal scaffold** `DESIGN_SYSTEM.md` (no deep recommendations)
+Add Claude-specific content below the import only when it cannot live in shared instructions. A symlink is also supported by Claude Code, but prefer the import for cross-platform repositories unless the user chooses otherwise.
 
-### Minimal Scaffold for DESIGN_SYSTEM.md (only if design-system-generator unavailable)
+For path-scoped Claude or Cursor rules, prefer their native scoped-rule mechanisms over expanding the always-loaded root file.
 
-If the user still wants a file now, generate ONLY this scaffold:
+### 5. Generate the minimum useful file
 
-```markdown
-# DESIGN_SYSTEM.md (Scaffold)
+Use the compact skeleton in [references/output-template.md](references/output-template.md). Include only sections that have verified content. Prefer bullets, exact paths, and exact commands.
 
-## Scope
-Defines UI consistency rules for this project.
+Write conditions explicitly:
 
-## Tokens (TBD)
-- Colors: CSS variables
-- Typography: scale + line-height
-- Spacing: spacing scale
-- Radius/Shadows: scales
+- Good: “When changing API schemas, update `api/openapi.yaml` before generated clients; run `pnpm generate:api`.”
+- Weak: “Keep API documentation up to date.”
+- Good: “Run `docker compose exec app php artisan test --filter=<affected test>`; PHP is not installed on the host.”
+- Weak: “Always test your changes.”
 
-## Components
-Define component patterns and required states:
-- hover, focus, disabled, loading, error
+Do not copy large documentation passages. Write a routed reference such as: “For public API changes, read `docs/api-versioning.md` before editing routes.”
 
-## Production assets
-Use hashed filenames + a manifest mapping to avoid cache issues.
-Minify CSS/JS and optimize images/fonts.
+### 6. Reconcile existing files
+
+Do not preserve content merely because it already exists. Classify each rule as:
+
+- `keep`: current, specific, and useful.
+- `update`: useful but contradicted by current source-of-truth evidence.
+- `move`: useful only for a subdirectory or detailed project document.
+- `remove`: generic, duplicated, stale, unverifiable, or task-status content.
+- `confirm`: a real conflict whose owner cannot be determined from repository evidence.
+
+Preserve author intent, but prefer current source-of-truth facts. Ask only about `confirm` items. Do not append a fresh template below old content, do not add generated/preserved marker comments, and do not keep both sides of a conflict for the user to clean up later.
+
+When Git tracks the file, rely on the working-tree diff for recovery. Do not create backup files, delete older backups, commit, or modify Git history unless the user explicitly requests it.
+
+Read [references/merge-and-verify.md](references/merge-and-verify.md) before compacting or updating an existing file.
+
+### 7. Verify before finishing
+
+Check every generated or updated instruction file:
+
+- All paths and commands cited exist or are clearly labeled as user-provided.
+- No unresolved placeholders such as `TBD`, `[command]`, or template braces remain.
+- Rules do not contradict nearer instruction files or repository configuration.
+- Root and nested scopes do not repeat the same content.
+- No secret, personal home path, prompt transcript, task status, or tool inventory was added.
+- The root file stays within the line and byte budgets.
+- Optional compatibility files use behavior supported by the selected tool.
+
+Measure rather than estimate:
+
+```bash
+wc -l -c AGENTS.md
 ```
 
-Do not pick Tailwind/MUI/shadcn/etc. in the scaffold unless the project already uses it.
+For an update, inspect the final diff and summarize what was kept, updated, moved, and removed. If the repository has its own validation command for generated files or documentation, run it.
 
-**Never** implement the full Design System logic inside `agents-md-generator`.
+## Quick mode
 
-## Quality Skill Delegation Reference
+When the user requests quick mode:
 
-For testing, debugging, performance, and UI visual QA guidance in generated project instructions, read `references/quality-skill-delegation.md`. Keep generated instructions concise and project-specific; do not duplicate full specialized skill workflows in `AGENTS.md`.
+- Discover facts from repository sources without a questionnaire.
+- Use safe defaults and omit uncertain sections.
+- Never overwrite an existing instruction file with unresolved conflicts.
+- Produce the same compact, verified output as the normal workflow; quick mode changes interaction, not quality or size limits.
 
-## Tech Stack Detection Reference
+## Maintainer note
 
-See `references/tech-stack-detection.md` for complete detection patterns.
-
-## Section Templates Reference
-
-See `references/section-templates.md` for complete section templates per stack.
-
-## Update/Merge Strategy Reference
-
-See `references/merge-strategy.md` for detailed merge logic.
-
-## Progress Tracking (Maintainers)
-
-When discussing or implementing new ideas/features for this skill, use `PROGRESS.md` as the single continuity file.
-
-Required `PROGRESS.md` sections:
-- `Original Prompt` (verbatim user request that initiated the task)
-- `Current Status` (what is done, in progress, blocked)
-- `Next Steps` (clear continuation checklist)
-
-Maintainer workflow:
-1. Read `PROGRESS.md` before starting any task.
-2. Compare `Original Prompt` and `Current Status` against the new request.
-3. Continue unfinished work first when it matches the same objective.
-4. Update `Current Status` and `Next Steps` before ending the task.
-
-Archiving rule: keep `PROGRESS.md` readable (about 200-300 lines max). Move old completed entries to `docs/archives/PROGRESS-YYYY-MM.md` when needed.
-
-## Output File Naming
-
-**Primary file:** `AGENTS.md`
-- This is the main instruction file that AI agents read
-- All edits should be made to this file
-- Keep it concise; Codex has a combined project-doc size cap (`project_doc_max_bytes`, 32 KiB by default)
-- Use nested `AGENTS.md` files for subprojects when closer-directory guidance should override broader guidance
-
-**Codex override file:** `AGENTS.override.md`
-- Higher priority than `AGENTS.md` for Codex in the same directory
-- Use only for Codex-specific, temporary, or nested-directory override rules
-- Do not create by default because Codex includes at most one instruction file per directory
-
-**Secondary file:** `CLAUDE.md`
-- Normal text file for Claude Code compatibility
-- First line: `@AGENTS.md`
-- May contain separate Claude-specific guidance only if the user explicitly wants parallel files
-- Claude Code expands `@AGENTS.md` when loading `CLAUDE.md`
-
-**Why this approach:**
-- Single source of truth prevents drift
-- Works across all AI coding tools
-- Avoids symbolic links that can cause duplicate context reads
-- Lets Claude Code share `AGENTS.md` through a lightweight file reference
-
----
-
-*This skill is part of the awesome-ai-agent-skills community library.*
+Do not bundle `ROADMAP.md`, `PROGRESS.md`, task logs, or archive helpers inside this runtime skill. Track future work in repository-level issues or maintainer documentation outside the packaged skill. Runtime skill contents should include only instructions and resources needed to perform the user-facing workflow.

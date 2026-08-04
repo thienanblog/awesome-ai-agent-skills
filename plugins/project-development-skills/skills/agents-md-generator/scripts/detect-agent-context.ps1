@@ -1,164 +1,131 @@
 param(
   [string]$Root = ".",
-  [string[]]$McpPath = @(),
+  [string[]]$ConfigPath = @(),
+  [int]$MaxDepth = 8,
+  [switch]$IncludeGlobal,
   [switch]$Help
 )
 
 $ErrorActionPreference = "Stop"
-
 if ($Help) {
-  Write-Host "Usage:"
-  Write-Host "  powershell -ExecutionPolicy Bypass -File detect-agent-context.ps1 [-Root <path>] [-McpPath <path>]"
-  Write-Host ""
-  Write-Host "Options:"
-  Write-Host "  -Root <path>     Project root (default: .)"
-  Write-Host "  -McpPath <path>  Additional MCP config path (repeatable)"
+  Write-Host "Usage: detect-agent-context.ps1 [-Root PATH] [-IncludeGlobal] [-ConfigPath PATH]"
   exit 0
 }
-
-function Write-Header {
-  Write-Host "Agent Context Report"
-  Write-Host "Project root: $Root"
-  Write-Host ""
+if (-not (Test-Path -LiteralPath $Root -PathType Container)) {
+  Write-Error "Root directory does not exist: $Root"
+  exit 2
+}
+$Root = (Resolve-Path -LiteralPath $Root).Path
+if ($env:AGENT_CONTEXT_CONFIG_PATHS) {
+  $ConfigPath += $env:AGENT_CONTEXT_CONFIG_PATHS.Split(';', [System.StringSplitOptions]::RemoveEmptyEntries)
 }
 
-function Write-Section {
-  param([string]$Title)
-  Write-Host $Title
-  Write-Host ("-" * $Title.Length)
+function Section([string]$Title) { Write-Host "`n$Title" }
+function Report-File([string]$Path, [string]$Kind) {
+  if (Test-Path -LiteralPath $Path -PathType Leaf) { Write-Host "  - $Path ($Kind)" }
 }
-
-function Report-File {
-  param([string]$Label, [string]$Path)
-  if (Test-Path -LiteralPath $Path -PathType Leaf) {
-    Write-Host "- $Label: $Path"
-    return $true
+function Has-Pattern([string]$Path, [string]$Pattern) {
+  if ((Test-Path -LiteralPath $Path -PathType Leaf) -and -not ((Get-Item -LiteralPath $Path).Attributes -band [IO.FileAttributes]::ReparsePoint)) {
+    return [bool](Select-String -LiteralPath $Path -Pattern $Pattern -Quiet)
   }
   return $false
 }
-
-function Report-Dir {
-  param([string]$Label, [string]$Path)
-  if (Test-Path -LiteralPath $Path -PathType Container) {
-    Write-Host "- $Label: $Path"
-    return $true
-  }
-  return $false
-}
-
-function Report-Glob {
-  param([string]$Label, [string]$Glob)
-  $items = Get-ChildItem -Path $Glob -ErrorAction SilentlyContinue
-  if ($items) {
-    foreach ($item in $items) {
-      Write-Host "- $Label: $($item.FullName)"
-    }
-    return $true
-  }
-  return $false
-}
-
-function Get-McpServers {
-  param([string]$Path)
+function Signal([string]$Name, [string]$Path) { Write-Host "  - $Name (evidence=$Path)" }
+function Get-JsonDependencyNames([string]$Path, [string[]]$Sections) {
   try {
-    $raw = Get-Content -LiteralPath $Path -Raw
-    $data = $raw | ConvertFrom-Json
-    $servers = $data.mcpServers
-    if ($servers -and $servers.PSObject.Properties.Count -gt 0) {
-      $servers.PSObject.Properties.Name | Sort-Object | ForEach-Object {
-        Write-Host "  - $_"
+    $data = Get-Content -LiteralPath $Path -Raw | ConvertFrom-Json
+    foreach ($section in $Sections) {
+      $property = $data.PSObject.Properties[$section]
+      if ($property -and $property.Value) {
+        $property.Value.PSObject.Properties.Name
       }
-    } else {
-      Write-Host "  - (no mcpServers found)"
     }
   } catch {
-    Write-Host "  - ERROR: $($_.Exception.GetType().Name)"
+    Write-Warning "Could not parse selected manifest: $Path"
   }
 }
 
-$Root = (Resolve-Path -LiteralPath $Root).Path
-$HomeDir = $HOME
-$CodexHome = $env:CODEX_HOME
-if (-not $CodexHome -and $HomeDir) {
-  $CodexHome = Join-Path $HomeDir ".codex"
+Write-Host "Agent context evidence report (PowerShell fallback)"
+Write-Host "Root: $Root"
+Section "Instruction and agent configuration paths:"
+@("AGENTS.override.md", "AGENTS.md", "CLAUDE.md", "CLAUDE.local.md", "GEMINI.md", ".github/copilot-instructions.md", ".cursorrules", ".clinerules", ".mcp.json", ".cursor/mcp.json", ".cline/mcp_settings.json", ".roo/mcp.json", ".roo/mcp_settings.json", ".kilocode/mcp.json", ".kilocode/config.json", ".kilo/config.json", ".kilocodemodes", "cline_mcp_settings.json", "opencode.json", "opencode.jsonc") | ForEach-Object {
+  Report-File (Join-Path $Root $_) "project"
+}
+if ($env:OPENCODE_CONFIG) { Report-File $env:OPENCODE_CONFIG "OPENCODE_CONFIG" }
+$ConfigPath | ForEach-Object { Report-File $_ "custom" }
+if ($IncludeGlobal) {
+  $codexDir = if ($env:CODEX_HOME) { $env:CODEX_HOME } else { Join-Path $HOME ".codex" }
+  $override = Join-Path $codexDir "AGENTS.override.md"
+  $agents = Join-Path $codexDir "AGENTS.md"
+  $activeOverride = (Test-Path -LiteralPath $override -PathType Leaf) -and ((Get-Item -LiteralPath $override).Length -gt 0)
+  if ($activeOverride) {
+    Report-File $override "global Codex override; active"
+  } elseif (Test-Path -LiteralPath $override -PathType Leaf) {
+    Write-Host "  - $override (global Codex override; empty and ignored)"
+  }
+  if ($activeOverride -and (Test-Path -LiteralPath $agents)) {
+    Write-Host "  - $agents (global Codex instructions; shadowed by override)"
+  } else { Report-File $agents "global Codex instructions" }
+  Report-File (Join-Path $HOME ".claude/CLAUDE.md") "global Claude instructions"
 }
 
-Write-Header
-
-Write-Section "Project Instruction Files"
-
-Report-File "CLAUDE.md" (Join-Path $Root "CLAUDE.md") | Out-Null
-Report-File "AGENTS.override.md" (Join-Path $Root "AGENTS.override.md") | Out-Null
-Report-File "AGENTS.md" (Join-Path $Root "AGENTS.md") | Out-Null
-Report-File "GitHub Copilot" (Join-Path $Root ".github/copilot-instructions.md") | Out-Null
-Report-File "Cursor" (Join-Path $Root ".cursorrules") | Out-Null
-Report-File "Cline (.clinerules file)" (Join-Path $Root ".clinerules") | Out-Null
-Report-Dir "Cline (.clinerules dir)" (Join-Path $Root ".clinerules") | Out-Null
-Report-File "Kilo Code (.kilocoderules)" (Join-Path $Root ".kilocoderules") | Out-Null
-Report-Dir "Kilo Code (.kilo dir)" (Join-Path $Root ".kilo") | Out-Null
-Report-File "Kilo Code (.kilocodemodes)" (Join-Path $Root ".kilocodemodes") | Out-Null
-Report-File "Kilo Code (.kilocode/config.json)" (Join-Path $Root ".kilocode/config.json") | Out-Null
-Report-Dir "Roo Code (.roo/rules)" (Join-Path $Root ".roo/rules") | Out-Null
-Report-Glob "Roo Code (.roo/rules-*)" (Join-Path $Root ".roo/rules-*") | Out-Null
-Report-Glob "Roo Code (.roorules*)" (Join-Path $Root ".roorules*") | Out-Null
-Report-File "OpenCode (opencode.jsonc)" (Join-Path $Root "opencode.jsonc") | Out-Null
-
-if ($env:OPENCODE_CONFIG) {
-  Report-File "OpenCode (OPENCODE_CONFIG)" $env:OPENCODE_CONFIG | Out-Null
-}
-
-Report-File "Claude Code (repo prompt)" (Join-Path $Root ".claude/CLAUDE.md") | Out-Null
-Report-File "Claude Code (.mcp.json)" (Join-Path $Root ".mcp.json") | Out-Null
-
-Write-Host ""
-Write-Section "Global Instruction Files"
-
-if ($HomeDir) {
-  Report-File "Claude Code Global Prompt" (Join-Path $HomeDir ".claude/CLAUDE.md") | Out-Null
-  Report-Dir "Roo Code Global Rules" (Join-Path $HomeDir ".roo/rules") | Out-Null
-  Report-Glob "Roo Code Global Rules (modes)" (Join-Path $HomeDir ".roo/rules-*") | Out-Null
-  Report-Dir "Kilo Code Global Rules" (Join-Path $HomeDir ".kilocode/rules") | Out-Null
-}
-
-if ($CodexHome) {
-  Report-File "Codex Global Override" (Join-Path $CodexHome "AGENTS.override.md") | Out-Null
-  Report-File "Codex Global Instructions" (Join-Path $CodexHome "AGENTS.md") | Out-Null
-  Report-File "Codex Config" (Join-Path $CodexHome "config.toml") | Out-Null
-}
-
-Write-Host ""
-Write-Section "MCP Configs"
-
-$mcpCandidates = @(
-  (Join-Path $Root ".mcp.json"),
-  (Join-Path $Root ".roo/mcp.json"),
-  (Join-Path $Root "cline_mcp_settings.json")
-)
-
-if ($HomeDir) {
-  $mcpCandidates += (Join-Path $HomeDir ".roo/mcp_settings.json")
-  $mcpCandidates += (Join-Path $HomeDir ".cline/cline_mcp_settings.json")
-  $mcpCandidates += (Join-Path $HomeDir ".config/cline/cline_mcp_settings.json")
-}
-
-if ($McpPath) {
-  $mcpCandidates += $McpPath
-}
-
-$foundAny = $false
-foreach ($candidate in $mcpCandidates) {
-  if (Test-Path -LiteralPath $candidate -PathType Leaf) {
-    $foundAny = $true
-    Write-Host "- $candidate"
-    Get-McpServers -Path $candidate
+$ignored = @(".git", "node_modules", "vendor", "dist", "build", "target", ".venv")
+$manifestNames = @("package.json", "composer.json", "pyproject.toml", "requirements.txt", "Gemfile", "pom.xml", "build.gradle", "build.gradle.kts", "go.mod", "Cargo.toml", "pubspec.yaml")
+$lockNames = @("package-lock.json", "pnpm-lock.yaml", "yarn.lock", "bun.lock", "composer.lock", "uv.lock", "poetry.lock")
+function Get-ProjectFiles([string]$Directory, [int]$Depth) {
+  if ($Depth -gt $MaxDepth) { return }
+  foreach ($item in Get-ChildItem -LiteralPath $Directory -Force -ErrorAction SilentlyContinue) {
+    if ($item.PSIsContainer) {
+      if (($ignored -notcontains $item.Name) -and -not ($item.Attributes -band [IO.FileAttributes]::ReparsePoint)) {
+        Get-ProjectFiles $item.FullName ($Depth + 1)
+      }
+    } else {
+      $item
+    }
   }
 }
+$files = @(Get-ProjectFiles $Root 0)
+$manifests = $files | Where-Object {
+  ($manifestNames -contains $_.Name) -and -not ($_.Attributes -band [IO.FileAttributes]::ReparsePoint)
+}
+$instructionNames = @("AGENTS.md", "AGENTS.override.md", "CLAUDE.md", "CLAUDE.local.md", "GEMINI.md", ".cursorrules", ".clinerules")
+$files | Where-Object {
+  (($_.DirectoryName -ne $Root) -and ($instructionNames -contains $_.Name)) -or
+  ($_.FullName -match '[\\/]\.(claude|cursor|roo|kilocode|kilo)[\\/]rules(?:-[^\\/]+)?[\\/]') -or
+  ($_.Name -like '.roorules*') -or ($_.Name -like '.kilocoderules*')
+} | Sort-Object FullName | ForEach-Object { Write-Host "  - $($_.FullName) (scoped instructions)" }
 
-if (-not $foundAny) {
-  Write-Host "- (no MCP configs found)"
+Section "Project manifests and lockfiles:"
+$files | Where-Object { ($manifestNames + $lockNames) -contains $_.Name } | Sort-Object FullName | ForEach-Object { Write-Host "  - $($_.FullName)" }
+
+Section "Technology signals:"
+foreach ($manifest in $manifests) {
+  if ($manifest.Name -eq "package.json") {
+    $dependencies = @(Get-JsonDependencyNames $manifest.FullName @("dependencies", "devDependencies", "peerDependencies"))
+    @(@("Next.js", "next"), @("Nuxt", "nuxt"), @("React", "react"), @("Vue", "vue"), @("Angular", "@angular/core"), @("SvelteKit", "@sveltejs/kit"), @("NestJS", "@nestjs/core"), @("Express", "express"), @("Fastify", "fastify"), @("Vitest", "vitest"), @("Jest", "jest"), @("Playwright", "@playwright/test"), @("ESLint", "eslint"), @("Prettier", "prettier")) | ForEach-Object {
+      if ($dependencies -contains $_[1]) { Signal $_[0] $manifest.FullName }
+    }
+    continue
+  }
+  if ($manifest.Name -eq "composer.json") {
+    $dependencies = @(Get-JsonDependencyNames $manifest.FullName @("require", "require-dev"))
+    @(@("Laravel", "laravel/framework"), @("Symfony", "symfony/framework-bundle"), @("Drupal", "drupal/core-recommended"), @("Joomla", "joomla/cms"), @("Pest", "pestphp/pest"), @("PHPUnit", "phpunit/phpunit"), @("Laravel Pint", "laravel/pint"), @("PHPStan", "phpstan/phpstan")) | ForEach-Object {
+      if ($dependencies -contains $_[1]) { Signal $_[0] $manifest.FullName }
+    }
+    continue
+  }
+  $rules = switch ($manifest.Name) {
+    { $_ -in @("pyproject.toml", "requirements.txt") } { @(@("Django", "django"), @("Flask", "flask"), @("FastAPI", "fastapi"), @("pytest", "pytest"), @("Ruff", "ruff")) }
+    "Gemfile" { @(@("Rails", "gem.*rails")) }
+    { $_ -in @("pom.xml", "build.gradle", "build.gradle.kts") } { @(@("Spring Boot", "org.springframework.boot")) }
+    "go.mod" { @(@("Gin", "github.com/gin-gonic/gin"), @("Fiber", "github.com/gofiber/fiber")) }
+    "Cargo.toml" { @(@("Axum", "^\s*axum\s*="), @("Actix Web", "^\s*actix-web\s*=")) }
+    "pubspec.yaml" { @(@("Flutter", "^\s*flutter:")) }
+    default { @() }
+  }
+  foreach ($rule in $rules) { if (Has-Pattern $manifest.FullName $rule[1]) { Signal $rule[0] $manifest.FullName } }
 }
 
-Write-Host ""
-Write-Section "Notes"
-Write-Host "- Global instructions and override files can affect project rules. Review them for conflicts."
-Write-Host "- Use --mcp-path <path> to scan additional MCP config locations."
+Section "Notes:"
+Write-Host "  - This fallback reads only selected public manifests and reports paths, never secrets or source contents."
+Write-Host "  - Use the Python detector when JSON output, command extraction, or stricter conflict reporting is required."

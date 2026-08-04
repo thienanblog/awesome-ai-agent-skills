@@ -1,6 +1,6 @@
 {
   "name": "project-development-skills",
-  "version": "1.20.0",
+  "version": "1.21.0",
   "description": "A cohesive workflow bundle for project setup, source-of-truth development, reviewable multi-slice delivery, UI/UX concept implementation, testing, debugging, performance, documentation, design systems, and production deployment planning.",
   "author": {
     "name": "Ân Vũ",
