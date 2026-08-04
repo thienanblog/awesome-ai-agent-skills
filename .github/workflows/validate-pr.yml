@@ -37,6 +37,9 @@ jobs:
       - name: Run validation
         run: npm run validate
 
+      - name: Test agent context detector
+        run: npm run test:agent-context
+
       - name: Check generated files are synced
         run: |
           npm run sync

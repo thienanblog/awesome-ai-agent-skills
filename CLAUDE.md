@@ -166,7 +166,7 @@ The matching `plugins/project-development-skills/.claude-plugin/plugin.json`:
 
 | Skill                        | Path                                   | Description                                                        |
 |------------------------------|----------------------------------------|--------------------------------------------------------------------|
-| agents-md-generator          | `./skills/agents-md-generator`         | Generate or update CLAUDE.md/AGENTS.md files for AI coding agents |
+| agents-md-generator          | `./skills/agents-md-generator`         | Create concise repository instructions using deterministic discovery |
 | debugging-workflow           | `./skills/debugging-workflow`          | Reproduce, isolate, and fix bugs without guessing                  |
 | design-system-generator      | `./skills/design-system-generator`     | Generate project-specific DESIGN_SYSTEM.md files                   |
 | docker-local-dev             | `./skills/docker-local-dev`            | Generate Docker local development environments                     |
@@ -196,6 +196,7 @@ This repository uses GitHub Actions for automated validation and syncing:
     and asks again before expanding that approved scope
   - Every skill in `skills/` is assigned to exactly one plugin in `plugin-groups.json`, and each plugin has an `owner`, `displayName`, and `description`
   - Every generated file (both marketplaces, every `.claude-plugin/plugin.json` and `.codex-plugin/plugin.json`) byte-matches what `npm run sync` would write — this is what catches hand-edits and newer-only schema keys
+  - `package.json` and both root version fields in `package-lock.json` match
   - Bundled skills under `plugins/<plugin-name>/skills/` match their canonical `skills/<skill-name>/` source
   - No stale plugin packages remain under `plugins/`
 - If validation fails, a comment is added to the PR with common issues
@@ -213,6 +214,7 @@ Before pushing changes, always run:
 ```bash
 npm run sync       # Update marketplace files, plugin packages, and README.md
 npm run validate   # Check skill structure, marketplace files, and plugin packages
+npm run test:agent-context # Test deterministic discovery and native fallback behavior
 ```
 
 Then confirm against Claude Code's own validator, which catches schema keys `npm run validate` does not know about:
