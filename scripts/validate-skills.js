@@ -149,9 +149,32 @@ function expectGenerated(filePath, expected) {
   }
 }
 
+function listRelativeFiles(root) {
+  const files = [];
+  const pending = [''];
+  while (pending.length > 0) {
+    const relativeDirectory = pending.pop();
+    const directory = path.join(root, relativeDirectory);
+    for (const entry of fs.readdirSync(directory, { withFileTypes: true })) {
+      if (entry.name === '.DS_Store') {
+        continue;
+      }
+      const relative = path.join(relativeDirectory, entry.name);
+      if (entry.isDirectory()) {
+        pending.push(relative);
+      } else if (entry.isFile()) {
+        files.push(relative);
+      }
+    }
+  }
+  return files.sort();
+}
+
 function validateBundledSkill(pluginName, skillName) {
-  const bundledPath = path.join(pluginSkillsPath(pluginName), skillName, 'SKILL.md');
-  const canonicalPath = path.join(SKILLS_DIR, skillName, 'SKILL.md');
+  const bundledRoot = path.join(pluginSkillsPath(pluginName), skillName);
+  const canonicalRoot = path.join(SKILLS_DIR, skillName);
+  const bundledPath = path.join(bundledRoot, 'SKILL.md');
+  const canonicalPath = path.join(canonicalRoot, 'SKILL.md');
 
   if (!fs.existsSync(bundledPath)) {
     error(`Plugin "${pluginName}": Missing bundled skill "${skillName}/SKILL.md"`);
@@ -168,6 +191,21 @@ function validateBundledSkill(pluginName, skillName) {
   const frontmatter = parseFrontmatter(bundled);
   if (!frontmatter || !frontmatter.name || !frontmatter.description) {
     error(`Plugin "${pluginName}": Bundled skill "${skillName}" has invalid frontmatter`);
+  }
+
+  const canonicalFiles = listRelativeFiles(canonicalRoot);
+  const bundledFiles = listRelativeFiles(bundledRoot);
+  if (JSON.stringify(canonicalFiles) !== JSON.stringify(bundledFiles)) {
+    error(`Plugin "${pluginName}": Bundled skill "${skillName}" file list differs from canonical source - run "npm run sync"`);
+    return;
+  }
+  for (const relative of canonicalFiles) {
+    if (!fs.readFileSync(path.join(canonicalRoot, relative)).equals(
+      fs.readFileSync(path.join(bundledRoot, relative))
+    )) {
+      error(`Plugin "${pluginName}": Bundled skill "${skillName}/${relative}" differs from canonical source - run "npm run sync"`);
+      return;
+    }
   }
 }
 
@@ -229,6 +267,30 @@ function validateGeneratedOutputs(config, meta) {
   }
 }
 
+function validatePackageLockVersion(meta) {
+  const lockfilePath = path.join(process.cwd(), 'package-lock.json');
+  if (!fs.existsSync(lockfilePath)) {
+    error('Missing package-lock.json');
+    return;
+  }
+
+  let lockfile;
+  try {
+    lockfile = JSON.parse(fs.readFileSync(lockfilePath, 'utf-8'));
+  } catch (e) {
+    error(`package-lock.json: Invalid JSON - ${e.message}`);
+    return;
+  }
+
+  const rootPackageVersion = lockfile.packages?.['']?.version;
+  if (lockfile.version !== meta.version || rootPackageVersion !== meta.version) {
+    error(
+      `package-lock.json version must match package.json (${meta.version}); ` +
+      `found top-level=${lockfile.version || 'missing'}, root-package=${rootPackageVersion || 'missing'}`
+    );
+  }
+}
+
 /**
  * Main validation
  */
@@ -265,6 +327,7 @@ function main() {
 
   log('📦 Validating generated marketplaces and plugin packages...');
   if (config && meta) {
+    validatePackageLockVersion(meta);
     validateGeneratedOutputs(config, meta);
   } else {
     log('   Skipped: fix the errors above first');
