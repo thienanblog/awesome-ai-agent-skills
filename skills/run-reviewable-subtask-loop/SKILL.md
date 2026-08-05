@@ -1,6 +1,6 @@
 ---
 name: run-reviewable-subtask-loop
-description: Deliver a large implementation plan, architecture migration, refactor, or feature roadmap as right-sized, coherent subtasks that are meaningful to code, review, test, and recover independently. Use only when the user explicitly requests this skill or workflow, or explicitly accepts it after an optional proposal during a user-initiated brainstorming or planning session before coding. Do not use for ordinary coding requests with clear requirements and no prior user-requested brainstorming or discussion. This skill does not authorize subagents; before any spawn, explain the usage impact and obtain explicit user approval for the proposed agent count and scope.
+description: Deliver a large implementation plan, architecture migration, refactor, or feature roadmap as right-sized, coherent subtasks with focused per-slice local checks, one full final local gate, and explicitly authorized Remote CI. Use only when the user explicitly requests this skill or workflow, or explicitly accepts it after an optional proposal during a user-initiated brainstorming or planning session before coding. Do not use for ordinary coding requests with clear requirements and no prior user-requested brainstorming or discussion. This skill does not authorize subagents; before any spawn, explain the usage impact and obtain explicit user approval for the proposed agent count and scope.
 ---
 
 # Run Reviewable Subtask Loop
@@ -9,7 +9,7 @@ Deliver a large change as a sequence of isolated, locally reviewed commits on an
 integration branch. Do not use pull requests, merge requests, or equivalent
 review requests as the transport between subtasks. Open one aggregate review
 request only after the integrated tree is ready for the user's final review and
-any required remote CI.
+any explicitly authorized Remote CI.
 
 ## Enforce the activation and delegation gate
 
@@ -45,16 +45,30 @@ any required remote CI.
    - protected base branch;
    - series integration branch and required branch prefix;
    - all local verification surfaces and their commands;
-   - remote CI workflow triggers and required checks;
+   - Remote CI workflow triggers and required checks from repository files;
    - final review-request and merge behavior;
    - documentation and progress-record rules.
-3. Default to an ephemeral integration branch created from the protected base.
+3. Before the first edit, ask whether Remote CI is authorized for the current
+   series whenever the workflow could use, require, or automatically trigger
+   it. Explain the expected trigger, purpose, and timing. Silence, a general
+   request to complete or publish the work, and permission to commit, push,
+   open a review request, merge, or release are not Remote CI authorization.
+   If the user does not authorize it, set the series to Local-only and do not
+   dispatch, rerun, cancel, inspect, poll, monitor, download logs from, or fix
+   failures from remote workflows or checks. Ask again before any later scope
+   expansion that would require Remote CI.
+4. Scope Remote CI authorization to the current series and the agreed trigger.
+   It never authorizes per-subtask Remote CI. If a push or review request would
+   automatically start Remote CI, disclose that before the action and obtain
+   authorization before proceeding.
+5. Default to an ephemeral integration branch created from the protected base.
    Use an established delivery branch only when repository policy or the user
    explicitly requires it.
-4. Treat planning as read-only. Create branches, commit, merge, push, open the
+6. Treat planning as read-only. Create branches, commit, merge, push, open the
    final review request, or delete branches only when the user's execution
    request or repository workflow authorizes those actions.
-5. Present the slices and workflow first when the user requests approval or
+7. Present the slices, workflow, Local CI budget, full final gate, and Remote CI
+   decision before implementation when the user requests approval or
    brainstorming.
 
 ## Use a local-first branch topology
@@ -190,7 +204,8 @@ approval before execution.
 
 ## Set the CI budget
 
-Inspect workflow triggers and branch protection before the first edit.
+Inspect workflow files and branch-protection requirements before the first edit,
+without inspecting live Remote CI state unless the user authorized it.
 
 Use three verification tiers:
 
@@ -198,39 +213,51 @@ Use three verification tiers:
   such as focused tests, typecheck or lint for the affected package, diff
   checks, and a cheap integration smoke. When behavior changes, do not treat a
   formatting or lint-only check as sufficient evidence.
-- **Phase gate:** after a group of related slices, run the affected package or
-  application suite, build, and representative manual browser or E2E coverage
-  once.
-- **Final gate:** on the exact integration tip, run repository-required checks
-  and broad verification for every affected or contract-connected surface.
+- **Phase gate:** only when several slices cross a shared contract, run one
+  focused cross-slice smoke or contract check. Do not turn a phase gate into a
+  full package, application, workspace, E2E, or browser matrix.
+- **Final gate:** after the last implementation slice, run the full Local test
+  and verification matrix required for every affected or contract-connected
+  surface on the exact integration tip.
 
 Apply these rules:
 
-1. Run a slice gate locally for every subtask. Do not repeat a full package,
-   workspace, API, application, E2E, or manual browser matrix per slice unless
-   the slice's risk or repository policy specifically requires it.
+1. Run a compact slice gate locally for every subtask and limit it to the code,
+   contract, package, or behavior changed by that slice. Do not run a full
+   package, workspace, API, application, E2E, or manual browser matrix on an
+   intermediate slice. If an intermediate slice cannot be validated safely
+   without a broad suite, merge it with the final slice or stop and agree on an
+   exception before running the broader gate.
 2. Do not push task branches, open subtask review requests, or intentionally
-   start remote CI for individual slices.
-3. Treat local verification as the primary gate. Reserve remote CI for checks
-   that cannot run locally because of platform, infrastructure, secrets, or
-   repository-required checks.
-4. Push the integration branch and open the integration-to-base review request
+   start Remote CI for individual slices.
+3. Run the full Local test matrix once, at the final gate after the last slice.
+   Rerun only affected failing portions while fixing issues, then repeat the
+   exact final gate once the candidate is stable.
+4. Treat local verification as the primary gate. Remote CI is optional and may
+   be used only within the user's explicit authorization, including when checks
+   cannot run locally because of platform, infrastructure, secrets, or branch
+   protection.
+5. Push the integration branch and open the integration-to-base review request
    only after local aggregate verification passes.
-5. Run remote CI on the final review request only when a required check or a
-   genuinely remote-only test remains. Record why each remote job is necessary.
-6. If push and review-request triggers unavoidably create duplicate runs, use
+6. When Remote CI was authorized, run it only at the agreed final trigger after
+   the final Local gate passes. Record why each remote job is necessary. When it
+   was not authorized, do not treat Remote CI as part of completion; report any
+   branch-protection conflict and ask for direction.
+7. If push and review-request triggers unavoidably create duplicate runs, use
    the minimum repository-compliant run count. Cancel a redundant run only when
-   authorized and when required checks will still report successfully.
-7. Do not weaken branch protection or permanently rewrite CI merely to reduce
+   Remote CI and cancellation were authorized and when required checks will
+   still report successfully.
+8. Do not weaken branch protection or permanently rewrite CI merely to reduce
    remote usage. Do not use skip annotations that leave required checks
    pending.
 
-Record local and remote aggregate evidence:
+Record aggregate evidence, including Remote CI fields only when it was
+authorized and used:
 
 - commit SHA and Git tree SHA;
 - exact commands and local conclusions;
 - branch and trigger when applicable;
-- CI run URL when remote CI was necessary;
+- CI run URL when Remote CI was authorized and used;
 - required-check conclusions.
 
 Any source, generated-file, conflict-resolution, or merge change that alters
@@ -246,8 +273,9 @@ Repeat this loop:
 2. Implement the current responsibility as a complete, coherent slice. Keep its
    production code, focused tests, documentation, plans, and generated artifacts
    together when they share the same acceptance criteria.
-3. Run the smallest relevant checks, followed by scoped local verification that
-   can actually detect a failure of the slice's responsibility.
+3. Run the compact slice gate for only the changed responsibility. Save full
+   suites, broad builds, complete E2E, and full browser matrices for the final
+   gate after the last implementation slice.
 4. Review the complete diff for:
    - correctness, edge cases, and regressions;
    - contract drift and integration compatibility;
@@ -303,12 +331,12 @@ Treat every validated integration commit as a recovery checkpoint.
    checkpoint. Rebuild the suffix with new commits and update the existing
    final review request. Replace or force-update the published integration
    branch only with explicit authorization and after accounting for reviewer
-   and CI state.
+   state and any authorized Remote CI state.
 8. Reimplement each invalidated slice through the normal review, verification,
    commit, and integration loop. Invalidate all aggregate evidence for the old
    tree.
-9. Run affected scoped checks after each rebuilt slice and the full final gate
-   on the completed replacement tree.
+9. Run compact affected checks after each rebuilt slice and the full final gate
+   only on the completed replacement tree.
 10. Delete failed or backup branches only after recovery succeeds and cleanup
     is authorized.
 
@@ -359,9 +387,11 @@ commits for shared history.
    - scoped and exhaustive local verification;
    - unavailable tests and any required remote-only checks;
    - known warnings or unresolved decisions.
-10. Run remote CI only for tests that could not run locally or checks enforced
-    by repository policy. Verify that any CI evidence tested the current review
-    head and record its commit and tree.
+10. If Remote CI was explicitly authorized at the agreed final trigger, run
+    only the approved remote checks and verify that their evidence tested the
+    current review head. If it was not authorized, do not inspect or wait for
+    Remote CI; report remote-only or branch-protection requirements as blockers
+    and ask before using them.
 11. Leave the review request open unless the user explicitly authorizes the
     final merge.
 12. Immediately before an authorized merge, fetch the recorded protected base
@@ -370,8 +400,9 @@ commits for shared history.
       same Git tree as the fully validated integration tip, reuse the evidence
       and do not run duplicate post-merge CI;
     - if it changed, invalidate the checkpoint, integrate the new base, resolve
-      conflicts, and rerun the final local gate. Rerun remote CI only for the
-      remaining remote-only or required checks against the updated candidate;
+      conflicts, and rerun the final local gate. Rerun Remote CI only when the
+      prior authorization explicitly covers the updated candidate; otherwise
+      ask again before using it;
     - if repository automation starts a duplicate base-branch run despite
       tree-equivalent evidence, skip or cancel it only when explicitly
       authorized, supported by the workflow, and compatible with required
@@ -388,6 +419,8 @@ On continuation:
 
 1. Inspect the working tree, current branch, local and remote branches,
    integration/base tips, ledger, and final review request if one exists.
+   Inspect Remote CI state only when the current series has explicit
+   authorization for it.
 2. Reconstruct completed slices from commits and repository records.
 3. Identify the first incomplete loop step.
 4. Reuse valid branches and commits. Never recreate work solely because
@@ -410,5 +443,6 @@ Stop and request direction when:
   authorized actions become necessary.
 
 Report integrated commits, local verification, review fixes, current branch
-state, final review-request and CI status if present, remaining slices, and the
-precise blocker. Never claim completion while required work remains.
+state, final review-request status, authorized Remote CI status when applicable,
+remaining slices, and the precise blocker. Never claim completion while
+required work remains.
