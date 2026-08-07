@@ -42,6 +42,9 @@ Skills are self-contained instruction sets that teach AI agents specific workflo
 
 # Install office web UI skill
 /plugin install office-web-ui-skills@awesome-ai-agent-skills
+
+# Install video production routing skill
+/plugin install video-production-skills@awesome-ai-agent-skills
 ```
 
 **Updating the marketplace**
@@ -89,6 +92,7 @@ In the plugin browser:
    - `laravel-app-skills`
    - `devops-skills`
    - `office-web-ui-skills`
+   - `video-production-skills`
 3. Select **Install plugin**.
 4. Start a new thread and ask Codex normally, or type `@` to choose the plugin or one of its bundled skills explicitly.
 
@@ -173,6 +177,7 @@ Use $run-reviewable-subtask-loop to split this migration into right-sized, coher
 | [run-reviewable-subtask-loop](./skills/run-reviewable-subtask-loop) | Deliver a large implementation plan, architecture migration, refactor, or feature roadmap as right-sized, coherent subtasks with focused per-slice local checks, one full final local gate, and explicitly authorized Remote CI. Use only when the user explicitly requests this skill or workflow, or explicitly accepts it after an optional proposal during a user-initiated brainstorming or planning session before coding. Do not use for ordinary coding requests with clear requirements and no prior user-requested brainstorming or discussion. This skill does not authorize subagents; before any spawn, explain the usage impact and obtain explicit user approval for the proposed agent count and scope. |
 | [testing-verification](./skills/testing-verification) | Plan, add, repair, and run tests and verification for software changes. Use when the user asks for tests, coverage, QA, acceptance criteria, regression checks, CI test failures, Playwright or browser verification, UI screenshot comparison, visual regression, or when a code change needs a focused test strategy across frontend, backend, API, or full-stack workflows. |
 | [ui-ux-concept-implementation](./skills/ui-ux-concept-implementation) | Implement frontend UI/UX from user-approved concepts, mockups, screenshots, visual references, or a website the user wants to emulate or clone. Use when Codex must generate and compare UI concepts, recommend a concept as a technical leader, predict the user's likely preference, persist the chosen concept outside commits, recreate a reference site's look and interactions in an existing project, or verify before/after UI with Playwright, Playwright MCP, Chrome DevTools MCP, screenshots, and responsive checks. |
+| [video-router](./skills/video-router) | Use first on any video-production request to choose and lock generation, deterministic composition, supplied-footage editing, or an AUTO end-to-end route before work begins. |
 | [vps-docker-traefik-deploy](./skills/vps-docker-traefik-deploy) | Plan and implement secure production deployments of Docker Compose applications on self-hosted VPS or cloud servers using Docker Engine, Docker Compose, Traefik, private registries, SSH tunnels, least-privilege users, persistent volumes, backups, DNS, and storage growth planning. Use when an AI agent needs to design, review, document, or execute a real deploy for websites, APIs, websockets, workers, databases, and object storage integrations on Ubuntu or Debian style Linux hosts. |
 <!-- SKILLS_TABLE_END -->
 
@@ -187,6 +192,7 @@ Plugins bundle related skills so you can install by domain. The source of truth 
 | [laravel-app-skills](./plugin-groups.json) | Guidelines for building Laravel 11/12 apps across common stacks and tooling. | [laravel-11-12-app-guidelines](./skills/laravel-11-12-app-guidelines) |
 | [devops-skills](./plugin-groups.json) | Skills for Docker-based local development environment configuration. | [docker-local-dev](./skills/docker-local-dev) |
 | [office-web-ui-skills](./plugin-groups.json) | Skills for designing and refactoring admin, internal, and back-office web interfaces. | [office-web-ui-system](./skills/office-web-ui-system) |
+| [video-production-skills](./plugin-groups.json) | Skills for routing video briefs across generation, deterministic composition, supplied-footage editing, and automatic end-to-end production plans. | [video-router](./skills/video-router) |
 <!-- PLUGINS_TABLE_END -->
 
 ## Repository Cleanup
