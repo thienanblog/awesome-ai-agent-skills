@@ -1,284 +1,87 @@
 # AI Agent Instructions
 
-This repository is a **community-shared skill library** for AI coding agents. It works with any AI coding tool that supports skills or custom instructions:
+This repository is a community-shared, tool-agnostic skill library for AI coding agents.
 
-- Claude Code (Anthropic)
-- OpenAI Codex
-- Cursor
-- Kilo Code
-- GitHub Copilot
-- Windsurf
-- And any other AI coding assistant
+`CLAUDE.md` is the tracked instruction source and `AGENTS.md` points to it by symlink; preserve that relationship.
 
-## Repository Purpose
+## Skill Authoring
 
-This is a universal, community-driven skill library. Skills are self-contained instruction sets that teach AI agents specific workflows, guidelines, or capabilities. The format is designed to be tool-agnostic and work across different AI platforms.
+Author each skill under `skills/<skill-name>/`:
 
-## Skill Structure
-
-Each skill follows this structure:
-```
-skills/
-  skill-name/
-    SKILL.md              # Required: Skill definition with YAML metadata
-    references/           # Optional: Reference documentation
-    assets/               # Optional: Images, templates
-    scripts/              # Optional: Helper scripts
+```text
+skills/<skill-name>/
+  SKILL.md
+  references/   # optional
+  assets/       # optional
+  scripts/      # optional
 ```
 
-### SKILL.md Format
-
-Every skill must have a `SKILL.md` with YAML frontmatter:
-```yaml
----
-name: skill-name
-description: Brief description of what the skill does and when to use it.
----
-```
-
-Do not add `author` to skill frontmatter. This repository only tracks the required `name` and `description` fields for skills.
+- Use kebab-case for the folder and frontmatter `name`.
+- Every `SKILL.md` requires YAML frontmatter with `name` and `description`; do not add `author`.
+- Write actionable workflows for a specific problem, with references for details that do not belong in the main skill.
+- Keep guidance compatible across agent tools unless the capability is inherently tool-specific.
 
 ## Neutral Skill Editing
 
-When reviewing, creating, or updating a skill under `skills/`, keep the editing
-process neutral:
+When reviewing, creating, or updating a skill under `skills/`:
 
-- Treat the target skill as an artifact to evaluate, not as a workflow to
-  execute merely because it is being edited.
-- Do not load, invoke, or follow any other skill from this repository during the
-  edit. In particular, do not let a sibling skill determine the target skill's
-  content, structure, delegation model, or verification workflow.
-- Use only the user request, repository instructions, the target skill's own
-  intended behavior, relevant source files, and repository validators as the
-  basis for the change.
-- Compare against another repository skill only when the user explicitly asks
-  for that comparison; inspect it as source material without activating it.
+- Treat the target skill as an artifact; do not execute it merely because it is being edited.
+- Do not load or follow sibling repository skills during the edit.
+- Base changes on the user request, repository instructions, the target skill's intended behavior, relevant source files, and repository validators.
+- Inspect another skill only when the user explicitly requests a comparison, without activating it.
+- Repository scripts such as `npm run sync` and `npm run validate` remain authoritative.
 
-Repository scripts such as `npm run sync` and `npm run validate` remain the
-required source-of-truth and verification tools for skill changes.
-
-## Source of Truth and Generated Files
+## Canonical Sources And Generated Outputs
 
 - Author skill content only in `skills/<skill-name>/`.
-- Use `plugin-groups.json` as the source of truth for plugin membership and identity: the marketplace `owner`, plus each plugin's `name`, `displayName`, `description`, and `skills`.
-- Use `scripts/lib/plugin-shape.js` as the single definition of every generated marketplace and manifest shape. `sync` writes those shapes; `validate` regenerates and diffs them. Change the shape there, never in a generated file.
-- Treat `.claude-plugin/marketplace.json`, `.agents/plugins/marketplace.json`, `plugins/**`, and generated README tables as outputs of `npm run sync`.
-- Do not edit `plugins/<plugin-name>/**` directly; those folders are generated plugin packages (Claude Code and Codex) built from `skills/`.
-- Do not duplicate a skill under multiple plugin groups. If two skills overlap, merge the unique guidance into one canonical skill folder and keep exactly one plugin assignment.
+- Use `plugin-groups.json` for marketplace ownership and each plugin's `name`, `displayName`, `description`, and skill membership.
+- Assign every skill to exactly one plugin group; merge overlapping skills instead of duplicating membership.
+- Use `scripts/lib/plugin-shape.js` as the sole definition of generated marketplace and manifest shapes.
+- Treat `.claude-plugin/marketplace.json`, `.agents/plugins/marketplace.json`, generated README tables, and `plugins/**` as `npm run sync` outputs.
+- Never edit `plugins/<plugin-name>/**` directly. Each generated package must contain its bundled skills plus `.claude-plugin/plugin.json` and `.codex-plugin/plugin.json`; the Codex manifest uses `skills: "./skills/"`.
+- Do not add marketplace or manifest keys until they have been validated against the oldest supported Claude Code. Claude rejects unknown keys, so preserve the shapes emitted by `scripts/lib/plugin-shape.js`.
 
-## Scanning and Updating Marketplace
+## Marketplace Updates
 
-When the user asks to "scan and update marketplace" or "update marketplace.json", follow this workflow:
+When adding, removing, regrouping, or scanning skills:
 
-### 1. Scan Skills Folder
-Scan all directories in `skills/` that contain a `SKILL.md` file.
+1. Scan directories under `skills/` that contain `SKILL.md` and verify their `name` and `description`.
+2. Update canonical skill files and `plugin-groups.json`; do not hand-edit generated outputs.
+3. Run `npm run sync` to regenerate both marketplaces, plugin packages, manifests, and README skill tables.
+4. Report added or removed skills and any missing or invalid metadata.
 
-### 2. Parse Skill Metadata
-For each `SKILL.md`, extract the `name` and `description` from the YAML frontmatter.
+Generated Claude marketplace entries must point to `./plugins/<plugin-name>` and use the version from `package.json`. Codex marketplace entries must also retain their generated installation, authentication, and category policy.
 
-### 3. Update Claude marketplace.json
-Update `.claude-plugin/marketplace.json`:
-- Keep the existing `name`, `owner`, and `metadata` sections
-- Update the `plugins` array based on `plugin-groups.json` so each plugin can contain multiple related skills
-- Each plugin requires: `name` (ending with `-skills`), `source: "./plugins/<plugin-name>"`, `description`, and `version` (matching `package.json`)
+## Verification And CI
 
-Each entry points at a real plugin package rather than the repository root, so Claude Code copies only that package into its plugin cache and discovers the bundled `skills/` directory. Keeping `version` in sync with `package.json` pins installs to a release instead of falling back to the git commit SHA.
+After changing skills, plugins, or documentation:
 
-**Schema compatibility is a hard constraint.** Claude Code rejects unrecognized manifest keys outright, so a key added in a newer release breaks the entire marketplace for anyone on an older client. The generated shapes therefore stay on keys accepted across releases in the wild: the marketplace description and version live under `metadata` (not top-level), and no entry carries `displayName`, `$schema`, or `renames`.
+1. Re-read `CLAUDE.md`, `README.md`, and affected skill documentation for synchronization needs.
+2. Run the complete local suite:
 
-This is enforced structurally, not by a list of banned keys. `scripts/lib/plugin-shape.js` is the single definition of every generated shape; `npm run validate` regenerates each file and diffs it against what is committed, so *any* extra or changed key fails the build. Before adding a key, confirm it is accepted by running `claude plugin validate .` and `claude plugin validate ./plugins/<plugin-name>` on the oldest Claude Code you intend to support.
-
-### 4. Update plugin packages and the Codex marketplace
-Update `.agents/plugins/marketplace.json` and `plugins/<plugin-name>/` from `plugin-groups.json`:
-- Each plugin package lives in `plugins/<plugin-name>/` and serves both agents
-- Each package requires `.claude-plugin/plugin.json` (Claude Code) and `.codex-plugin/plugin.json` (Codex)
-- The Codex manifest uses `skills: "./skills/"`; Claude Code scans `skills/` by default
-- Each plugin bundles copies of its skill folders under `plugins/<plugin-name>/skills/`
-- Each Codex marketplace entry points to `./plugins/<plugin-name>` and includes `policy.installation`, `policy.authentication`, and `category`
-
-Use `npm run sync` to regenerate these files instead of editing generated plugin packages manually.
-
-### 5. Update README.md
-Update the "Available Skills" table in `README.md` to match the current skills.
-
-### 6. Report Changes
-Report to the user:
-- New skills added
-- Skills removed (if any were deleted)
-- Any skills with missing or invalid metadata
-
-### Example Update
-
-If a new skill `api-testing` is added to `skills/api-testing/SKILL.md`, assign it to a plugin in `plugin-groups.json`:
-
-```json
-{
-  "owner": {
-    "name": "Ân Vũ",
-    "email": "8651688+thienanblog@users.noreply.github.com"
-  },
-  "plugins": [
-    {
-      "name": "project-development-skills",
-      "displayName": "Project Development Skills",
-      "description": "A cohesive workflow bundle for project setup, ...",
-      "skills": ["project-development-mindset", "api-testing"]
-    }
-  ]
-}
-```
-
-Then run `npm run sync`. The generated `.claude-plugin/marketplace.json` looks like this:
-
-```json
-{
-  "name": "awesome-ai-agent-skills",
-  "owner": {
-    "name": "Ân Vũ",
-    "email": "8651688+thienanblog@users.noreply.github.com"
-  },
-  "metadata": {
-    "description": "Community-shared skills for AI coding agents",
-    "version": "1.19.1"
-  },
-  "plugins": [
-    {
-      "name": "project-development-skills",
-      "source": "./plugins/project-development-skills",
-      "description": "A cohesive workflow bundle for project setup, source-of-truth development, reviewable multi-slice delivery, UI/UX concept implementation, testing, debugging, performance, documentation, design systems, and production deployment planning.",
-      "version": "1.19.1",
-      "author": {
-        "name": "Ân Vũ",
-        "email": "8651688+thienanblog@users.noreply.github.com"
-      },
-      "homepage": "https://github.com/thienanblog/awesome-ai-agent-skills",
-      "repository": "https://github.com/thienanblog/awesome-ai-agent-skills",
-      "license": "MIT",
-      "keywords": ["claude-code", "agent-skills", "project-development-mindset"],
-      "category": "productivity"
-    }
-  ]
-}
-```
-
-The matching `plugins/project-development-skills/.claude-plugin/plugin.json`:
-
-```json
-{
-  "name": "project-development-skills",
-  "version": "1.19.1",
-  "description": "A cohesive workflow bundle for project setup, source-of-truth development, reviewable multi-slice delivery, UI/UX concept implementation, testing, debugging, performance, documentation, design systems, and production deployment planning.",
-  "author": {
-    "name": "Ân Vũ",
-    "email": "8651688+thienanblog@users.noreply.github.com"
-  },
-  "homepage": "https://github.com/thienanblog/awesome-ai-agent-skills",
-  "repository": "https://github.com/thienanblog/awesome-ai-agent-skills",
-  "license": "MIT",
-  "keywords": ["claude-code", "agent-skills", "project-development-mindset"]
-}
-```
-
-**Note:** Contributors can group related skills in one plugin (like Anthropic's `document-skills` with xlsx, docx, pptx, pdf). Update `plugin-groups.json` to add multiple skills to the same plugin.
-
-## Current Skills
-
-| Skill                        | Path                                   | Description                                                        |
-|------------------------------|----------------------------------------|--------------------------------------------------------------------|
-| agents-md-generator          | `./skills/agents-md-generator`         | Create concise repository instructions using deterministic discovery |
-| debugging-workflow           | `./skills/debugging-workflow`          | Reproduce, isolate, and fix bugs without guessing                  |
-| design-system-generator      | `./skills/design-system-generator`     | Generate project-specific DESIGN_SYSTEM.md files                   |
-| docker-local-dev             | `./skills/docker-local-dev`            | Generate Docker local development environments                     |
-| documentation-guidelines     | `./skills/documentation-guidelines`    | Backend feature documentation following DOCUMENTATION_GUIDELINES.md |
-| laravel-11-12-app-guidelines | `./skills/laravel-11-12-app-guidelines`| Laravel 11/12 application development guidelines                   |
-| laravel-13-app-guidelines    | `./skills/laravel-13-app-guidelines`   | Laravel 13 application and upgrade guidelines                      |
-| office-web-ui-system         | `./skills/office-web-ui-system`        | Design and refactor office-style admin web interfaces              |
-| performance-optimization     | `./skills/performance-optimization`    | Diagnose and improve performance with measurements                 |
-| project-development-mindset  | `./skills/project-development-mindset` | Universal developer mindset and project workflow guide             |
-| run-reviewable-subtask-loop  | `./skills/run-reviewable-subtask-loop` | Deliver large changes as right-sized, reviewable, testable slices  |
-| testing-verification         | `./skills/testing-verification`        | Plan, add, repair, and run tests and verification                  |
-| ui-ux-concept-implementation | `./skills/ui-ux-concept-implementation`| Implement UI from selected concepts or reference websites          |
-| vps-docker-traefik-deploy    | `./skills/vps-docker-traefik-deploy`   | Plan and implement secure Docker/Traefik VPS deployments           |
-
-## GitHub CI Validation
-
-This repository uses GitHub Actions for automated validation and syncing:
-
-### On Pull Requests (validate-pr.yml)
-- Runs `npm run validate` to check:
-  - Each skill folder has a valid `SKILL.md`
-  - YAML frontmatter contains required `name` and `description` fields
-  - YAML frontmatter does not contain `author`
-  - Skill frontmatter does not contain `context: fork` or `agent`, which would
-    execute the skill through a subagent without runtime user consent
-  - Every skill defaults to the main conversation, warns that delegation can
-    increase usage, requires approval for the proposed agent count and scope,
-    and asks again before expanding that approved scope
-  - Every skill in `skills/` is assigned to exactly one plugin in `plugin-groups.json`, and each plugin has an `owner`, `displayName`, and `description`
-  - Every generated file (both marketplaces, every `.claude-plugin/plugin.json` and `.codex-plugin/plugin.json`) byte-matches what `npm run sync` would write — this is what catches hand-edits and newer-only schema keys
-  - `package.json` and both root version fields in `package-lock.json` match
-  - Bundled skills under `plugins/<plugin-name>/skills/` match their canonical `skills/<skill-name>/` source
-  - No stale plugin packages remain under `plugins/`
-- If validation fails, a comment is added to the PR with common issues
-
-### On Merge to Main (sync-marketplace.yml)
-- Automatically runs `npm run sync` to:
-  - Scan all skills in `skills/` folder
-  - Update Claude and Codex marketplace files based on `plugin-groups.json`
-  - Update plugin packages under `plugins/`
-  - Update the skills table in `README.md`
-  - Commit and push changes if any
-
-### Local Validation Commands
-Before pushing changes, always run:
-```bash
-npm run sync       # Update marketplace files, plugin packages, and README.md
-npm run validate   # Check skill structure, marketplace files, and plugin packages
-npm run test:agent-context # Test deterministic discovery and native fallback behavior
-```
-
-Then confirm against Claude Code's own validator, which catches schema keys `npm run validate` does not know about:
-```bash
-claude plugin validate .
-```
-
-## Quality Guidelines for New Skills
-
-When reviewing or creating skills:
-
-1. **Clear Purpose**: The skill should solve a specific, well-defined problem
-2. **Actionable Instructions**: Include step-by-step workflows, not just descriptions
-3. **Reference Documentation**: Provide detailed references for complex topics
-4. **Consistent Naming**: Use kebab-case for folder and skill names
-5. **Complete Metadata**: Always include `name` and `description` in YAML frontmatter, and do not include `author`
-6. **Universal Compatibility**: Write instructions that work across different AI tools, avoid tool-specific syntax when possible
-
-## Post-Task Workflow
-
-After completing any task that modifies skills, plugins, or documentation:
-
-1. **Re-read context files** to ensure documentation is synchronized:
-   - `CLAUDE.md` - Check if instructions need updating
-   - `README.md` - Verify skills table and plugin groups are current
-   - Any skill-specific documentation that was modified
-
-2. **Sync marketplace** if skills were added, removed, modified, or regrouped:
    ```bash
    npm run sync
+   npm run validate
+   npm run test:agent-context
+   claude plugin validate .
    ```
 
-3. **Run validation** to catch any issues:
-   ```bash
-   npm run validate
-   ```
+3. Report any command that could not run and why.
+
+The pull-request workflow runs `npm run validate`. It verifies frontmatter, subagent consent gates, one-to-one plugin assignment, generated-file parity, version consistency, bundled-skill parity, and stale plugin removal. The main-branch sync workflow regenerates marketplace outputs after merge.
+
+Every skill must run in the main conversation by default, warn that delegation can increase usage, require approval for the proposed agent count and scope, and require fresh approval before expanding that scope. Do not use `context: fork` or `agent` frontmatter.
 
 ## Releasing
 
-`package.json` `version` is the single source of truth for the release version. Bump it first, then run `npm run sync` so it propagates into `.claude-plugin/marketplace.json` (both `metadata.version` and every plugin entry) and into each generated plugin manifest. `npm run validate` fails when these drift.
+- Treat `package.json` `version` as the release source of truth. Bump it before `npm run sync` so marketplaces and every generated plugin manifest receive the new version.
+- Never release skill changes without a version bump; explicit plugin versions prevent unchanged versions from reaching installed users.
+- Every GitHub Release must contain a self-contained, user-facing changelog. Do not publish release notes that only list or refer readers to pull requests.
+- Summarize each material change and its impact under clear sections such as Added, Changed, Fixed, Breaking Changes, and Upgrade Notes; omit empty sections.
+- Pull-request links may follow a plain-language description for traceability, but must never replace it.
+- Before publishing, compare the changelog with all merged changes since the previous tag and call out breaking changes, migration steps, compatibility requirements, and known limitations when applicable.
 
-Because plugin entries carry an explicit `version`, users only receive an update when the version changes. Skipping the bump means published skill changes never reach installed users.
+## Commit And Pull Request Conventions
 
-## Commit and PR Conventions
-
-- When asked to commit, use one of these prefixes: `feat`, `bug`, `chore`, or `refactor`.
-- When asked to open a pull request, create it (prefer `gh` if available) and follow the repo's PR template or guidance.
+- Use one of these commit prefixes: `feat`, `bug`, `chore`, or `refactor`.
+- When asked to open a pull request, create it with `gh` when available and follow the repository PR template or guidance.
