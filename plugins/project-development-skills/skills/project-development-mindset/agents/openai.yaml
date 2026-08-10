@@ -1,4 +1,4 @@
 interface:
   display_name: "Project Development Mindset"
-  short_description: "Source-of-truth-first project workflow"
-  default_prompt: "Use $project-development-mindset to guide a maintainable project change from discovery through verification."
+  short_description: "Adaptive, repository-aware change workflow"
+  default_prompt: "Use $project-development-mindset to make a project-aware change with effort and verification calibrated to risk."

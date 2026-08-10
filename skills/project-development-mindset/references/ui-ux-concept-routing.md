@@ -1,46 +1,36 @@
 # UI/UX Concept Routing
 
-Use this reference from `project-development-mindset` when a task includes UI/UX concepts, mockups, screenshots, visual references, or a request to emulate or clone a website.
+Use this reference when the task centers on generating or selecting UI concepts, implementing a screenshot or mockup, following a visual reference, or emulating a website's look and interaction patterns.
 
-## Route To The Optional Skill
+Stay in the general workflow for small local UI fixes that do not depend on concept selection or visual matching. Use an available specialized UI/UX skill when it directly owns the requested workflow; continue with the guidance below when none is available.
 
-Use `ui-ux-concept-implementation` when the sibling skill exists and the task centers on:
+## Establish The Visual Contract
 
-- generating UI concepts before implementation
-- implementing a user-selected concept
-- matching a screenshot, mockup, or visual reference
-- recreating the look and interaction pattern of a reference website
-- verifying visual before and after states with browser screenshots
+- Inspect supplied images and the project's current rendered UI before deciding what to change.
+- Identify the relevant design-system source, reusable components, tokens, assets, responsive conventions, and accessibility patterns.
+- Distinguish visual requirements from examples that merely communicate intent.
+- Ask a narrow question only when unresolved visual ambiguity would lead to materially different implementations.
+- Annotate a copy of a supplied image only when labels or callouts would make that clarification substantially easier. Preserve the original artifact.
 
-Stay in `project-development-mindset` for small local UI fixes that do not need concept selection, screenshot matching, or reference-site reconstruction.
+## Concepts And Selection
 
-Use `design-system-generator` when the project needs a durable `docs/DESIGN_SYSTEM.md` or design-token rules. Use `testing-verification` when browser verification, screenshot comparison, acceptance criteria, or visual QA is the main risk area.
+When the user asks for multiple concepts:
 
-## Concept Selection Rules
+- Give each concept a stable name and explain its meaningful tradeoffs.
+- Recommend one concept using technical, usability, accessibility, consistency, and implementation evidence.
+- Predict user preference only when prior user choices or explicit criteria provide evidence; do not invent a preference.
+- Ask the user to choose before implementation only when the concepts differ in a consequential way.
 
-When the task includes creating concepts:
+Preserve the selected concept outside committed source when it is needed for later comparison. Use an existing ignored artifact location or another environment-supported mechanism. Do not modify ignore configuration or create project files solely to store a transient concept unless that persistence is necessary and authorized.
 
-- Label each concept with a stable name.
-- Always state which concept you would choose as Technical Leader and why.
-- Always state which concept the user is most likely to prefer and why.
-- Ask the user to decide before implementation when the concepts materially differ.
+## Implementation And Verification
 
-After the user chooses:
+- Match the project's visual language and interaction model before introducing new tokens, components, motion, or layout conventions.
+- Keep page-level code focused on composition and data flow when the project has suitable component boundaries.
+- Compare target, current, and updated states at equivalent viewports when practical.
+- Capture the smallest useful region for component-level changes; use full-page captures when page composition, scrolling, or surrounding context matters.
+- Verify the states relevant to the request, such as default, loading, empty, error, validation, disabled, focus, responsive layout, and navigation. Do not manufacture every possible state when the affected component cannot enter it.
+- Use a real rendering environment for material visual work. Select among built-in browser control, project-owned end-to-end tests, browser automation, screenshots, or manual checks according to current capabilities and project policy.
+- Distinguish exploratory browser verification from repeatable source-controlled regression tests in the final report.
 
-- Save the selected concept immediately in a project-local temporary folder.
-- Prefer an existing ignored temp folder; otherwise use `.tmp/ui-ux-concepts/`.
-- If the project uses Git, add the temp folder to `.git/info/exclude` when needed.
-- Never stage or commit the saved concept artifact.
-
-## Verification Preference
-
-Suggest a Goal when the environment supports persistent goals so the agent can keep verifying the concept, current state, and final after-state until the UI work is complete.
-
-Use browser tooling in this order:
-
-1. Playwright MCP
-2. Chrome DevTools MCP
-3. Local Playwright CLI or equivalent browser automation
-4. Manual browser checks only when automation is unavailable
-
-If Playwright MCP and Chrome DevTools MCP both exist, use Playwright MCP first.
+If the task establishes a durable visual convention, update the project's existing design-system source or use an available design-system skill. Do not create a new design-system document for a one-off visual change.

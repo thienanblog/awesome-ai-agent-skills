@@ -1,97 +1,43 @@
-# Quality Skill Routing
+# Specialized Quality Routing
 
-Use this reference from `project-development-mindset` when a task might need a specialized quality skill.
+Use this reference only when a specialized concern is central to the task. Keep `project-development-mindset` as the cross-cutting baseline, let the most relevant specialized workflow lead, and avoid loading unrelated skills.
 
-## Stay In Project Development Mindset
+## Routing Decision
 
-Stay in the general workflow when:
+Stay in the general workflow when the task is a normal implementation or documentation change and specialized work is only a small supporting step.
 
-- The task is a normal feature, refactor, docs update, setup change, or small bug fix.
-- Testing, debugging, or performance is only a small verification step.
-- The main risk is understanding project source of truth, reuse, file boundaries, or documentation alignment.
+Route to a specialized skill or capability when the task centers on one of these concerns:
 
-## Optionally Propose `run-reviewable-subtask-loop`
+- **Testing and verification:** test strategy, coverage, acceptance criteria, CI checks, browser verification, screenshot comparison, or visual regression.
+- **Debugging:** unexplained errors, regressions, crashes, logs, stack traces, flaky behavior, failing commands, or root-cause isolation.
+- **Performance:** measured slowness, query count, rendering lag, memory or CPU pressure, caching, payload size, bundle size, or slow builds and tests.
+- **Documentation:** documentation architecture, feature or module docs, API contracts, workflows, runbooks, or cleanup of stale documentation.
+- **Security:** threat modeling, security review, validation of findings, secure implementation, or remediation whose primary risk is security.
+- **Deployment:** production architecture, container or infrastructure design, rollout planning, live operations, or environment-specific deployment work.
+- **UI/UX concepts:** concept generation or selection, screenshot or mockup matching, visual references, or website emulation. Read `ui-ux-concept-routing.md` before proceeding.
 
-Do not switch to this skill automatically. Consider proposing it only during a
-user-initiated brainstorming or planning session before coding, when the
-discussion centers on:
+Use names such as `testing-verification`, `debugging-workflow`, `performance-optimization`, `documentation-guidelines`, or `vps-docker-traefik-deploy` only when those skills are actually available. An equivalent capability from another installed source is acceptable. Do not discover availability from an assumed relative path, install missing skills silently, or block ordinary work because an optional skill is absent.
 
-- Executing a large plan, architecture migration, refactor, or feature roadmap
-  as multiple dependent slices.
-- Choosing coherent subtask boundaries that are substantial enough to code,
-  review, and test meaningfully without mixing unrelated responsibilities.
-- Creating atomic locally reviewed commits and last-known-good integration
-  checkpoints.
-- Recovering by rebuilding an invalid slice and its dependent suffix.
-- Budgeting local slice, phase, and final verification while reserving remote CI
-  for the aggregate review request.
-- Resuming a partially completed multi-slice delivery from branches, commits,
-  and repository records.
+## Unknown Causes And Transitions
 
-Present the proposal as optional and use the skill only after the user
-explicitly requests or accepts it. If the user declines it, stay in
-`project-development-mindset` and use a normal proportionate plan.
+- Start with debugging when a failure or performance symptom has no established cause.
+- Switch to performance guidance after evidence identifies a resource or latency bottleneck.
+- Switch to testing guidance when the cause is understood and the remaining work is primarily regression coverage or acceptance verification.
+- Use security guidance whenever the central question becomes exploitability, trust boundaries, sensitive data, authorization, or remediation of a vulnerability.
 
-Do not propose, load, or use `run-reviewable-subtask-loop` for an ordinary
-coding request with clear requirements and no prior user-requested brainstorming
-or implementation discussion. The agent's own internal planning does not count
-as a user-initiated brainstorm. Subtask boundaries also do not authorize
-subagents. Before any delegation, explain that it can increase usage and ask the
-user to approve the proposed agent count and scope; ask again before expanding
-that scope.
+Do not keep multiple full workflows active after the primary risk changes. Retain only the cross-cutting constraints and the workflow that best matches the current problem.
 
-## Switch To `testing-verification`
+## Multi-Slice Delivery
 
-Use `testing-verification` when the task centers on:
+Consider `run-reviewable-subtask-loop` only for a large plan, migration, refactor, or roadmap that genuinely benefits from multiple independently reviewable and recoverable slices.
 
-- Adding, repairing, or expanding tests.
-- Choosing test strategy or coverage.
-- Verifying acceptance criteria.
-- Running or interpreting test suites.
-- Browser verification, Playwright screenshots, visual regression, or UI before/after checks.
-- CI failures where the failure is already clearly a test or verification problem.
-
-If the test is failing for an unknown reason, use `debugging-workflow` first.
-
-## Switch To `debugging-workflow`
-
-Use `debugging-workflow` when the task starts from:
-
-- Error messages, stack traces, failing commands, broken UI, incorrect data, crashes, regressions, or logs.
-- Flaky tests or behavior that cannot be explained yet.
-- A request to debug, diagnose, investigate, find root cause, or fix a bug.
-
-If the isolated cause is slow queries, memory, CPU, rendering, build time, or resource usage, switch to `performance-optimization`.
-
-## Switch To `performance-optimization`
-
-Use `performance-optimization` when the task centers on:
-
-- Slow pages, slow APIs, slow queries, N+1 queries, high memory, high CPU, large payloads, render lag, bundle size, Core Web Vitals, caching, queues, background jobs, slow builds, or slow tests.
-- Profiling, benchmarking, optimization, pagination, virtualization, lazy loading, image/font optimization, or cache design.
-
-If the performance symptom cannot be reproduced or the cause is unknown, start with `debugging-workflow` and switch after the bottleneck is identified.
-
-## Switch To `ui-ux-concept-implementation`
-
-Use `ui-ux-concept-implementation` when the task centers on:
-
-- generating and selecting UI/UX concepts before implementation
-- implementing a selected concept, screenshot, mockup, or visual reference
-- emulating or cloning a reference website's look and interaction pattern
-- saving the selected concept outside commits
-- verifying before/current/after UI states with Playwright MCP, Chrome DevTools MCP, Playwright, or screenshots
-
-Use `testing-verification` too when screenshot comparison, acceptance criteria, or broader browser QA becomes the main verification risk.
+Use it only when the user explicitly requests it or explicitly accepts it during user-initiated planning before implementation. Do not activate it from routine internal planning, task size alone, or the existence of subtask boundaries. If it is unavailable or declined, use a proportionate plan in the main workflow.
 
 ## Combined Tasks
 
-For broad tasks:
+For work spanning several concerns:
 
-1. Use `project-development-mindset` to establish source of truth, reuse, and file boundaries.
-2. During user-initiated brainstorming before coding, optionally propose
-   `run-reviewable-subtask-loop` when the work needs multiple independently
-   recoverable slices. Use it only after explicit user acceptance; otherwise
-   continue with the general workflow.
-3. Use the specialized skill for the deepest risk area.
-4. Return to `project-development-mindset` for documentation, project memory, and final reporting.
+1. Establish project context, scope, authorization, and success criteria with the general mindset.
+2. Choose the specialized workflow for the deepest current risk.
+3. Change routing if evidence shows another concern has become primary.
+4. Return to the general mindset for cross-boundary verification, durable context alignment, and concise reporting.
