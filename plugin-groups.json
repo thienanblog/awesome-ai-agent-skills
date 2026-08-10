@@ -44,6 +44,14 @@
       "skills": [
         "office-web-ui-system"
       ]
+    },
+    {
+      "name": "video-production-skills",
+      "displayName": "Video Production Skills",
+      "description": "Skills for routing video briefs across generation, deterministic composition, supplied-footage editing, and automatic end-to-end production plans.",
+      "skills": [
+        "video-router"
+      ]
     }
   ]
 }

@@ -87,6 +87,25 @@
         "office-web-ui-system"
       ],
       "category": "productivity"
+    },
+    {
+      "name": "video-production-skills",
+      "source": "./plugins/video-production-skills",
+      "description": "Skills for routing video briefs across generation, deterministic composition, supplied-footage editing, and automatic end-to-end production plans.",
+      "version": "1.21.1",
+      "author": {
+        "name": "Ân Vũ",
+        "email": "8651688+thienanblog@users.noreply.github.com"
+      },
+      "homepage": "https://github.com/thienanblog/awesome-ai-agent-skills",
+      "repository": "https://github.com/thienanblog/awesome-ai-agent-skills",
+      "license": "MIT",
+      "keywords": [
+        "claude-code",
+        "agent-skills",
+        "video-router"
+      ],
+      "category": "productivity"
     }
   ]
 }

@@ -1,0 +1,31 @@
+{
+  "name": "video-production-skills",
+  "version": "1.21.1",
+  "description": "Skills for routing video briefs across generation, deterministic composition, supplied-footage editing, and automatic end-to-end production plans.",
+  "homepage": "https://github.com/thienanblog/awesome-ai-agent-skills",
+  "repository": "https://github.com/thienanblog/awesome-ai-agent-skills",
+  "license": "MIT",
+  "keywords": [
+    "codex",
+    "skills",
+    "video-router"
+  ],
+  "skills": "./skills/",
+  "interface": {
+    "displayName": "Video Production Skills",
+    "shortDescription": "Skills for routing video briefs across generation, deterministic composition, supplied-footage editing, and automatic end-to-end production plans.",
+    "longDescription": "Skills for routing video briefs across generation, deterministic composition, supplied-footage editing, and automatic end-to-end production plans.",
+    "developerName": "Ân Vũ",
+    "category": "Productivity",
+    "capabilities": [
+      "Read",
+      "Write"
+    ],
+    "websiteURL": "https://github.com/thienanblog/awesome-ai-agent-skills",
+    "defaultPrompt": [
+      "Use video-router to guide this project task.",
+      "Apply video-production-skills to review this repository."
+    ],
+    "brandColor": "#10A37F"
+  }
+}

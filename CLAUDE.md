@@ -197,6 +197,7 @@ The matching `plugins/project-development-skills/.claude-plugin/plugin.json`:
 | run-reviewable-subtask-loop  | `./skills/run-reviewable-subtask-loop` | Deliver large changes as right-sized, reviewable, testable slices  |
 | testing-verification         | `./skills/testing-verification`        | Plan, add, repair, and run tests and verification                  |
 | ui-ux-concept-implementation | `./skills/ui-ux-concept-implementation`| Implement UI from selected concepts or reference websites          |
+| video-router                 | `./skills/video-router`                | Route video briefs before production begins                        |
 | vps-docker-traefik-deploy    | `./skills/vps-docker-traefik-deploy`   | Plan and implement secure Docker/Traefik VPS deployments           |
 
 ## GitHub CI Validation
