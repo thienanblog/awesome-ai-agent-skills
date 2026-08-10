@@ -1,0 +1,4 @@
+interface:
+  display_name: "Laravel 13 App Guidelines"
+  short_description: "Build and upgrade Laravel 13 apps safely"
+  default_prompt: "Use $laravel-13-app-guidelines to implement this Laravel 13 change using the project's detected stack and conventions."
