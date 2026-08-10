@@ -191,6 +191,7 @@ The matching `plugins/project-development-skills/.claude-plugin/plugin.json`:
 | docker-local-dev             | `./skills/docker-local-dev`            | Generate Docker local development environments                     |
 | documentation-guidelines     | `./skills/documentation-guidelines`    | Backend feature documentation following DOCUMENTATION_GUIDELINES.md |
 | laravel-11-12-app-guidelines | `./skills/laravel-11-12-app-guidelines`| Laravel 11/12 application development guidelines                   |
+| laravel-13-app-guidelines    | `./skills/laravel-13-app-guidelines`   | Laravel 13 application and upgrade guidelines                      |
 | office-web-ui-system         | `./skills/office-web-ui-system`        | Design and refactor office-style admin web interfaces              |
 | performance-optimization     | `./skills/performance-optimization`    | Diagnose and improve performance with measurements                 |
 | project-development-mindset  | `./skills/project-development-mindset` | Universal developer mindset and project workflow guide             |
