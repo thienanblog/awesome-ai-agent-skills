@@ -1,7 +1,7 @@
 {
   "name": "laravel-app-skills",
-  "version": "1.24.0",
-  "description": "Guidelines for building Laravel 11/12 apps across common stacks and tooling.",
+  "version": "1.25.0",
+  "description": "Version-aware guidelines for building and upgrading Laravel 11, 12, and 13 applications across common stacks and tooling.",
   "author": {
     "name": "Ân Vũ",
     "email": "8651688+thienanblog@users.noreply.github.com"
@@ -12,6 +12,7 @@
   "keywords": [
     "claude-code",
     "agent-skills",
-    "laravel-11-12-app-guidelines"
+    "laravel-11-12-app-guidelines",
+    "laravel-13-app-guidelines"
   ]
 }

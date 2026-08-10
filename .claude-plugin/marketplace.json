@@ -6,14 +6,14 @@
   },
   "metadata": {
     "description": "Community-shared skills for AI coding agents",
-    "version": "1.24.0"
+    "version": "1.25.0"
   },
   "plugins": [
     {
       "name": "project-development-skills",
       "source": "./plugins/project-development-skills",
       "description": "A cohesive workflow bundle for project setup, source-of-truth development, reviewable multi-slice delivery, UI/UX concept implementation, testing, debugging, performance, documentation, design systems, and production deployment planning.",
-      "version": "1.24.0",
+      "version": "1.25.0",
       "author": {
         "name": "Ân Vũ",
         "email": "8651688+thienanblog@users.noreply.github.com"
@@ -34,8 +34,8 @@
     {
       "name": "laravel-app-skills",
       "source": "./plugins/laravel-app-skills",
-      "description": "Guidelines for building Laravel 11/12 apps across common stacks and tooling.",
-      "version": "1.24.0",
+      "description": "Version-aware guidelines for building and upgrading Laravel 11, 12, and 13 applications across common stacks and tooling.",
+      "version": "1.25.0",
       "author": {
         "name": "Ân Vũ",
         "email": "8651688+thienanblog@users.noreply.github.com"
@@ -46,7 +46,8 @@
       "keywords": [
         "claude-code",
         "agent-skills",
-        "laravel-11-12-app-guidelines"
+        "laravel-11-12-app-guidelines",
+        "laravel-13-app-guidelines"
       ],
       "category": "productivity"
     },
@@ -54,7 +55,7 @@
       "name": "devops-skills",
       "source": "./plugins/devops-skills",
       "description": "Skills for Docker-based local development environment configuration.",
-      "version": "1.24.0",
+      "version": "1.25.0",
       "author": {
         "name": "Ân Vũ",
         "email": "8651688+thienanblog@users.noreply.github.com"
@@ -73,7 +74,7 @@
       "name": "office-web-ui-skills",
       "source": "./plugins/office-web-ui-skills",
       "description": "Skills for designing and refactoring admin, internal, and back-office web interfaces.",
-      "version": "1.24.0",
+      "version": "1.25.0",
       "author": {
         "name": "Ân Vũ",
         "email": "8651688+thienanblog@users.noreply.github.com"
