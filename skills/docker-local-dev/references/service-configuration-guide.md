@@ -1,654 +1,241 @@
 # Service Configuration Guide
 
-Comprehensive configuration options for all Docker services.
+Use this reference for image selection, process layout, dependencies, mounts, Dockerfiles, and local configuration.
 
-## Image Management Strategy
+## Contents
 
-### Scan Existing Images
+- [Image selection](#image-selection)
+- [Service layout](#service-layout)
+- [Stateful and optional services](#stateful-and-optional-services)
+- [Source and dependency strategies](#source-and-dependency-strategies)
+- [Dockerfile guidance](#dockerfile-guidance)
+- [Environment and secrets](#environment-and-secrets)
+- [Platform considerations](#platform-considerations)
 
-Before pulling new images, scan what's already available locally to save disk space:
+## Image Selection
 
-```bash
-./scripts/detect-images.sh
-```
+Choose images in this order:
 
-This script outputs JSON with:
-- Database images (MySQL, MariaDB, PostgreSQL)
-- PHP images with versions
-- Node.js images with versions
-- Redis images
-- Mail testing images (Mailpit, MailHog)
-- Nginx images
+1. project runtime constraints and lockfiles
+2. team or production compatibility when parity matters
+3. Docker Official Image or Verified Publisher provenance
+4. a supported, explicit major/minor tag; use a digest when strict reproducibility is required
+5. host architecture and native dependency compatibility
+6. already-downloaded images as a final tie-breaker
 
-### Image Selection Priority
+Use `./scripts/detect-images.sh` only to identify cache opportunities. A cached image can be stale and must not override compatibility or security. Avoid floating `latest` and unqualified tags such as `redis:alpine` in generated files. Document the update policy for mutable major/minor tags and use `docker compose build --pull` when freshness is required.
 
-1. **Use existing images when possible** - saves disk space and download time
-2. **Match production versions** - if user needs specific version for compatibility
-3. **Prefer Alpine variants** - smaller image size (e.g., `redis:7-alpine` vs `redis:7`)
+Do not assume Alpine is always better. Prefer it when the project supports musl and the smaller image is useful; prefer Debian or Ubuntu slim variants when native modules, debugging tools, or glibc compatibility make them more reliable.
 
-### Example Decision Flow
-
-```
-Detected: mysql:8.0.35 (2.3 GB already downloaded)
-
-Options:
-1. mysql:8.0.35 (already downloaded - recommended)
-2. mysql:8.4 (will download ~500 MB)
-3. mariadb:11 (will download ~400 MB)
-
-→ If production uses MySQL 8.0.x, recommend option 1
-→ If production uses MySQL 8.4, recommend option 2
-→ Always ask user for production compatibility
-```
-
-### Docker Compose Version
-
-**Important:** Do not include `version:` field in docker-compose.yml files.
-- Docker Compose v2 deprecated this field
-- Modern compose files don't need it
-
-## Local Dev vs Production Images
-
-Use different Docker patterns for local development and production:
+Keep local development and production separate:
 
 | Concern | Local development | Production |
-|---------|-------------------|------------|
-| Source code | Bind mount for live reload | Copy source into immutable image |
-| Dependencies | Named volumes plus one-shot installer services when useful | Install during image build |
-| Debugging | Optional Xdebug/dev tools, verbose logs | Minimal runtime tools and logs |
-| Commands | Dev servers/watchers | Optimized web server/runtime command |
-| Secrets | Local `.env.docker` or safe local defaults | Deployment env/secrets, scoped per service |
+|---|---|---|
+| Source | bind mount or Compose Watch | copied into immutable image |
+| Dependencies | image layer or named volume | installed during image build |
+| Commands | watcher or development server | production runtime command |
+| Tooling | debugger and local utilities as needed | minimal runtime packages |
+| Secrets | ignored local env/secrets | deployment secret mechanism |
 
-Do not reuse one-shot dependency installer services in production compose. Production images should be self-contained enough to start without first running Composer, npm, pnpm, or migrations inside a dependency helper container.
+## Service Layout
 
-## Nginx Configuration
+Run one concern per Compose service and keep its primary command in the foreground:
 
-### PHP-FPM (Laravel/WordPress)
+- web/API: framework development command
+- worker: queue or background consumer command
+- scheduler: scheduler command such as `php artisan schedule:work` or Celery Beat
+- proxy: Nginx, Caddy, or Traefik only when the local routing requirement justifies it
 
-```nginx
-server {
-    listen 80;
-    server_name localhost;
-    root /var/www/html/public;  # Laravel
-    # root /var/www/html;        # WordPress
-    index index.php index.html;
+Use the same built application image for web, worker, and scheduler services when possible. Add `init: true` when the primary process does not reliably reap or forward signals. Do not add Supervisor or PM2 by default; use them only when the repository already depends on them or the user requests production-parity behavior.
 
-    location / {
-        try_files $uri $uri/ /index.php?$query_string;
-    }
+Use a stable top-level project name and ordinary service names:
 
-    location ~ \.php$ {
-        fastcgi_pass app:9000;
-        fastcgi_index index.php;
-        fastcgi_param SCRIPT_FILENAME $realpath_root$fastcgi_script_name;
-        include fastcgi_params;
-    }
+```yaml
+name: inventory-api
 
-    location ~ /\.ht {
-        deny all;
-    }
-
-    # Increase upload size (adjust as needed)
-    client_max_body_size 100M;
-}
+services:
+  app:
+    build: .
+    init: true
+  worker:
+    build: .
+    command: ["php", "artisan", "queue:work", "--sleep=3", "--tries=3"]
 ```
 
-### Node.js Reverse Proxy
+Do not add `container_name` unless a proven external integration requires it. Compose-generated names avoid collisions and permit scaling.
 
-```nginx
-server {
-    listen 80;
-    server_name localhost;
+Use long-form `depends_on` only for real readiness or one-shot requirements:
 
-    location / {
-        proxy_pass http://app:3000;
-        proxy_http_version 1.1;
-        proxy_set_header Upgrade $http_upgrade;
-        proxy_set_header Connection 'upgrade';
-        proxy_set_header Host $host;
-        proxy_set_header X-Real-IP $remote_addr;
-        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
-        proxy_set_header X-Forwarded-Proto $scheme;
-        proxy_cache_bypass $http_upgrade;
-    }
-}
+```yaml
+depends_on:
+  db:
+    condition: service_healthy
+  app-deps:
+    condition: service_completed_successfully
 ```
 
-### Python WSGI/ASGI
+Every `service_healthy` dependency must define a healthcheck whose command exists in the selected image. Startup ordering is not a substitute for application retry logic.
 
-```nginx
-server {
-    listen 80;
-    server_name localhost;
+## Stateful and Optional Services
 
-    location / {
-        proxy_pass http://app:8000;
-        proxy_set_header Host $host;
-        proxy_set_header X-Real-IP $remote_addr;
-        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
-        proxy_set_header X-Forwarded-Proto $scheme;
-    }
+Add a database only when the application needs a local database container. Preserve SQLite, remote development databases, and shared host services when those are intentional.
 
-    location /static/ {
-        alias /var/www/static/;
-    }
+For MySQL/MariaDB and PostgreSQL:
 
-    location /media/ {
-        alias /var/www/media/;
-    }
-}
-```
+- pin a project-compatible image version
+- store data in a named volume
+- keep the port internal unless a host SQL tool needs it
+- use a non-root application user and separate root/admin credentials
+- use image-supported `_FILE` variables or Compose secrets when practical
+- define a readiness healthcheck using container-side variables escaped as `$$VAR`
 
-## Database Configuration
-
-### MySQL 8.x
+Example:
 
 ```yaml
 db:
-  image: mysql:8.0
+  image: postgres:${POSTGRES_VERSION:?set POSTGRES_VERSION}
   environment:
-    MYSQL_ROOT_PASSWORD: ${DB_PASSWORD:-secret}
-    MYSQL_DATABASE: ${DB_DATABASE:-app}
-    MYSQL_USER: ${DB_USERNAME:-app}
-    MYSQL_PASSWORD: ${DB_PASSWORD:-secret}
-  volumes:
-    - db_data:/var/lib/mysql
-    - ./docker/mysql/init:/docker-entrypoint-initdb.d
-  ports:
-    - "${DB_PORT:-3306}:3306"
-  command: --default-authentication-plugin=mysql_native_password
-```
-
-**Development settings (my.cnf):**
-```ini
-[mysqld]
-# Performance
-innodb_buffer_pool_size = 256M
-innodb_log_file_size = 64M
-
-# Development friendly
-sql_mode = "STRICT_TRANS_TABLES,NO_ZERO_DATE,NO_ZERO_IN_DATE,ERROR_FOR_DIVISION_BY_ZERO"
-
-# Logging (optional for debugging)
-# general_log = 1
-# general_log_file = /var/log/mysql/query.log
-```
-
-### MariaDB 11.x
-
-```yaml
-db:
-  image: mariadb:11
-  environment:
-    MARIADB_ROOT_PASSWORD: ${DB_PASSWORD:-secret}
-    MARIADB_DATABASE: ${DB_DATABASE:-app}
-    MARIADB_USER: ${DB_USERNAME:-app}
-    MARIADB_PASSWORD: ${DB_PASSWORD:-secret}
-  volumes:
-    - db_data:/var/lib/mysql
-  ports:
-    - "${DB_PORT:-3306}:3306"
-```
-
-### PostgreSQL 16/17.x
-
-```yaml
-db:
-  image: postgres:17-alpine
-  environment:
-    POSTGRES_DB: ${DB_DATABASE:-app}
-    POSTGRES_USER: ${DB_USERNAME:-app}
-    POSTGRES_PASSWORD: ${DB_PASSWORD:-secret}
+    POSTGRES_DB: ${DB_DATABASE:?set DB_DATABASE}
+    POSTGRES_USER: ${DB_USERNAME:?set DB_USERNAME}
+    POSTGRES_PASSWORD_FILE: /run/secrets/db_password
+  secrets:
+    - db_password
   volumes:
     - db_data:/var/lib/postgresql/data
-  ports:
-    - "${DB_PORT:-5432}:5432"
+  healthcheck:
+    test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER} -d $${POSTGRES_DB}"]
+    interval: 5s
+    timeout: 5s
+    retries: 10
+    start_period: 10s
 ```
 
-### PostgreSQL 18+ Data Volume Mount
+Add Redis only when configuration or source usage shows it is needed. Do not publish Redis to the host by default. Configure persistence only when local behavior needs it.
 
-For `postgres:18` and newer official images, mount the named volume at `/var/lib/postgresql`, not `/var/lib/postgresql/data`. PostgreSQL 18+ uses a version-specific data directory under that parent path, and mounting only the old `data` path can create confusing anonymous-volume behavior during recreation or upgrades.
+Prefer Mailpit for SMTP capture when email delivery needs browser inspection. Keep SMTP internal and publish only the UI to loopback. Do not include real SMTP credentials.
+
+Use Compose profiles for optional administration or debugging tools:
 
 ```yaml
-db:
-  image: postgres:18-alpine
-  environment:
-    POSTGRES_DB: ${DB_DATABASE:-app}
-    POSTGRES_USER: ${DB_USERNAME:-app}
-    POSTGRES_PASSWORD: ${DB_PASSWORD:-secret}
+adminer:
+  image: ${ADMINER_IMAGE:?set ADMINER_IMAGE}
+  profiles: ["tools"]
+```
+
+Do not profile a dependency required by an always-enabled application service unless both sides share compatible profiles.
+
+## Source and Dependency Strategies
+
+### Bind mount
+
+Use a narrow bind mount for straightforward hot reload:
+
+```yaml
+volumes:
+  - ./apps/api:/app
+  - api_vendor:/app/vendor
+```
+
+Do not publish fixed performance percentages. File-system behavior varies across native Linux, Docker Desktop, WSL2, repository size, and dependency tree shape.
+
+### Compose Watch
+
+When Docker Compose 2.22 or later is available, use Watch for granular sync, cross-platform native dependencies, or large repositories:
+
+```yaml
+develop:
+  watch:
+    - action: sync
+      path: ./src
+      target: /app/src
+    - action: rebuild
+      path: ./package-lock.json
+```
+
+Exclude `node_modules`, `vendor`, virtual environments, build output, and other generated trees from sync. Use `sync+restart` for configuration changes that do not require a rebuild.
+
+### Dependencies in the image
+
+Install dependencies in the development image when rebuilding on lockfile changes is acceptable. Copy manifests and lockfiles before source code to preserve build cache. Use the repository's package manager and frozen/locked install command.
+
+### One-shot installer
+
+Use a one-shot installer only when it solves bind-mount or workspace dependency ownership:
+
+```yaml
+app-deps:
+  image: composer:2
+  working_dir: /app
+  command: ["composer", "install", "--no-interaction", "--prefer-dist"]
   volumes:
-    - db_data:/var/lib/postgresql
-  ports:
-    - "${DB_PORT:-5432}:5432"
-```
+    - ./apps/api:/app
+    - api_vendor:/app/vendor
 
-For older PostgreSQL images, `/var/lib/postgresql/data` remains acceptable. When generating a stack, choose the mount target based on the selected image major version.
-
-## Redis Configuration
-
-### Basic Redis
-
-```yaml
-redis:
-  image: redis:alpine
+app:
+  depends_on:
+    app-deps:
+      condition: service_completed_successfully
   volumes:
-    - redis_data:/data
-  ports:
-    - "${REDIS_PORT:-6379}:6379"
-  command: redis-server --appendonly yes
+    - ./apps/api:/app
+    - api_vendor:/app/vendor
 ```
 
-### Redis with Password
-
-```yaml
-redis:
-  image: redis:alpine
-  volumes:
-    - redis_data:/data
-  ports:
-    - "${REDIS_PORT:-6379}:6379"
-  command: redis-server --appendonly yes --requirepass ${REDIS_PASSWORD:-secret}
-```
-
-### Redis Configuration Options
-
-| Option | Value | Description |
-|--------|-------|-------------|
-| `appendonly` | yes | Enable AOF persistence |
-| `maxmemory` | 256mb | Memory limit |
-| `maxmemory-policy` | allkeys-lru | Eviction policy |
-
-## Email Testing Services
-
-### Mailpit (Recommended)
-
-```yaml
-mailpit:
-  image: axllent/mailpit:latest
-  ports:
-    - "${MAIL_PORT:-1025}:1025"      # SMTP
-    - "${MAIL_UI_PORT:-8025}:8025"   # Web UI
-  environment:
-    MP_SMTP_AUTH_ACCEPT_ANY: 1
-    MP_SMTP_AUTH_ALLOW_INSECURE: 1
-```
-
-**Framework configuration:**
-
-Laravel (.env):
-```env
-MAIL_MAILER=smtp
-MAIL_HOST=mailpit
-MAIL_PORT=1025
-MAIL_USERNAME=null
-MAIL_PASSWORD=null
-MAIL_ENCRYPTION=null
-```
-
-WordPress (wp-config.php):
-```php
-define('SMTP_HOST', 'mailpit');
-define('SMTP_PORT', 1025);
-```
-
-Django (settings.py):
-```python
-EMAIL_HOST = 'mailpit'
-EMAIL_PORT = 1025
-EMAIL_USE_TLS = False
-```
-
-### MailHog (Alternative)
-
-```yaml
-mailhog:
-  image: mailhog/mailhog:latest
-  ports:
-    - "${MAIL_PORT:-1025}:1025"
-    - "${MAIL_UI_PORT:-8025}:8025"
-```
-
-## Opcache Configuration
-
-### Development Settings
-
-```ini
-; docker/php/opcache.ini
-opcache.enable=1
-opcache.memory_consumption=256
-opcache.interned_strings_buffer=16
-opcache.max_accelerated_files=10000
-
-; CRITICAL for development - validate on every request
-opcache.validate_timestamps=1
-opcache.revalidate_freq=0
-
-; Optional: Enable file-based cache
-; opcache.file_cache=/tmp/opcache
-```
-
-### Production Hints (Comments)
-
-```ini
-; For production, consider:
-; opcache.validate_timestamps=0  ; Don't check for file changes
-; opcache.revalidate_freq=60     ; Or check less frequently
-```
-
-## Laravel Development Server
-
-When a Laravel app has a host `.env` file but Docker Compose provides different environment variables, `php artisan serve` can be a poor dev-server command because the framework serve command may pass a narrow environment set to the child PHP server. If Compose env values must reliably override the app `.env`, prefer running PHP's built-in server directly from `public/`:
-
-```yaml
-services:
-  api:
-    command: >
-      sh -lc "cd public &&
-      php -d variables_order=EGPCS
-      -S 0.0.0.0:8000
-      ../vendor/laravel/framework/src/Illuminate/Foundation/resources/server.php"
-```
-
-Use `php artisan serve` only when you have verified the intended env values are visible to the served process, or when the project uses a Docker-specific app env file.
-
-## Supervisor Configuration
-
-### Laravel Queue Worker
-
-```ini
-[program:laravel-worker]
-process_name=%(program_name)s_%(process_num)02d
-command=php /var/www/artisan queue:work redis --sleep=3 --tries=3 --max-time=3600
-autostart=true
-autorestart=true
-stopasgroup=true
-killasgroup=true
-user=www-data
-numprocs=2
-redirect_stderr=true
-stdout_logfile=/var/www/storage/logs/worker.log
-stopwaitsecs=3600
-```
-
-### Laravel Scheduler
-
-```ini
-[program:laravel-scheduler]
-command=/bin/sh -c "while [ true ]; do php /var/www/artisan schedule:run --verbose --no-interaction; sleep 60; done"
-autostart=true
-autorestart=true
-user=www-data
-redirect_stderr=true
-stdout_logfile=/var/www/storage/logs/scheduler.log
-```
-
-### Celery Worker (Python)
-
-```ini
-[program:celery]
-command=celery -A myapp worker --loglevel=info
-directory=/var/www
-user=www-data
-numprocs=1
-autostart=true
-autorestart=true
-startsecs=10
-stopwaitsecs=600
-stdout_logfile=/var/log/celery/worker.log
-stderr_logfile=/var/log/celery/worker-error.log
-```
-
-## Volume Mount Strategies
-
-### Bind Mount (Development)
-
-```yaml
-volumes:
-  - ./:/var/www
-```
-
-**Pros:**
-- Instant file sync
-- No rebuild needed for code changes
-- Easy debugging
-
-**Cons:**
-- Slower on macOS (~10-20%)
-- File permission issues possible
-
-### Bind Mount with Performance Options (macOS)
-
-```yaml
-volumes:
-  - ./:/var/www:cached           # Relaxed consistency
-  # or
-  - ./:/var/www:delegated        # Container-authoritative
-```
-
-### Named Volume (Performance)
-
-```yaml
-volumes:
-  - app_code:/var/www
-
-volumes:
-  app_code:
-```
-
-**Pros:**
-- Best performance
-- Native Docker speed
-
-**Cons:**
-- Requires rebuild for code changes
-- Not suitable for active development
-
-### Hybrid Approach
-
-```yaml
-volumes:
-  - ./:/var/www                  # Source code (bind mount)
-  - vendor_cache:/var/www/vendor # Dependencies (named volume)
-  - node_modules_cache:/var/www/node_modules
-
-volumes:
-  vendor_cache:
-  node_modules_cache:
-```
-
-### One-Shot Dependency Installer Services
-
-For live-reload development with bind-mounted source, dependency directories are often hidden by the bind mount or should be isolated from the host. A one-shot installer service can populate named volumes, then exit successfully.
-
-```yaml
-services:
-  api-deps:
-    image: composer:2
-    working_dir: /app
-    command: composer install --no-interaction --prefer-dist
-    volumes:
-      - ./apps/api:/app
-      - api_vendor:/app/vendor
-
-  api:
-    build:
-      context: .
-      dockerfile: infra/docker/api.dev.Dockerfile
-    depends_on:
-      api-deps:
-        condition: service_completed_successfully
-    volumes:
-      - ./apps/api:/app
-      - api_vendor:/app/vendor
-
-volumes:
-  api_vendor:
-```
-
-```yaml
-services:
-  node-deps:
-    image: node:22-alpine
-    working_dir: /repo
-    command: sh -lc "corepack enable && pnpm install --frozen-lockfile"
-    volumes:
-      - ./:/repo
-      - node_modules:/repo/node_modules
-      - pnpm_store:/root/.local/share/pnpm/store
-
-volumes:
-  node_modules:
-  pnpm_store:
-```
-
-These containers are expected to stop after successful installation. Explain this in generated usage docs so a stopped `*-deps` container is not mistaken for a failed app container. Verify with `docker compose ps -a` and logs.
-
-### Monorepo Dependency and Build Context Strategy
-
-For monorepos, first identify whether dependencies are installed at the repository root, per app, or both. Do not assume every app has independent lockfiles.
-
-**Common patterns:**
-
-| Layout | Compose strategy |
-|--------|------------------|
-| Root `pnpm-workspace.yaml` with `apps/*` and `packages/*` | Use repo root as build context, root dependency installer, app-specific `working_dir` |
-| Laravel API under `apps/api` plus Node apps under `apps/*` | Separate Composer and Node dependency volumes; separate installer services |
-| Shared packages under `packages/*` | Bind mount shared packages or repo root so live reload sees local package changes |
-| App-local lockfiles | Use app path as build context when no shared packages are needed |
-
-**Generic pnpm workspace example:**
-
-```yaml
-services:
-  node-deps:
-    image: node:22-alpine
-    working_dir: /workspace
-    command: sh -lc "corepack enable && pnpm install --frozen-lockfile"
-    volumes:
-      - ./:/workspace
-      - workspace_node_modules:/workspace/node_modules
-      - pnpm_store:/root/.local/share/pnpm/store
-
-  web:
-    image: node:22-alpine
-    working_dir: /workspace/apps/web
-    command: sh -lc "corepack enable && pnpm dev --hostname 0.0.0.0"
-    depends_on:
-      node-deps:
-        condition: service_completed_successfully
-    volumes:
-      - ./:/workspace
-      - workspace_node_modules:/workspace/node_modules
-      - web_next:/workspace/apps/web/.next
-
-volumes:
-  workspace_node_modules:
-  pnpm_store:
-  web_next:
-```
-
-**Generic PHP app inside monorepo:**
-
-```yaml
-services:
-  api-deps:
-    image: composer:2
-    working_dir: /workspace/apps/api
-    command: composer install --no-interaction --prefer-dist
-    volumes:
-      - ./:/workspace
-      - api_vendor:/workspace/apps/api/vendor
-
-  api:
-    build:
-      context: .
-      dockerfile: infra/docker/api.dev.Dockerfile
-    working_dir: /workspace/apps/api
-    depends_on:
-      api-deps:
-        condition: service_completed_successfully
-    volumes:
-      - ./:/workspace
-      - api_vendor:/workspace/apps/api/vendor
-
-volumes:
-  api_vendor:
-```
-
-Keep examples generic. Replace `apps/web`, `apps/api`, and `packages/*` with the user's actual paths only in that user's project files, not in reusable skill documentation.
-
-## Environment Variables
-
-### .env File Approach (Recommended)
-
-```env
-# .env.docker
-APP_PORT=8080
-DB_PORT=3306
-REDIS_PORT=6379
-MAIL_PORT=1025
-MAIL_UI_PORT=8025
-
-DB_DATABASE=app
-DB_USERNAME=app
-DB_PASSWORD=secret
-```
-
-**docker-compose.yml:**
-```yaml
-services:
-  nginx:
-    ports:
-      - "${APP_PORT:-8080}:80"
-```
-
-### Direct in docker-compose.yml
-
-```yaml
-services:
-  nginx:
-    ports:
-      - "8080:80"
-  db:
-    environment:
-      MYSQL_DATABASE: app
-      MYSQL_PASSWORD: secret
-```
-
-### `.dockerignore` for Dev and Production Builds
-
-When generating Dockerfiles, also generate or update `.dockerignore` to avoid leaking secrets or copying bulky local artifacts:
+Document that the installer is expected to exit with code 0. Ensure lockfile changes have a clear reinstall command. Do not carry installer services into production Compose.
+
+For monorepos, use the repository root as build context only when root lockfiles or shared packages require it. Keep Dockerfile paths, working directories, sync rules, and dependency volumes app-specific.
+
+## Dockerfile Guidance
+
+- Start with `# syntax=docker/dockerfile:1` when BuildKit features are used.
+- Pin base image versions and use trusted sources.
+- Install only packages required by the selected stack; use `--no-install-recommends` on Debian-family images.
+- Copy lockfiles before application source and use locked installs.
+- Use BuildKit cache mounts for package-manager caches when they materially improve rebuilds.
+- Run the app as a non-root user when practical; parameterize UID/GID when Linux bind-mount ownership requires it.
+- Use JSON-array `CMD` or `ENTRYPOINT`. Do not place a multi-token command into one JSON string.
+- Ensure every healthcheck binary is installed in the final development image.
+- Put production-only compilation and runtime reduction in separate stages or Dockerfiles.
+
+Generate a `.dockerignore` covering at least:
 
 ```dockerignore
 .git
 .env
 .env.*
-**/.env
-**/.env.*
+!.env.example
+!**/.env.example
 node_modules
 **/node_modules
 vendor
 **/vendor
+.venv
+**/.venv
 .next
 **/.next
-storage/logs
-**/storage/logs
+dist
+**/dist
 ```
 
-If examples are committed, allow them explicitly:
+## Environment and Secrets
 
-```dockerignore
-!.env.example
-!**/.env.example
-!.env.production.example
-!**/.env.production.example
+Distinguish Compose interpolation from container environment. Prefer an explicit command such as:
+
+```bash
+docker compose --env-file .env.docker up -d
 ```
 
-### Production Environment Scoping
+Generate:
 
-For production compose files:
+- `.env.docker.example` with safe placeholders and documented required keys
+- an ignored `.env.docker` only when the user wants it created
+- service-scoped `environment`, `env_file`, or `secrets` declarations
 
-- Use a root deployment env file such as `.env.production` or an external secrets mechanism; do not load app-local development `.env` files.
-- Scope env vars by service. API/PHP workers need database, cache, mail, queue, and storage secrets; frontend/static/proxy containers usually do not.
-- Do not pass `DB_PASSWORD`, `AWS_SECRET_ACCESS_KEY`, SMTP credentials, or app private keys to Caddy/Nginx or Next.js containers unless the service genuinely needs them at runtime.
-- Keep production example files free of real secrets.
+Do not copy application `.env` files into images. Do not pass database, mail, cloud, or application secrets to frontend, proxy, or tooling containers that do not need them. Never print resolved secrets with `docker compose config` output in the final report.
+
+## Platform Considerations
+
+- Native Linux: match UID/GID when containers must write to bind mounts.
+- SELinux hosts: apply `:z` or `:Z` only after determining whether the mount is shared or private.
+- macOS and Windows: prefer narrow mounts or Compose Watch for large generated trees; do not assume legacy consistency flags improve current Docker Desktop behavior.
+- WSL2: keep active source inside the Linux filesystem when practical.
+- Mixed architectures: verify image platform support and native module compatibility before adding `platform:` overrides.

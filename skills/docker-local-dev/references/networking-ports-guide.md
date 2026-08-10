@@ -1,534 +1,184 @@
-# Networking & Ports Guide
+# Networking and Ports Guide
 
-Configuration guide for port management and Docker networking.
+Use this reference for host exposure, Compose networks, reverse proxies, local domains, host-service access, and conflict handling.
 
-## Port Selection Strategy
+## Contents
 
-### Host Port Registry
+- [Exposure defaults](#exposure-defaults)
+- [Port checks and registry](#port-checks-and-registry)
+- [Compose networking](#compose-networking)
+- [Reverse proxies and domains](#reverse-proxies-and-domains)
+- [Host and cross-project services](#host-and-cross-project-services)
+- [Troubleshooting](#troubleshooting)
 
-Use a per-user host port registry when the user wants persistent local port tracking. Do not hardcode a machine-specific project path into reusable skill content.
+## Exposure Defaults
 
-Resolve the registry path as:
+Containers on the same Compose network reach one another by service name and internal port. `expose` is normally unnecessary because image and Compose networking already make internal ports reachable.
+
+Publish only services the host must access:
+
+```yaml
+services:
+  web:
+    ports:
+      - "127.0.0.1:${APP_PORT:-8080}:80"
+```
+
+Bind to `127.0.0.1` by default. Publishing `HOST_PORT:CONTAINER_PORT` without a host address binds all host interfaces and can expose development databases, caches, mail, and debug endpoints to the local network.
+
+Keep these internal unless explicitly required:
+
+- PHP-FPM
+- Redis or other caches
+- database ports when no host SQL client is used
+- SMTP capture ports
+- internal APIs behind a local proxy
+
+When LAN or device testing is requested, identify the exact service and explain the broader exposure before binding `0.0.0.0` or `[::]`.
+
+## Port Checks and Registry
+
+Check live availability with:
+
+```bash
+./scripts/port-check.sh verify 8080 5432 8025
+./scripts/port-check.sh suggest
+```
+
+The first command exits nonzero when any requested port is occupied. `suggest` emits JSON on stdout.
+
+Persistent port tracking is optional. Resolve the registry path as:
 
 ```bash
 PORT_REGISTRY_FILE="${DOCKER_LOCAL_DEV_PORT_REGISTRY:-${XDG_STATE_HOME:-$HOME/.local/state}/docker-local-dev/HOST_PORT_REGISTRY.md}"
 ```
 
-Before choosing a new host port:
+Read an existing registry before allocating ports. Treat configured and runtime ports as reserved even when no listener is currently active.
+
+Before creating or refreshing the registry, disclose its path and scan root and ask for confirmation. The scan can record local project names, service names, and paths:
 
 ```bash
-test -f "$PORT_REGISTRY_FILE" && sed -n '1,220p' "$PORT_REGISTRY_FILE"
+node ./scripts/scan-host-ports.mjs \
+  --root "<approved-root>" \
+  --out "$PORT_REGISTRY_FILE" \
+  --yes
 ```
 
-Rules:
-- Treat ports in `Configured Ports`, `Runtime Listeners`, and `Conflicts And Shared Ports` as reserved, even if the port is not currently listening.
-- Prefer the `Suggested Free Ports` section for new assignments.
-- If the registry is missing or stale, ask the user before creating or updating it. State the exact registry path and scan root before writing.
-- The registry may include local project names, service names, file paths, and host-exposed ports, so do not write it without confirmation.
-- Ask which root to scan when it is not obvious. Use the current project root only after confirming the user wants a project-scoped scan.
-- Re-run a scan or update the registry after changing Docker Compose `ports`, Vite `server.port`, Webpack dev server ports, Next/Nuxt dev ports, or package scripts with `--port`.
-- If a reverse proxy is used, prefer no host port exposure except for local tools that truly need direct database, mail, or debug access.
+For a standalone project without an existing registry, a live check is sufficient. Do not force a user-wide scan.
 
-After confirmation, refresh or create the registry from this skill directory with:
+## Compose Networking
 
-```bash
-node ./scripts/scan-host-ports.mjs --root "<absolute scan root>" --out "$PORT_REGISTRY_FILE" --yes
-```
-
-### Common Development Port Ranges
-
-| Service | Default | Range | Notes |
-|---------|---------|-------|-------|
-| HTTP | 8080 | 8080-8099 | Web server |
-| HTTPS | 8443 | 8443-8499 | SSL (if needed) |
-| MySQL | 3306 | 3306-3399 | Database |
-| PostgreSQL | 5432 | 5432-5499 | Database |
-| Redis | 6379 | 6379-6399 | Cache |
-| Mail SMTP | 1025 | 1025-1099 | Email testing |
-| Mail UI | 8025 | 8025-8099 | Email web interface |
-| PHP-FPM | 9000 | 9000-9099 | (Usually not exposed) |
-
-### Checking Port Availability
-
-**Using lsof:**
-```bash
-lsof -i :8080
-```
-
-**Using netcat:**
-```bash
-nc -z localhost 8080 && echo "in use" || echo "available"
-```
-
-**Using ss:**
-```bash
-ss -tuln | grep :8080
-```
-
-### Finding Available Ports
-
-Use the `port-check.sh` script:
-
-```bash
-# Check common ports
-./scripts/port-check.sh check
-
-# Get suggested available ports (JSON)
-./scripts/port-check.sh suggest
-
-# Verify specific ports
-./scripts/port-check.sh verify 8080 3306 6379
-
-# Find first available in range
-./scripts/port-check.sh find 8080 8099
-```
-
-## Port Exposure Options
-
-### Reverse Proxy Detection
-
-Before deciding on port exposure, run the network detection script:
-
-```bash
-./scripts/detect-network.sh
-```
-
-This script detects:
-- Running reverse proxy containers (Nginx Proxy Manager, Traefik, Caddy)
-- Available Docker networks
-- Suggested network to join
-
-**If reverse proxy detected:**
-- Recommend internal-only ports (no host exposure)
-- Suggest connecting to the proxy's network
-- Only expose database port for SQL tools (optional)
-
-### Internal Only (For Reverse Proxy Users)
-
-When using Nginx Proxy Manager, Traefik, or other reverse proxies:
+Use the implicit project network for standalone stacks unless explicit segmentation improves the design:
 
 ```yaml
-services:
-  nginx:
-    # No ports exposed - proxy handles routing
-    networks:
-      - default
-      - proxy_network  # Shared with reverse proxy
+name: inventory-api
 
+services:
+  app:
+    build: .
   db:
-    # Optionally expose for SQL tools
-    ports:
-      - "${DB_PORT:-3306}:3306"
-
-  app:
-    # No ports exposed
-
-  redis:
-    # No ports exposed
-
-  mailpit:
-    # No ports exposed - access via proxy or internal network
+    image: ${DB_IMAGE:?set DB_IMAGE}
 ```
 
-**Benefits:**
-- No port conflicts
-- Clean architecture
-- Proxy handles SSL, domains, routing
+The app connects to `db:<internal-port>`, never `localhost:<host-port>`.
 
-### Minimal Exposure (Recommended for Standalone)
-
-Only expose ports needed for:
-1. Web browser access (Nginx)
-2. Database tools (DBeaver, DataGrip, TablePlus)
+Use multiple networks to isolate data services from a proxy-facing edge:
 
 ```yaml
 services:
-  nginx:
-    ports:
-      - "${APP_PORT:-8080}:80"
-
+  proxy:
+    networks: [edge]
+  app:
+    networks: [edge, backend]
   db:
-    ports:
-      - "${DB_PORT:-3306}:3306"
+    networks: [backend]
 
-  # These stay internal
-  app:
-    # No ports exposed
-
-  redis:
-    # No ports exposed
-
-  mailpit:
-    ports:
-      - "${MAIL_UI_PORT:-8025}:8025"  # Only web UI
-```
-
-### Full Exposure
-
-For debugging or when tools need direct access:
-
-```yaml
-services:
-  nginx:
-    ports:
-      - "${APP_PORT:-8080}:80"
-
-  db:
-    ports:
-      - "${DB_PORT:-3306}:3306"
-
-  redis:
-    ports:
-      - "${REDIS_PORT:-6379}:6379"
-
-  mailpit:
-    ports:
-      - "${MAIL_PORT:-1025}:1025"     # SMTP
-      - "${MAIL_UI_PORT:-8025}:8025"  # Web UI
-
-  app:
-    ports:
-      - "${PHP_FPM_PORT:-9000}:9000"  # Usually not needed
-```
-
-## Docker Networking
-
-### Isolated Project Network (Default)
-
-```yaml
 networks:
-  default:
-    driver: bridge
-    name: ${COMPOSE_PROJECT_NAME:-myapp}_network
-
-services:
-  app:
-    networks:
-      - default
-```
-
-**Pros:**
-- Containers isolated from other projects
-- No naming conflicts
-- Secure by default
-
-### Shared External Network
-
-For microservices or multiple projects that need to communicate:
-
-**Create the network first:**
-```bash
-docker network create shared_network
-```
-
-**docker-compose.yml:**
-```yaml
-networks:
-  shared:
-    external: true
-    name: shared_network
-
-services:
-  app:
-    networks:
-      - default
-      - shared
-
-  api:
-    networks:
-      - default
-      - shared
-```
-
-**Cross-project communication:**
-```bash
-# From one project, access another by container name
-curl http://other-project-app:80
-```
-
-### Multiple Networks
-
-```yaml
-networks:
-  frontend:
-    driver: bridge
+  edge:
   backend:
-    driver: bridge
-
-services:
-  nginx:
-    networks:
-      - frontend
-
-  app:
-    networks:
-      - frontend
-      - backend
-
-  db:
-    networks:
-      - backend
+    internal: true
 ```
 
-## Nginx Proxy Manager Integration
+Use an external network only when an existing reverse proxy or another Compose project must connect:
 
-For managing multiple Docker projects with custom domains.
-
-### When to Use NPM
-
-- Running 3+ Docker projects
-- Need custom domains (app.localhost, api.localhost)
-- Want automatic SSL certificates
-- Prefer visual configuration
-
-### NPM Setup
-
-**docker-compose.yml for NPM:**
 ```yaml
-# Note: No 'version' field needed - deprecated in Docker Compose v2
-
-services:
-  npm:
-    image: jc21/nginx-proxy-manager:latest
-    restart: unless-stopped
-    ports:
-      - "80:80"
-      - "443:443"
-      - "81:81"    # Admin UI
-    volumes:
-      - npm_data:/data
-      - npm_letsencrypt:/etc/letsencrypt
-    networks:
-      - proxy
-
 networks:
   proxy:
     external: true
-    name: proxy_network
-
-volumes:
-  npm_data:
-  npm_letsencrypt:
+    name: ${PROXY_NETWORK:?set PROXY_NETWORK}
 ```
 
-**Create proxy network:**
-```bash
-docker network create proxy_network
-```
+Verify the network exists before startup. Do not infer reverse-proxy identity from a container name alone; inspect its image, labels, published ports, and attached networks.
 
-### Project Configuration with NPM
+## Reverse Proxies and Domains
 
-```yaml
-# Your project's docker-compose.yml
-networks:
-  default:
-  proxy:
-    external: true
-    name: proxy_network
+When a local proxy already exists:
 
-services:
-  app:
-    networks:
-      - default
-      - proxy
-    # No port exposure needed - NPM handles it
-```
+1. identify the proxy implementation and configuration source
+2. attach only the routed service to the proxy network
+3. keep database/cache networks private
+4. preserve same-origin `/api` routing when the frontend relies on it
+5. avoid publishing a duplicate host HTTP port
 
-### Local Domain Setup
+Prefer explicit `.localhost` hosts such as:
 
-Prefer explicit `*.localhost` hostnames unless the user explicitly needs wildcard local routing. Host machines commonly resolve `*.localhost` to `127.0.0.1`, so users usually do not need to edit `/etc/hosts`.
+- `app.localhost`
+- `api.localhost`
+- `admin.localhost`
 
-**Use local hostnames directly:**
-```
-app.localhost
-api.localhost
-admin.localhost
-```
+Ask about wildcard routing only when wildcard behavior is actually under test. Order explicit routes before wildcard routes.
 
-If a specific OS or resolver does not resolve `*.localhost`, fall back to explicit `/etc/hosts` entries:
-```
-127.0.0.1 app.localhost
-127.0.0.1 api.localhost
-127.0.0.1 admin.localhost
-```
+Do not claim public automatic TLS for `.localhost`. When local HTTPS is needed, use a trusted local CA such as mkcert or the proxy's local CA support, document trust installation, and keep certificate files out of version control. Production wildcard HTTPS requires a DNS-01 challenge or a pre-provisioned wildcard certificate and belongs in deployment documentation.
 
-**Use dnsmasq for custom wildcard domains only when local wildcard testing is required:**
-```bash
-# macOS with Homebrew
-brew install dnsmasq
-echo 'address=/.test/127.0.0.1' >> /usr/local/etc/dnsmasq.conf
-sudo brew services start dnsmasq
-```
+For a same-origin frontend/API arrangement, proxy the API path explicitly:
 
-If both explicit and wildcard routes exist, configure explicit hosts first in the reverse proxy so admin/customer/API routes do not get swallowed by a renderer catch-all.
-
-### Same-Origin `/api` Proxy
-
-For frontend apps that call the API through a same-origin `/api` prefix, keep that proxy path in local Docker routing. This avoids browser CORS/preflight complexity while preserving a production-like URL shape.
-
-**Nginx example:**
 ```nginx
-server {
-    listen 80;
-    server_name app.localhost admin.localhost;
-
-    location /api/ {
-        proxy_pass http://api:8000/api/;
-        proxy_set_header Host $host;
-        proxy_set_header X-Real-IP $remote_addr;
-        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
-        proxy_set_header X-Forwarded-Proto $scheme;
-    }
-
-    location / {
-        proxy_pass http://web:3000;
-    }
+location /api/ {
+    proxy_pass http://api:8000/;
+    proxy_set_header Host $host;
+    proxy_set_header X-Forwarded-Proto $scheme;
+    proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
 }
 ```
 
-If the API already serves routes under `/api`, keep path rewriting explicit and test a real endpoint. Avoid accidentally producing `/api/api/...`.
+Match trailing-slash behavior to the application routes.
 
-### Production Wildcard Domains
+## Host and Cross-Project Services
 
-Production wildcard domains such as `*.example.com` should be handled by the edge proxy/load balancer. For HTTPS wildcard certificates, Caddy/Traefik generally need DNS-01 automation or a preloaded wildcard certificate. Do not imply that local wildcard DNS is required just because production wildcard routing exists.
+If a container must reach a host service:
 
-## Configuration Storage
+- Docker Desktop normally provides `host.docker.internal`
+- on Linux Engine, verify support and add `extra_hosts: ["host.docker.internal:host-gateway"]` when needed
+- prefer a dedicated Compose service or shared external network when that produces a reproducible team setup
 
-### .env File Approach (Recommended)
-
-**.env.docker:**
-```env
-# Ports
-APP_PORT=8080
-DB_PORT=3306
-REDIS_PORT=6379
-MAIL_PORT=1025
-MAIL_UI_PORT=8025
-
-# Database
-DB_DATABASE=app
-DB_USERNAME=app
-DB_PASSWORD=secret
-
-# Compose project name (for network naming)
-COMPOSE_PROJECT_NAME=myapp
-```
-
-**docker-compose.yml:**
-```yaml
-services:
-  nginx:
-    ports:
-      - "${APP_PORT:-8080}:80"
-  db:
-    environment:
-      MYSQL_DATABASE: ${DB_DATABASE:-app}
-      MYSQL_PASSWORD: ${DB_PASSWORD:-secret}
-```
-
-**Benefits:**
-- Easy to change without editing compose file
-- Different configs per environment
-- Keep secrets out of version control
-
-### Direct docker-compose.yml
-
-```yaml
-services:
-  nginx:
-    ports:
-      - "8080:80"
-  db:
-    environment:
-      MYSQL_DATABASE: app
-      MYSQL_PASSWORD: secret
-```
-
-**Benefits:**
-- Simpler for basic setups
-- All config in one place
-
-**Drawbacks:**
-- Harder to customize per environment
-- Secrets in version control (careful!)
-
-## Port Conflict Resolution
-
-### Detection
-
-```bash
-# Check what's using a port
-lsof -i :8080
-
-# Kill process using port (careful!)
-kill $(lsof -t -i :8080)
-```
-
-### Resolution Strategies
-
-1. **Use Different Port**
-   ```yaml
-   ports:
-     - "8081:80"  # Instead of 8080
-   ```
-
-2. **Stop Conflicting Service**
-   ```bash
-   # Stop local MySQL
-   brew services stop mysql
-   # or
-   sudo systemctl stop mysql
-   ```
-
-3. **Use Docker Network Only**
-   ```yaml
-   # Don't expose port, access via Docker network only
-   db:
-     # No ports directive
-   ```
-
-### Common Conflicts
-
-| Port | Common Conflicting Service |
-|------|---------------------------|
-| 80 | Apache, Nginx, MAMP, XAMPP |
-| 3306 | MySQL, MariaDB |
-| 5432 | PostgreSQL |
-| 6379 | Redis |
-| 8080 | Various dev servers |
+For cross-project communication, prefer a documented shared external network and stable service aliases. Do not use `container_name` as service discovery.
 
 ## Troubleshooting
 
-### Container Can't Reach Another
+For a host port conflict:
 
 ```bash
-# Check both are on same network
-docker network inspect myapp_network
-
-# Test connectivity from container
-docker compose exec app ping db
-docker compose exec app nc -z db 3306
-```
-
-### Port Not Accessible from Host
-
-```bash
-# Check port mapping
-docker compose port nginx 80
-
-# Check container is running
+./scripts/port-check.sh verify "${APP_PORT:-8080}"
 docker compose ps
-
-# Check logs
-docker compose logs nginx
 ```
 
-### DNS Resolution Issues
+Choose a different port or stop the conflicting service only with user authorization. Do not kill a process automatically.
+
+For container-to-container failures:
 
 ```bash
-# Inside container, check /etc/hosts
-docker compose exec app cat /etc/hosts
-
-# Check Docker DNS
-docker compose exec app nslookup db
+docker compose config --services
+docker compose exec app getent hosts db
+docker compose exec app nc -vz db 5432
+docker network inspect "${COMPOSE_PROJECT_NAME}_default"
 ```
+
+For host-access failures:
+
+```bash
+docker compose port web 80
+docker compose ps
+docker compose logs --tail=100 web
+```
+
+Verify that the application listens on `0.0.0.0` inside its container; binding to container-local `127.0.0.1` prevents published-port access.

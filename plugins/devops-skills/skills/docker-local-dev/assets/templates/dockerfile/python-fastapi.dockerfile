@@ -1,6 +1,7 @@
 # FastAPI Dockerfile
 # Template markers: {{PYTHON_VERSION}}
 
+# syntax=docker/dockerfile:1
 FROM python:{{PYTHON_VERSION}}-slim
 
 # Set environment variables
@@ -10,7 +11,7 @@ ENV PYTHONDONTWRITEBYTECODE=1 \
     PIP_DISABLE_PIP_VERSION_CHECK=1
 
 # Install system dependencies
-RUN apt-get update && apt-get install -y \
+RUN apt-get update && apt-get install -y --no-install-recommends \
     build-essential \
     libpq-dev \
     git \
@@ -33,14 +34,12 @@ RUN pip install --upgrade pip \
 #     && poetry config virtualenvs.create false \
 #     && poetry install --no-interaction --no-ansi
 
-# Install Uvicorn
-RUN pip install uvicorn[standard]
-
 # Copy application code
 COPY . .
 
 # Create non-root user
-RUN useradd -m -u 1000 appuser && chown -R appuser:appuser /app
+ARG APP_UID=1000
+RUN useradd -m -u "$APP_UID" appuser && chown -R appuser:appuser /app
 USER appuser
 
 # Expose port

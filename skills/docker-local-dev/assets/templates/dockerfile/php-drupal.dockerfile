@@ -1,10 +1,11 @@
 # Drupal PHP-FPM Dockerfile
-# Includes Drush
+# Use project-local Drush from vendor/bin/drush.
 
+# syntax=docker/dockerfile:1
 FROM php:{{PHP_VERSION}}-fpm
 
 # Install system dependencies
-RUN apt-get update && apt-get install -y \
+RUN apt-get update && apt-get install -y --no-install-recommends \
     git \
     curl \
     zip \
@@ -37,12 +38,7 @@ RUN pecl install imagick && docker-php-ext-enable imagick
 RUN pecl install redis && docker-php-ext-enable redis
 
 # Install Composer
-COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
-
-# Install Drush launcher
-RUN curl -OL https://github.com/drush-ops/drush-launcher/releases/latest/download/drush.phar \
-    && chmod +x drush.phar \
-    && mv drush.phar /usr/local/bin/drush
+COPY --from=composer:2 /usr/bin/composer /usr/bin/composer
 
 # Configure opcache for development
 RUN echo 'opcache.enable=1' >> /usr/local/etc/php/conf.d/opcache.ini \
@@ -63,6 +59,8 @@ WORKDIR /var/www/html
 
 # Set proper permissions
 RUN chown -R www-data:www-data /var/www/html
+
+USER www-data
 
 EXPOSE 9000
 

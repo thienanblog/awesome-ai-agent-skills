@@ -1,236 +1,97 @@
-#!/bin/bash
-#
-# health-check.sh - Verify all Docker services are healthy
-# Runs AUTOMATICALLY after docker-compose up
-#
+#!/usr/bin/env bash
 
-set -e
+# Summarize Compose container state and declared health without guessing service
+# roles or probing unrelated localhost ports.
 
-# Colors
-RED='\033[0;31m'
-GREEN='\033[0;32m'
-YELLOW='\033[1;33m'
-BLUE='\033[0;34m'
-NC='\033[0m'
+set -uo pipefail
 
-# Counters
 PASSED=0
 FAILED=0
 
-echo ""
-echo "=========================================="
-echo "Docker Local Dev - Health Check"
-echo "=========================================="
-echo ""
+is_one_shot() {
+    local service=$1
+    case "$service" in
+        *-deps|*-installer) return 0 ;;
+    esac
+    case " ${ONE_SHOT_SERVICES:-} " in
+        *" $service "*) return 0 ;;
+    esac
+    return 1
+}
 
-# Helper function to check service
-check_service() {
-    local name=$1
-    local command=$2
-    local container=$3
+pass() {
+    PASSED=$((PASSED + 1))
+    printf 'PASS  %s\n' "$1"
+}
 
-    printf "Checking %-20s" "$name..."
+fail() {
+    FAILED=$((FAILED + 1))
+    printf 'FAIL  %s\n' "$1"
+}
 
-    if [[ -n "$container" ]]; then
-        if docker compose exec -T "$container" sh -c "$command" > /dev/null 2>&1; then
-            echo -e "${GREEN}OK${NC}"
-            ((PASSED++))
-            return 0
+services=$(docker compose config --services 2>/dev/null) || {
+    printf 'Could not resolve Compose services. Run docker compose config --quiet first.\n' >&2
+    exit 2
+}
+
+if [[ -z "$services" ]]; then
+    printf 'Compose configuration contains no services.\n' >&2
+    exit 2
+fi
+
+while IFS= read -r service; do
+    [[ -z "$service" ]] && continue
+    ids=$(docker compose ps --all --quiet "$service" 2>/dev/null || true)
+    if [[ -z "$ids" ]]; then
+        fail "$service has no container"
+        continue
+    fi
+
+    instance=0
+    while IFS= read -r id; do
+        [[ -z "$id" ]] && continue
+        instance=$((instance + 1))
+        state=$(docker inspect --format '{{.State.Status}}|{{.State.ExitCode}}|{{if .State.Health}}{{.State.Health.Status}}{{end}}' "$id" 2>/dev/null || true)
+        if [[ -z "$state" ]]; then
+            fail "$service instance $instance could not be inspected"
+            continue
         fi
+
+        IFS='|' read -r status exit_code health <<<"$state"
+        label="$service"
+        [[ "$instance" -gt 1 ]] && label="$service[$instance]"
+
+        if is_one_shot "$service"; then
+            if [[ "$status" == exited && "$exit_code" == 0 ]]; then
+                pass "$label completed successfully"
+            else
+                fail "$label expected exited(0), observed ${status}(${exit_code})"
+            fi
+        elif [[ "$status" != running ]]; then
+            fail "$label is $status (exit $exit_code)"
+        elif [[ -n "$health" && "$health" != healthy ]]; then
+            fail "$label health is $health"
+        elif [[ "$health" == healthy ]]; then
+            pass "$label is running and healthy"
+        else
+            pass "$label is running (no declared healthcheck)"
+        fi
+    done <<<"$ids"
+done <<<"$services"
+
+if [[ -n "${HEALTHCHECK_URL:-}" ]]; then
+    if curl --fail --silent --show-error --max-time "${HEALTHCHECK_TIMEOUT:-5}" "$HEALTHCHECK_URL" >/dev/null; then
+        pass "HTTP smoke check $HEALTHCHECK_URL"
     else
-        if eval "$command" > /dev/null 2>&1; then
-            echo -e "${GREEN}OK${NC}"
-            ((PASSED++))
-            return 0
-        fi
-    fi
-
-    echo -e "${RED}FAILED${NC}"
-    ((FAILED++))
-    return 1
-}
-
-# Helper function to check HTTP endpoint
-check_http() {
-    local name=$1
-    local url=$2
-    local expected_codes=${3:-"200 301 302"}
-
-    printf "Checking %-20s" "$name..."
-
-    local http_code=$(curl -s -o /dev/null -w '%{http_code}' "$url" 2>/dev/null || echo "000")
-
-    if echo "$expected_codes" | grep -q "$http_code"; then
-        echo -e "${GREEN}OK${NC} (HTTP $http_code)"
-        ((PASSED++))
-        return 0
-    fi
-
-    echo -e "${RED}FAILED${NC} (HTTP $http_code)"
-    ((FAILED++))
-    return 1
-}
-
-# Detect what services are running
-detect_services() {
-    SERVICES=$(docker compose ps --services 2>/dev/null || echo "")
-}
-
-detect_services
-
-# ============================================
-# Check Database
-# ============================================
-if echo "$SERVICES" | grep -qE "^(db|mysql|mariadb)$"; then
-    DB_SERVICE=$(echo "$SERVICES" | grep -E "^(db|mysql|mariadb)$" | head -1)
-    check_service "MySQL/MariaDB" "mysqladmin ping -h localhost -u root --silent" "$DB_SERVICE"
-elif echo "$SERVICES" | grep -qE "^(postgres|postgresql)$"; then
-    DB_SERVICE=$(echo "$SERVICES" | grep -E "^(postgres|postgresql)$" | head -1)
-    check_service "PostgreSQL" "pg_isready -U postgres" "$DB_SERVICE"
-fi
-
-# ============================================
-# Check Redis
-# ============================================
-if echo "$SERVICES" | grep -q "^redis$"; then
-    check_service "Redis" "redis-cli ping | grep -q PONG" "redis"
-fi
-
-# ============================================
-# Check Web Server
-# ============================================
-if echo "$SERVICES" | grep -qE "^(nginx|web)$"; then
-    # Try common ports
-    for port in 80 8080 8000 3000; do
-        if curl -s "http://localhost:$port" > /dev/null 2>&1; then
-            check_http "Nginx (port $port)" "http://localhost:$port"
-            break
-        fi
-    done
-fi
-
-# ============================================
-# Check PHP-FPM / Application
-# ============================================
-if echo "$SERVICES" | grep -qE "^(app|php|php-fpm)$"; then
-    APP_SERVICE=$(echo "$SERVICES" | grep -E "^(app|php|php-fpm)$" | head -1)
-
-    # Check if PHP is running
-    check_service "PHP-FPM" "php -v" "$APP_SERVICE"
-
-    # Laravel specific check
-    if docker compose exec -T "$APP_SERVICE" test -f artisan 2>/dev/null; then
-        check_service "Laravel" "php artisan --version" "$APP_SERVICE"
-    fi
-
-    # WordPress specific check
-    if docker compose exec -T "$APP_SERVICE" test -f wp-includes/version.php 2>/dev/null; then
-        if docker compose exec -T "$APP_SERVICE" which wp > /dev/null 2>&1; then
-            check_service "WP-CLI" "wp core version" "$APP_SERVICE"
-        fi
+        fail "HTTP smoke check $HEALTHCHECK_URL"
     fi
 fi
 
-# ============================================
-# Check Node.js Application
-# ============================================
-if echo "$SERVICES" | grep -qE "^(node|app)$"; then
-    NODE_SERVICE=$(echo "$SERVICES" | grep -E "^(node|app)$" | head -1)
-    if docker compose exec -T "$NODE_SERVICE" which node > /dev/null 2>&1; then
-        check_service "Node.js" "node -v" "$NODE_SERVICE"
-    fi
-fi
+printf '\nPassed: %s\nFailed: %s\n' "$PASSED" "$FAILED"
 
-# ============================================
-# Check Python Application
-# ============================================
-if echo "$SERVICES" | grep -qE "^(python|app|web)$"; then
-    PY_SERVICE=$(echo "$SERVICES" | grep -E "^(python|app|web)$" | head -1)
-    if docker compose exec -T "$PY_SERVICE" which python > /dev/null 2>&1; then
-        check_service "Python" "python --version" "$PY_SERVICE"
-
-        # Django check
-        if docker compose exec -T "$PY_SERVICE" test -f manage.py 2>/dev/null; then
-            check_service "Django" "python manage.py check" "$PY_SERVICE"
-        fi
-    fi
-fi
-
-# ============================================
-# Check Email Service
-# ============================================
-if echo "$SERVICES" | grep -qE "^(mailpit|mailhog|mail)$"; then
-    MAIL_SERVICE=$(echo "$SERVICES" | grep -E "^(mailpit|mailhog|mail)$" | head -1)
-
-    # Check web UI
-    for port in 8025 1080; do
-        if curl -s "http://localhost:$port" > /dev/null 2>&1; then
-            check_http "Mail UI (port $port)" "http://localhost:$port"
-            break
-        fi
-    done
-fi
-
-# ============================================
-# Check Queue Worker (Supervisor)
-# ============================================
-if echo "$SERVICES" | grep -qE "^(worker|queue|supervisor)$"; then
-    WORKER_SERVICE=$(echo "$SERVICES" | grep -E "^(worker|queue|supervisor)$" | head -1)
-    check_service "Queue Worker" "ps aux | grep -E 'queue:work|celery|bull' | grep -v grep" "$WORKER_SERVICE"
-fi
-
-# ============================================
-# Summary
-# ============================================
-echo ""
-echo "=========================================="
-echo "Health Check Summary"
-echo "=========================================="
-echo -e "Passed: ${GREEN}$PASSED${NC}"
-echo -e "Failed: ${RED}$FAILED${NC}"
-echo ""
-
-if [[ $FAILED -eq 0 ]]; then
-    echo -e "${GREEN}All services are healthy!${NC}"
-    echo ""
-
-    # Print access information
-    echo "Your development environment is ready:"
-    echo ""
-
-    # Detect and show URLs
-    for port in 80 8080 8000 3000; do
-        if curl -s "http://localhost:$port" > /dev/null 2>&1; then
-            echo "  Web: http://localhost:$port"
-            break
-        fi
-    done
-
-    # Database port
-    for port in 3306 5432; do
-        if nc -z localhost $port 2>/dev/null; then
-            echo "  Database: localhost:$port"
-            break
-        fi
-    done
-
-    # Mail UI
-    for port in 8025 1080; do
-        if curl -s "http://localhost:$port" > /dev/null 2>&1; then
-            echo "  Mail UI: http://localhost:$port"
-            break
-        fi
-    done
-
-    echo ""
-    exit 0
-else
-    echo -e "${RED}Some services failed health checks.${NC}"
-    echo ""
-    echo "Troubleshooting tips:"
-    echo "  1. Check container logs: docker compose logs"
-    echo "  2. Verify containers are running: docker compose ps"
-    echo "  3. Restart services: docker compose restart"
-    echo ""
+if ((FAILED > 0)); then
+    printf 'Inspect failures with: docker compose ps -a && docker compose logs --tail=150 <service>\n' >&2
     exit 1
 fi
+
+printf 'All inspected services passed.\n'

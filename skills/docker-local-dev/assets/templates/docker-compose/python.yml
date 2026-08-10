@@ -4,14 +4,15 @@
 # Template variables: {{PROJECT_NAME}}, {{PYTHON_VERSION}}, {{DB_IMAGE}}, etc.
 # Note: No 'version' field needed - deprecated in Docker Compose v2
 
+name: {{PROJECT_NAME}}
+
 services:
   # Python Application (Django/FastAPI/Flask)
   app:
     build:
       context: .
       dockerfile: Dockerfile
-    container_name: {{PROJECT_NAME}}_app
-    restart: unless-stopped
+    init: true
     working_dir: /app
     volumes:
       - ./:/app
@@ -19,13 +20,13 @@ services:
     environment:
       PYTHONUNBUFFERED: 1
       DJANGO_SETTINGS_MODULE: {{PROJECT_NAME}}.settings
-      DATABASE_URL: postgres://{{DB_USER}}:{{DB_PASSWORD}}@db:5432/{{DB_DATABASE}}
+      DATABASE_URL: postgresql://${DB_USERNAME:?set DB_USERNAME}:${DB_PASSWORD:?set DB_PASSWORD}@db:5432/${DB_DATABASE:?set DB_DATABASE}
       REDIS_URL: redis://redis:6379/0
-      SECRET_KEY: {{SECRET_KEY}}
+      SECRET_KEY: ${SECRET_KEY:?set SECRET_KEY}
       DEBUG: "True"
       ALLOWED_HOSTS: "*"
     ports:
-      - "${APP_PORT:-8000}:8000"
+      - "127.0.0.1:${APP_PORT:-8000}:8000"
     depends_on:
       db:
         condition: service_healthy
@@ -39,23 +40,15 @@ services:
     # command: uvicorn main:app --host 0.0.0.0 --port 8000 --reload
     # For production with Gunicorn:
     # command: gunicorn {{PROJECT_NAME}}.wsgi:application --bind 0.0.0.0:8000 --workers 4
-    healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:8000/health/"]
-      interval: 10s
-      timeout: 5s
-      retries: 3
 
   # Nginx Reverse Proxy
   nginx:
-    image: nginx:alpine
-    container_name: {{PROJECT_NAME}}_nginx
-    restart: unless-stopped
+    image: {{NGINX_IMAGE}}
+    profiles: ["proxy"]
     ports:
-      - "${NGINX_PORT:-8080}:80"
-      - "${NGINX_SSL_PORT:-8443}:443"
+      - "127.0.0.1:${NGINX_PORT:-8080}:80"
     volumes:
       - ./docker/nginx/python-wsgi.conf:/etc/nginx/conf.d/default.conf:ro
-      - ./docker/nginx/ssl:/etc/nginx/ssl:ro
       - static_files:/var/www/static:ro
       - ./media:/var/www/media:ro
     depends_on:
@@ -65,32 +58,27 @@ services:
 
   # PostgreSQL Database (Recommended for Django)
   db:
-    image: postgres:16-alpine
-    container_name: {{PROJECT_NAME}}_db
-    restart: unless-stopped
-    ports:
-      - "${DB_PORT:-5432}:5432"
+    image: {{POSTGRES_IMAGE}}
+    # Publish to loopback only when a host SQL client needs access:
+    # ports:
+    #   - "127.0.0.1:${DB_PORT:-5432}:5432"
     environment:
-      POSTGRES_DB: {{DB_DATABASE}}
-      POSTGRES_USER: {{DB_USER}}
-      POSTGRES_PASSWORD: {{DB_PASSWORD}}
+      POSTGRES_DB: ${DB_DATABASE:?set DB_DATABASE}
+      POSTGRES_USER: ${DB_USERNAME:?set DB_USERNAME}
+      POSTGRES_PASSWORD: ${DB_PASSWORD:?set DB_PASSWORD}
     volumes:
       - db_data:/var/lib/postgresql/data
     networks:
       - {{PROJECT_NAME}}_network
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U {{DB_USER}} -d {{DB_DATABASE}}"]
+      test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER} -d $${POSTGRES_DB}"]
       interval: 10s
       timeout: 5s
       retries: 5
 
   # Redis Cache/Message Broker
   redis:
-    image: redis:7-alpine
-    container_name: {{PROJECT_NAME}}_redis
-    restart: unless-stopped
-    ports:
-      - "${REDIS_PORT:-6379}:6379"
+    image: {{REDIS_IMAGE}}
     volumes:
       - redis_data:/data
     networks:
@@ -106,15 +94,15 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
-    container_name: {{PROJECT_NAME}}_celery
-    restart: unless-stopped
+    init: true
+    profiles: ["workers"]
     working_dir: /app
     volumes:
       - ./:/app
     environment:
       PYTHONUNBUFFERED: 1
       DJANGO_SETTINGS_MODULE: {{PROJECT_NAME}}.settings
-      DATABASE_URL: postgres://{{DB_USER}}:{{DB_PASSWORD}}@db:5432/{{DB_DATABASE}}
+      DATABASE_URL: postgresql://${DB_USERNAME:?set DB_USERNAME}:${DB_PASSWORD:?set DB_PASSWORD}@db:5432/${DB_DATABASE:?set DB_DATABASE}
       REDIS_URL: redis://redis:6379/0
     depends_on:
       - db
@@ -128,15 +116,15 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
-    container_name: {{PROJECT_NAME}}_celery_beat
-    restart: unless-stopped
+    init: true
+    profiles: ["workers"]
     working_dir: /app
     volumes:
       - ./:/app
     environment:
       PYTHONUNBUFFERED: 1
       DJANGO_SETTINGS_MODULE: {{PROJECT_NAME}}.settings
-      DATABASE_URL: postgres://{{DB_USER}}:{{DB_PASSWORD}}@db:5432/{{DB_DATABASE}}
+      DATABASE_URL: postgresql://${DB_USERNAME:?set DB_USERNAME}:${DB_PASSWORD:?set DB_PASSWORD}@db:5432/${DB_DATABASE:?set DB_DATABASE}
       REDIS_URL: redis://redis:6379/0
     depends_on:
       - db
@@ -147,12 +135,9 @@ services:
 
   # Email Testing
   mailpit:
-    image: axllent/mailpit:latest
-    container_name: {{PROJECT_NAME}}_mailpit
-    restart: unless-stopped
+    image: {{MAILPIT_IMAGE}}
     ports:
-      - "${MAIL_UI_PORT:-8025}:8025"
-      - "${MAIL_SMTP_PORT:-1025}:1025"
+      - "127.0.0.1:${MAIL_UI_PORT:-8025}:8025"
     networks:
       - {{PROJECT_NAME}}_network
 
