@@ -15,58 +15,34 @@ before expanding an approved scope.
 ## Operating Rules
 
 - Follow project instructions, existing test tools, naming conventions, and nearby tests.
-- Test behavior and contracts, not implementation details, unless the project already expects lower-level tests.
+- Test public behavior and contracts at the narrowest reliable level; avoid implementation details unless the project expects them.
 - Do not add a new testing framework unless the project has no reasonable existing path and the benefit is clear.
 - Keep tests maintainable: small setup, clear assertions, stable fixtures, no hidden network or production dependencies.
 
 ## Workflow
 
-### 1. Discover Test Sources
+### 1. Discover And Scope
 
-- Identify test commands, CI jobs, browser tooling, fixtures, helpers, and source-of-truth behavior docs.
-- Read nearby tests for structure, setup, cleanup, and assertion style.
+- Identify test commands, CI jobs, nearby tests, browser tooling, fixtures, helpers, and source-of-truth behavior docs.
+- Read `references/test-strategy.md`, choose the lowest reliable level, and prioritize targeted checks before broader suites.
+- Use documented manual steps only when automation is unavailable or disproportionate.
 
-### 2. Choose Verification Level
+### 2. Add Tests Or Checks
 
-- Unit: pure logic, validation, formatting, reducers, helpers, composables, hooks.
-- Integration: service boundaries, repositories, controllers, API contracts, database behavior.
-- Component: rendered states, props/events, accessibility expectations.
-- Browser pass: user-visible states, exploratory interaction, dashboards, visual layout, screenshots.
-- E2E: repeatable routing, forms, authentication, multi-step workflows, CI regressions.
-- Manual verification: acceptable only when automation is unavailable or disproportionate; document exact steps.
-
-Read `references/test-strategy.md` when deciding what level to use.
-
-### 3. Implement Tests Or Checks
-
-- Reuse existing helpers and fixtures before creating new ones.
-- Keep each test focused on one coherent behavior or scenario.
+- Reuse existing helpers and fixtures; keep each test focused on one coherent behavior or scenario.
 - Include edge cases that are business-relevant, not exhaustive noise.
 - For bug fixes, add a regression test that fails before the fix when practical.
 - For docs-only changes, verify links, examples, generated outputs, or commands when relevant.
 
-### 4. Verify UI In A Browser
+### 3. Verify UI In A Browser
 
 - For interactive, exploratory, screenshot, or visual-comparison work, use the harness's built-in Browser when available and follow its instructions.
 - Use Playwright MCP only when built-in Browser is unavailable, and record why. If the user explicitly selected Browser, report the blocker and ask before substituting another surface.
 - Keep source-controlled Playwright E2E distinct: it provides repeatable regression and CI coverage and may complement, not replace, an interactive Browser pass.
 - Read `references/ui-visual-verification.md` for screenshot scope, before/after comparison, viewport consistency, and ambiguous-image handling.
 
-### 5. Run And Iterate
+### 4. Run And Report
 
-- Run the smallest useful command first.
-- Fix failures and rerun the failing target.
-- Run broader tests when practical after targeted checks pass.
-- If a failure is unclear, switch to `debugging-workflow`.
-- If the task is slow performance validation, switch to `performance-optimization`.
-
-## Reporting
-
-Report:
-
-- Test or verification strategy used.
-- Commands run and results.
-- UI verification surface used: built-in Browser, Playwright MCP fallback, Playwright E2E, or a combination.
-- Screenshots or visual artifacts captured when relevant.
-- Coverage gaps or checks that could not be run.
-- Residual risk and the next highest-value test if any.
+- Run the smallest useful target first, rerun failures, then broaden when practical.
+- Use `debugging-workflow` for unclear failures and `performance-optimization` for performance validation.
+- Report the strategy, exact commands and results, UI verification surface, screenshots, gaps, residual risk, and next highest-value test.
