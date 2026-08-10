@@ -22,8 +22,8 @@ Choose the lowest reliable level that proves the behavior:
 | Pure function, formatter, parser, validator | Unit |
 | Hook, composable, store, reducer, state transition | Unit or component |
 | API contract, controller, service, repository, database rule | Integration |
-| Form behavior, validation messages, loading/error UI | Component or browser |
-| Navigation, auth, multi-step user workflow | E2E/browser |
+| Form behavior, validation messages, loading/error UI | Component; Browser pass when interaction or visual state matters |
+| Navigation, auth, multi-step user workflow | Source-controlled E2E; Browser pass for exploratory verification |
 | Visual layout, screenshot-driven UI task | Browser screenshot, preferably element-level |
 | Bug fix with known reproduction | Regression test at the failing boundary |
 
