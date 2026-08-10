@@ -4,35 +4,50 @@
  * Optimized for local development
  */
 
-// Database settings from environment
-define('DB_NAME', getenv('WORDPRESS_DB_NAME') ?: 'wordpress');
-define('DB_USER', getenv('WORDPRESS_DB_USER') ?: 'wordpress');
-define('DB_PASSWORD', getenv('WORDPRESS_DB_PASSWORD') ?: 'wordpress');
-define('DB_HOST', getenv('WORDPRESS_DB_HOST') ?: 'db');
+function docker_env_required(string $name): string
+{
+    $value = getenv($name);
+    if ($value === false || $value === '') {
+        throw new RuntimeException("Missing required environment variable: {$name}");
+    }
+    return $value;
+}
+
+function docker_env_bool(string $name, bool $default = false): bool
+{
+    $value = getenv($name);
+    return $value === false ? $default : filter_var($value, FILTER_VALIDATE_BOOL);
+}
+
+// Database settings from ignored local environment or Compose secrets.
+define('DB_NAME', docker_env_required('WORDPRESS_DB_NAME'));
+define('DB_USER', docker_env_required('WORDPRESS_DB_USER'));
+define('DB_PASSWORD', docker_env_required('WORDPRESS_DB_PASSWORD'));
+define('DB_HOST', getenv('WORDPRESS_DB_HOST') ?: 'db:3306');
 define('DB_CHARSET', 'utf8mb4');
 define('DB_COLLATE', '');
 
-// Authentication Keys and Salts
-// Generate at: https://api.wordpress.org/secret-key/1.1/salt/
-define('AUTH_KEY',         'put-your-unique-phrase-here');
-define('SECURE_AUTH_KEY',  'put-your-unique-phrase-here');
-define('LOGGED_IN_KEY',    'put-your-unique-phrase-here');
-define('NONCE_KEY',        'put-your-unique-phrase-here');
-define('AUTH_SALT',        'put-your-unique-phrase-here');
-define('SECURE_AUTH_SALT', 'put-your-unique-phrase-here');
-define('LOGGED_IN_SALT',   'put-your-unique-phrase-here');
-define('NONCE_SALT',       'put-your-unique-phrase-here');
+// Derive distinct local keys from one ignored, project-specific secret.
+$wordpressSecret = docker_env_required('WORDPRESS_SECRET');
+define('AUTH_KEY',         hash_hmac('sha256', 'AUTH_KEY', $wordpressSecret));
+define('SECURE_AUTH_KEY',  hash_hmac('sha256', 'SECURE_AUTH_KEY', $wordpressSecret));
+define('LOGGED_IN_KEY',    hash_hmac('sha256', 'LOGGED_IN_KEY', $wordpressSecret));
+define('NONCE_KEY',        hash_hmac('sha256', 'NONCE_KEY', $wordpressSecret));
+define('AUTH_SALT',        hash_hmac('sha256', 'AUTH_SALT', $wordpressSecret));
+define('SECURE_AUTH_SALT', hash_hmac('sha256', 'SECURE_AUTH_SALT', $wordpressSecret));
+define('LOGGED_IN_SALT',   hash_hmac('sha256', 'LOGGED_IN_SALT', $wordpressSecret));
+define('NONCE_SALT',       hash_hmac('sha256', 'NONCE_SALT', $wordpressSecret));
 
 $table_prefix = 'wp_';
 
 // ============================================
 // Development Settings
 // ============================================
-define('WP_DEBUG', true);
-define('WP_DEBUG_LOG', true);
-define('WP_DEBUG_DISPLAY', true);
-define('SCRIPT_DEBUG', true);
-define('SAVEQUERIES', true);
+define('WP_DEBUG', docker_env_bool('WP_DEBUG', true));
+define('WP_DEBUG_LOG', docker_env_bool('WP_DEBUG_LOG', true));
+define('WP_DEBUG_DISPLAY', docker_env_bool('WP_DEBUG_DISPLAY', false));
+define('SCRIPT_DEBUG', docker_env_bool('SCRIPT_DEBUG', true));
+define('SAVEQUERIES', docker_env_bool('SAVEQUERIES', false));
 
 // Memory
 define('WP_MEMORY_LIMIT', '256M');

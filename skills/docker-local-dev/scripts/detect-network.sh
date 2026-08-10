@@ -11,8 +11,11 @@ if ! docker info &>/dev/null 2>&1; then
     exit 0
 fi
 
-# Find reverse proxy containers (Nginx Proxy Manager, Traefik, Caddy, etc.)
-NPM_CONTAINERS=$(docker ps --format '{{.Names}}' 2>/dev/null | grep -iE 'nginx.*proxy|npm|proxy.*manager|traefik|caddy|reverse.*proxy' | head -5 || true)
+# Match known proxy images or labels; avoid broad name-only matches such as "npm".
+NPM_CONTAINERS=$(docker ps --format '{{.Names}}|{{.Image}}|{{.Labels}}' 2>/dev/null \
+    | grep -iE 'jc21/nginx-proxy-manager|nginx-proxy|traefik|caddy|reverse-proxy' \
+    | cut -d'|' -f1 \
+    | head -5 || true)
 
 # Get all custom networks (exclude default bridge, host, none)
 ALL_NETWORKS=$(docker network ls --format '{{.Name}}' 2>/dev/null | grep -vE '^(bridge|host|none)$' || true)

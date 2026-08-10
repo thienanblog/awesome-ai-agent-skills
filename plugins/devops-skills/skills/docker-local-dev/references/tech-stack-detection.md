@@ -1,266 +1,110 @@
-# Tech Stack Detection Reference
+# Tech Stack Detection
 
-This document describes how to detect various tech stacks automatically before using AI analysis.
+Use detection to reduce questions, not to make irreversible decisions. Confirm results from manifests, lockfiles, runtime files, and existing commands.
 
-## Detection Priority
+## Contents
 
-1. Run `scripts/detect-stack.sh` first (saves AI tokens)
-2. If detection fails or user disagrees, use AI analysis
-3. If stack is unsupported, warn user and proceed with generic config
+- [Repository inventory](#repository-inventory)
+- [Runtime and framework signals](#runtime-and-framework-signals)
+- [Service signals](#service-signals)
+- [Monorepos](#monorepos)
+- [Detection output](#detection-output)
 
-## PHP Detection
+## Repository Inventory
 
-### Laravel
-
-**Primary indicators:**
-- `composer.json` exists AND contains `laravel/framework`
-- `artisan` file exists in project root
-
-**Version detection:**
-```bash
-# From composer.json
-grep '"laravel/framework"' composer.json | grep -oE '[0-9]+\.[0-9]+'
-```
-
-**Additional detection:**
-- `config/app.php` - Laravel configuration
-- `routes/web.php` - Laravel routes
-- `app/Http/Kernel.php` - HTTP kernel
-
-**Laravel Sail detection:**
-- `docker-compose.yml` with `sail` references
-- `.env` with `SAIL_` variables
-- Warn user to avoid conflicts with existing Sail setup
-
-### WordPress
-
-**Primary indicators:**
-- `wp-config.php` exists
-- `wp-content/` directory exists
-- `wp-includes/` directory exists
-
-**Version detection:**
-```bash
-# From wp-includes/version.php
-grep '$wp_version' wp-includes/version.php | grep -oE '[0-9]+\.[0-9]+'
-```
-
-**Theme/Plugin detection:**
-- `wp-content/themes/` - active theme
-- `wp-content/plugins/` - installed plugins
-
-### Drupal
-
-**Primary indicators:**
-- `core/` directory with Drupal core
-- `sites/default/` directory
-- `core/lib/Drupal.php` exists
-
-**Version detection:**
-```bash
-# From core/lib/Drupal.php
-grep 'const VERSION' core/lib/Drupal.php | grep -oE '[0-9]+\.[0-9]+'
-```
-
-**Drush detection:**
-- `vendor/bin/drush` exists
-- `drush/` directory in project
-
-### Joomla
-
-**Primary indicators:**
-- `configuration.php` exists
-- `administrator/` directory exists
-- `libraries/src/` or `libraries/joomla/` exists
-
-**Version detection:**
-```bash
-# From libraries/src/Version.php
-grep 'MAJOR_VERSION\|MINOR_VERSION' libraries/src/Version.php
-```
-
-## Node.js Detection
-
-### Framework Detection
-
-**Next.js:**
-- `package.json` contains `"next"`
-- `next.config.js` or `next.config.ts` exists
-
-**NestJS:**
-- `package.json` contains `"@nestjs/core"`
-- `nest-cli.json` exists
-
-**Express:**
-- `package.json` contains `"express"`
-- Common patterns: `app.js`, `server.js`, `index.js`
-
-**Fastify:**
-- `package.json` contains `"fastify"`
-
-### Version Detection
+Inspect Docker-related files before generating anything:
 
 ```bash
-# From .nvmrc
-cat .nvmrc | tr -d 'v'
-
-# From package.json engines
-grep '"node"' package.json | grep -oE '[0-9]+'
+rg --files -g 'compose*.yml' -g 'compose*.yaml' \
+  -g 'docker-compose*.yml' -g 'docker-compose*.yaml' \
+  -g 'Dockerfile*' -g '.dockerignore' -g '.devcontainer/**'
 ```
 
-### Package Manager Detection
+Also inspect project instructions, Git status, env examples, Makefiles, package scripts, runtime-version files, and CI commands. Existing Compose overrides, profiles, project names, volumes, and external networks can encode intentional team workflows.
 
-| Lock File | Package Manager |
-|-----------|-----------------|
-| `pnpm-lock.yaml` | pnpm |
-| `yarn.lock` | yarn |
-| `bun.lockb` | bun |
-| `package-lock.json` | npm |
-
-## Python Detection
-
-### Framework Detection
-
-**Django:**
-- `manage.py` exists
-- `requirements.txt` or `pyproject.toml` contains `django`
-- `settings.py` in project
-
-**FastAPI:**
-- `requirements.txt` or `pyproject.toml` contains `fastapi`
-- `main.py` with FastAPI app
-
-**Flask:**
-- `requirements.txt` or `pyproject.toml` contains `flask`
-- `app.py` or `application.py`
-
-### Version Detection
+Run the detector from the skill directory:
 
 ```bash
-# From pyproject.toml
-grep 'python' pyproject.toml | grep -oE '[0-9]+\.[0-9]+'
-
-# From runtime.txt (Heroku style)
-cat runtime.txt | grep -oE '[0-9]+\.[0-9]+'
-
-# From .python-version (pyenv)
-cat .python-version
+./scripts/detect-stack.sh "<project-root>"
 ```
 
-### Package Manager Detection
+Parse stdout as JSON. Treat stderr as diagnostics. Do not source application env files or print secret values.
 
-| File | Package Manager |
-|------|-----------------|
-| `poetry.lock` | Poetry |
-| `Pipfile.lock` | Pipenv |
-| `requirements.txt` | pip |
+## Runtime and Framework Signals
 
-## Database Detection
+Use the strongest available constraints:
 
-### From .env File
+### PHP
+
+- `composer.json` and `composer.lock`
+- `artisan` plus `laravel/framework`
+- `wp-config.php`, `wp-content/`, or Composer-based WordPress layout
+- Drupal `core/`, `sites/default/`, and Composer metadata
+- Joomla `configuration.php`, `administrator/`, and version sources
+
+Extract supported PHP ranges rather than guessing the newest version. Prefer project-local Drush, WP-CLI, and framework CLIs over unpinned global downloads.
+
+### Node.js
+
+- `packageManager` in `package.json`
+- Corepack metadata and lockfile: npm, pnpm, Yarn, or Bun
+- `.nvmrc`, `.node-version`, `.tool-versions`, Volta, or `engines.node`
+- framework packages and actual development scripts
+
+Do not infer a framework from a script name. Preserve the detected package manager and frozen/immutable install semantics.
+
+### Python
+
+- `pyproject.toml`, lockfiles, `requirements*.txt`, `Pipfile.lock`, `uv.lock`
+- `.python-version`, `.tool-versions`, or project constraints
+- Django, FastAPI, Flask, Celery, and ASGI/WSGI packages
+
+Do not assume `requirements.txt` when a project uses Poetry, uv, PDM, Pipenv, or another locked workflow.
+
+## Service Signals
+
+Check both configuration and source usage before adding optional infrastructure:
+
+- database driver, URL scheme, migrations, and ORM packages
+- Redis/cache/session configuration and client packages
+- queue driver, worker packages, queued jobs, and dispatch calls
+- scheduler declarations and commands
+- SMTP/mail configuration and test requirements
+- object storage, search, browser, websocket, or other supporting services explicitly used by the project
+
+An env key alone is not proof that a service is active; examples and stale defaults are common. Conversely, an absent local env file does not prove the service is unused.
+
+Recognize SQLite and externally hosted services. Do not add a local database container automatically.
+
+## Monorepos
+
+Locate workspace roots and app manifests without traversing dependency or build directories:
 
 ```bash
-# MySQL
-grep -E 'DB_CONNECTION=mysql|DATABASE_URL.*mysql' .env
-
-# PostgreSQL
-grep -E 'DB_CONNECTION=pgsql|DATABASE_URL.*postgres' .env
-
-# SQLite
-grep -E 'DB_CONNECTION=sqlite' .env
+rg --files -g 'pnpm-workspace.yaml' -g 'package.json' -g 'composer.json' \
+  -g 'pyproject.toml' -g 'turbo.json' -g 'nx.json' -g 'lerna.json' \
+  -g '!node_modules/**' -g '!vendor/**' -g '!dist/**' -g '!build/**'
 ```
 
-### From Framework Config
+For each app in scope, determine:
 
-**Laravel:**
-- `config/database.php` - default connection
-- `.env` - `DB_CONNECTION`
+- path, role, dev command, and internal port
+- dependency installation root and lockfile
+- shared packages that must reload
+- build context and Dockerfile path
+- public hostname or proxy route
+- required internal services
 
-**Django:**
-- `settings.py` - `DATABASES` dict
-- Look for `mysql`, `postgresql`, `psycopg`
+Use the repository root as build context only when root lockfiles or shared packages require it. Mount or sync the narrowest paths that preserve workspace resolution.
 
-**Node.js:**
-- `config/database.js` or similar
-- `.env` for connection string
+## Detection Output
 
-## Redis Detection
+The detector reports hints for language, runtime, framework/CMS, package manager, database, Redis, queue usage, existing Docker files, and support status.
 
-**From .env:**
-```bash
-grep -E 'REDIS_HOST|CACHE_DRIVER=redis|SESSION_DRIVER=redis|QUEUE_CONNECTION=redis' .env
-```
+If detection is incomplete:
 
-**From package.json:**
-```bash
-grep -E '"redis"|"ioredis"|"bull"' package.json
-```
+1. inspect the relevant manifests directly
+2. summarize what is known and uncertain
+3. ask one grouped question about only the choices that change the generated design
 
-**From requirements.txt:**
-```bash
-grep -iE '^redis|^celery|^django-redis' requirements.txt
-```
-
-## Queue Detection
-
-**Laravel:**
-- `QUEUE_CONNECTION=redis` or `database` in `.env`
-- `app/Jobs/` directory exists
-
-**Node.js:**
-- `bull` or `bullmq` in `package.json`
-
-**Python:**
-- `celery` in requirements
-
-## Existing Docker Detection
-
-Check for these files:
-- `docker-compose.yml`
-- `docker-compose.yaml`
-- `Dockerfile`
-- `.dockerignore`
-
-If found, ask user how to proceed:
-1. Merge with existing
-2. Replace (backup first)
-3. Cancel
-
-## Detection Output Format
-
-```json
-{
-  "detected": true,
-  "language": "php",
-  "languageVersion": "8.3",
-  "framework": "laravel",
-  "frameworkVersion": "11.0",
-  "cms": null,
-  "packageManager": "composer",
-  "database": "mysql",
-  "redis": true,
-  "queue": true,
-  "existingDocker": false,
-  "supported": true
-}
-```
-
-## Supported Stack List
-
-| Stack | Fully Supported |
-|-------|-----------------|
-| Laravel | Yes |
-| WordPress | Yes |
-| Drupal | Yes |
-| Joomla | Yes |
-| Next.js | Yes |
-| NestJS | Yes |
-| Express | Yes |
-| Django | Yes |
-| FastAPI | Yes |
-| Flask | Yes |
-
-For unsupported stacks, the skill will:
-1. Warn the user
-2. Proceed with generic configuration
-3. Encourage contribution to improve support
+For unsupported stacks, apply generic Compose principles and avoid pretending framework-specific support. Do not solicit contributions in the middle of completing the user's task.

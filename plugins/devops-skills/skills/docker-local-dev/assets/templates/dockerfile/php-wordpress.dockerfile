@@ -1,10 +1,11 @@
 # WordPress PHP-FPM Dockerfile
-# Includes WP-CLI and debug extensions
+# Use a separate pinned WP-CLI service for CLI commands.
 
+# syntax=docker/dockerfile:1
 FROM php:{{PHP_VERSION}}-fpm
 
 # Install system dependencies
-RUN apt-get update && apt-get install -y \
+RUN apt-get update && apt-get install -y --no-install-recommends \
     git \
     curl \
     zip \
@@ -39,11 +40,6 @@ RUN pecl install imagick && docker-php-ext-enable imagick
 # Install Redis extension
 RUN pecl install redis && docker-php-ext-enable redis
 
-# Install WP-CLI
-RUN curl -O https://raw.githubusercontent.com/wp-cli/builds/gh-pages/phar/wp-cli.phar \
-    && chmod +x wp-cli.phar \
-    && mv wp-cli.phar /usr/local/bin/wp
-
 # Configure opcache for development
 RUN echo 'opcache.enable=1' >> /usr/local/etc/php/conf.d/opcache.ini \
     && echo 'opcache.memory_consumption=256' >> /usr/local/etc/php/conf.d/opcache.ini \
@@ -64,6 +60,8 @@ WORKDIR /var/www/html
 
 # Set proper permissions
 RUN chown -R www-data:www-data /var/www/html
+
+USER www-data
 
 EXPOSE 9000
 

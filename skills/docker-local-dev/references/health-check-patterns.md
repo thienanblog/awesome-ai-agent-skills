@@ -1,490 +1,139 @@
 # Health Check Patterns
 
-Service verification patterns for all supported stacks.
+Use healthchecks to prove readiness at the narrowest reliable boundary. Do not confuse a running process with a usable application.
 
-## Overview
+## Contents
 
-Health checks run automatically after `docker compose up` to verify all services are working correctly.
+- [Principles](#principles)
+- [Compose healthchecks](#compose-healthchecks)
+- [Application smoke checks](#application-smoke-checks)
+- [Database checks](#database-checks)
+- [Workers and one-shot services](#workers-and-one-shot-services)
+- [Failure reporting](#failure-reporting)
+
+## Principles
+
+- Use a command available in the final image.
+- Test readiness, not just process existence.
+- Keep checks fast, deterministic, and free of persistent mutations.
+- Escape container-side Compose variables as `$$VAR`.
+- Add a realistic `start_period` for slow initialization.
+- Avoid dependencies on host ports when the check can run inside the service network.
+- Do not put secret values directly in healthcheck commands or generated logs.
+
+## Compose Healthchecks
+
+PostgreSQL:
+
+```yaml
+healthcheck:
+  test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER} -d $${POSTGRES_DB}"]
+  interval: 5s
+  timeout: 5s
+  retries: 10
+  start_period: 10s
+```
+
+MySQL or MariaDB:
+
+```yaml
+healthcheck:
+  test: ["CMD-SHELL", "mysqladmin ping -h 127.0.0.1 -u root --password=$${MYSQL_ROOT_PASSWORD} --silent"]
+  interval: 5s
+  timeout: 5s
+  retries: 12
+  start_period: 15s
+```
+
+Redis without authentication:
+
+```yaml
+healthcheck:
+  test: ["CMD", "redis-cli", "ping"]
+  interval: 5s
+  timeout: 3s
+  retries: 10
+```
+
+HTTP application, only when the image contains the chosen client:
+
+```yaml
+healthcheck:
+  test: ["CMD", "curl", "--fail", "--silent", "http://127.0.0.1:8000/health"]
+  interval: 10s
+  timeout: 5s
+  retries: 6
+  start_period: 15s
+```
+
+Do not use `php-fpm-healthcheck`, `curl`, or `wget` unless the Dockerfile or selected image provides it. For PHP-FPM, prefer an actual FastCGI readiness tool or verify through the web service.
+
+Use health-gated dependencies when readiness matters:
+
+```yaml
+depends_on:
+  db:
+    condition: service_healthy
+```
+
+Applications should still retry transient dependency failures after startup.
+
+## Application Smoke Checks
+
+After Compose reports readiness, run the most relevant non-destructive check:
+
+```bash
+docker compose exec app php artisan about --no-interaction
+docker compose run --rm wpcli core version
+docker compose exec app ./vendor/bin/drush status
+docker compose exec app python manage.py check
+docker compose exec app python -c 'import app'
+docker compose exec app node --version
+```
+
+Prefer a project-defined health endpoint that verifies only safe dependencies. Avoid returning secret, version, or infrastructure details from public health responses.
+
+For published HTTP routes, derive the host address from `docker compose port` or use an explicitly configured `HEALTHCHECK_URL`. Do not probe a list of common localhost ports because an unrelated host process may answer.
 
 ## Database Checks
 
-### MySQL/MariaDB
-
-**Connection check:**
-```bash
-docker compose exec db mysqladmin ping -h localhost -u root --silent
-```
-
-**Expected output:** `mysqld is alive`
-
-**CRUD test:**
-```sql
--- Create test table
-CREATE TABLE IF NOT EXISTS _health_check_test (
-    id INT AUTO_INCREMENT PRIMARY KEY,
-    value VARCHAR(255),
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-);
-
--- Insert
-INSERT INTO _health_check_test (value) VALUES ('test');
-
--- Update
-UPDATE _health_check_test SET value = 'updated' WHERE value = 'test';
-
--- Select (verify)
-SELECT COUNT(*) FROM _health_check_test WHERE value = 'updated';
--- Expected: 1
-
--- Delete
-DELETE FROM _health_check_test WHERE value = 'updated';
-
--- Cleanup
-DROP TABLE IF EXISTS _health_check_test;
-```
-
-### PostgreSQL
-
-**Connection check:**
-```bash
-docker compose exec db pg_isready -U postgres
-```
-
-**Expected output:** `localhost:5432 - accepting connections`
-
-**CRUD test:**
-```sql
--- Create test table
-CREATE TABLE IF NOT EXISTS _health_check_test (
-    id SERIAL PRIMARY KEY,
-    value VARCHAR(255),
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-);
-
--- Insert
-INSERT INTO _health_check_test (value) VALUES ('test');
-
--- Update
-UPDATE _health_check_test SET value = 'updated' WHERE value = 'test';
-
--- Select (verify)
-SELECT COUNT(*) FROM _health_check_test WHERE value = 'updated';
--- Expected: 1
-
--- Delete
-DELETE FROM _health_check_test WHERE value = 'updated';
-
--- Cleanup
-DROP TABLE IF EXISTS _health_check_test;
-```
-
-## Web Server Checks
-
-### Nginx
-
-**HTTP request:**
-```bash
-curl -s -o /dev/null -w '%{http_code}' http://localhost:8080
-```
-
-**Expected:** `200`, `301`, or `302`
-
-**Headers check:**
-```bash
-curl -I http://localhost:8080
-```
-
-**Check configuration:**
-```bash
-docker compose exec nginx nginx -t
-```
-
-## Redis Checks
-
-**Ping test:**
-```bash
-docker compose exec redis redis-cli ping
-```
-
-**Expected:** `PONG`
-
-**Set/Get test:**
-```bash
-docker compose exec redis redis-cli SET health_check test
-docker compose exec redis redis-cli GET health_check
-docker compose exec redis redis-cli DEL health_check
-```
-
-**Memory info:**
-```bash
-docker compose exec redis redis-cli INFO memory | grep used_memory_human
-```
-
-## Email Service Checks
-
-### Mailpit
-
-**Web UI check:**
-```bash
-curl -s -o /dev/null -w '%{http_code}' http://localhost:8025
-```
-
-**Expected:** `200`
-
-**SMTP connection:**
-```bash
-nc -z localhost 1025 && echo "SMTP OK" || echo "SMTP FAILED"
-```
-
-**API check:**
-```bash
-curl -s http://localhost:8025/api/v1/messages | head -c 100
-```
-
-### MailHog
-
-**Web UI check:**
-```bash
-curl -s -o /dev/null -w '%{http_code}' http://localhost:8025
-```
-
-**API check:**
-```bash
-curl -s http://localhost:8025/api/v2/messages | head -c 100
-```
-
-## Application Checks
-
-### Laravel
-
-**Artisan check:**
-```bash
-docker compose exec app php artisan --version
-```
-
-**Expected:** `Laravel Framework X.X.X`
-
-**Environment check:**
-```bash
-docker compose exec app php artisan about
-```
-
-**Database connection:**
-```bash
-docker compose exec app php artisan db:show
-```
-
-**Cache check:**
-```bash
-docker compose exec app php artisan cache:clear
-```
-
-**Queue check (if enabled):**
-```bash
-docker compose exec app php artisan queue:work --once
-```
-
-**Queue and scheduler discovery:**
-```bash
-# Queue driver and failed jobs
-docker compose exec app sh -lc "grep -E '^QUEUE_CONNECTION=' .env .env.docker 2>/dev/null || true"
-docker compose exec app php artisan queue:failed 2>/dev/null || true
-
-# Scheduled commands
-docker compose exec app php artisan schedule:list --no-interaction
-```
-
-If `schedule:list` has no real tasks, the scheduler service can still be valid infrastructure but should be documented as idle. Do not report "scheduler support" as "scheduled jobs implemented" unless actual scheduled commands exist.
-
-### WordPress
-
-**WP-CLI version:**
-```bash
-docker compose exec app wp --version
-```
-
-**Core version:**
-```bash
-docker compose exec app wp core version
-```
-
-**Database check:**
-```bash
-docker compose exec app wp db check
-```
-
-**Core checksums:**
-```bash
-docker compose exec app wp core verify-checksums
-```
-
-**Plugin list:**
-```bash
-docker compose exec app wp plugin list
-```
-
-### Drupal
-
-**Drush status:**
-```bash
-docker compose exec app drush status
-```
-
-**Database check:**
-```bash
-docker compose exec app drush sql:query "SELECT 1"
-```
-
-**Cache rebuild:**
-```bash
-docker compose exec app drush cr
-```
-
-### Django
-
-**Check command:**
-```bash
-docker compose exec app python manage.py check
-```
-
-**Expected:** `System check identified no issues`
-
-**Database check:**
-```bash
-docker compose exec app python manage.py dbshell -c "SELECT 1"
-```
-
-**Migration status:**
-```bash
-docker compose exec app python manage.py showmigrations
-```
-
-### FastAPI
-
-**Health endpoint:**
-```bash
-curl -s http://localhost:8000/health
-# or
-curl -s http://localhost:8000/docs
-```
-
-**OpenAPI docs:**
-```bash
-curl -s -o /dev/null -w '%{http_code}' http://localhost:8000/docs
-```
-
-**Expected:** `200`
-
-### Node.js/Express
-
-**HTTP check:**
-```bash
-curl -s -o /dev/null -w '%{http_code}' http://localhost:3000
-# or health endpoint
-curl -s http://localhost:3000/health
-```
-
-**Node version:**
-```bash
-docker compose exec app node -v
-```
-
-## Queue Worker Checks
-
-### One-Shot Dependency Installer Checks
-
-Dependency installer services such as `api-deps`, `composer-deps`, `node-deps`, or `pnpm-deps` are expected to stop after successful installation. Treat them as healthy when they exited with code 0 and the app containers can see the dependency directories.
+Use the bundled script for a connection and read-only query:
 
 ```bash
-docker compose ps -a api-deps node-deps
-docker compose logs api-deps node-deps
-docker compose exec app test -d vendor
-docker compose exec web test -d node_modules
+./scripts/db-test.sh
 ```
 
-If an installer service exits non-zero, inspect lockfile compatibility, package manager availability, auth tokens for private packages, and volume mount targets before restarting app containers.
-
-### Supervisor Process
-
-**Check running processes:**
-```bash
-docker compose exec worker supervisorctl status
-```
-
-**Expected output:**
-```
-laravel-worker:laravel-worker_00   RUNNING   pid 123, uptime 0:05:00
-laravel-scheduler                   RUNNING   pid 124, uptime 0:05:00
-```
-
-### Laravel Horizon
-
-**Horizon status:**
-```bash
-docker compose exec app php artisan horizon:status
-```
-
-### Celery
-
-**Worker status:**
-```bash
-docker compose exec worker celery -A myapp status
-```
-
-**Inspect active:**
-```bash
-docker compose exec worker celery -A myapp inspect active
-```
-
-## Full Stack Integration Test
-
-### Test Sequence
+Use `--crud` only when explicitly requested. It uses a temporary table in one database session and should leave no persistent table:
 
 ```bash
-#!/bin/bash
-
-echo "=== Full Stack Health Check ==="
-
-# 1. Database
-echo -n "Database... "
-docker compose exec -T db mysqladmin ping -u root --silent && echo "OK" || echo "FAIL"
-
-# 2. Redis
-echo -n "Redis... "
-docker compose exec -T redis redis-cli ping | grep -q PONG && echo "OK" || echo "FAIL"
-
-# 3. Web Server
-echo -n "Web Server... "
-curl -s -o /dev/null -w '%{http_code}' http://localhost:8080 | grep -qE '200|301|302' && echo "OK" || echo "FAIL"
-
-# 4. Application
-echo -n "Application... "
-docker compose exec -T app php artisan --version > /dev/null 2>&1 && echo "OK" || echo "FAIL"
-
-# 5. Database CRUD
-echo -n "Database CRUD... "
-./scripts/db-test.sh > /dev/null 2>&1 && echo "OK" || echo "FAIL"
-
-# 6. Mail Service
-echo -n "Mail Service... "
-curl -s -o /dev/null -w '%{http_code}' http://localhost:8025 | grep -q 200 && echo "OK" || echo "FAIL"
-
-echo "=== Complete ==="
+./scripts/db-test.sh --crud
 ```
 
-## Common Failure Scenarios
+Pass service and credential configuration through documented environment variables when names differ from defaults. Never default to a production or shared database.
 
-### Database Connection Refused
+## Workers and One-Shot Services
 
-**Symptoms:**
-- `Connection refused` error
-- `Can't connect to MySQL server`
+For a worker, inspect the service state and run a framework-native status or safe test job only when the user approves queue mutation. Process-list matching alone is weak evidence.
 
-**Checks:**
-```bash
-# Is container running?
-docker compose ps db
+For schedulers, distinguish configured infrastructure from actual scheduled tasks. An idle scheduler can be healthy without proving any task exists.
 
-# Check logs
-docker compose logs db
-
-# Is port exposed?
-docker compose port db 3306
-```
-
-**Solutions:**
-1. Wait longer for database to start
-2. Check environment variables
-3. Check healthcheck in compose file
-
-### Redis Not Ready
-
-**Symptoms:**
-- `Could not connect to Redis`
-- `Connection refused`
-
-**Checks:**
-```bash
-docker compose exec redis redis-cli ping
-docker compose logs redis
-```
-
-### Web Server 502 Bad Gateway
-
-**Symptoms:**
-- Nginx returns 502
-- Can't reach PHP-FPM
-
-**Checks:**
-```bash
-# Is PHP-FPM running?
-docker compose exec app php-fpm -t
-
-# Check Nginx config
-docker compose exec nginx nginx -t
-
-# Check Nginx logs
-docker compose logs nginx
-```
-
-### Queue Worker Not Processing
-
-**Symptoms:**
-- Jobs stay in queue
-- Worker shows as running but not processing
-
-**Checks:**
-```bash
-# Check supervisor status
-docker compose exec worker supervisorctl status
-
-# Check worker logs
-docker compose logs worker
-
-# Check queue driver and actual pending/failed jobs
-docker compose exec app sh -lc "grep -E '^QUEUE_CONNECTION=' .env .env.docker 2>/dev/null || true"
-docker compose exec app php artisan queue:failed 2>/dev/null || true
-
-# Manually run job
-docker compose exec app php artisan queue:work --once
-```
-
-Also verify that the application actually defines queued jobs/listeners. A running worker with no `ShouldQueue` jobs or dispatched work is not a failure.
-
-## Health Check in docker-compose.yml
-
-### Adding Health Checks
-
-```yaml
-services:
-  db:
-    image: mysql:8.0
-    healthcheck:
-      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
-      interval: 10s
-      timeout: 5s
-      retries: 3
-      start_period: 30s
-
-  redis:
-    image: redis:alpine
-    healthcheck:
-      test: ["CMD", "redis-cli", "ping"]
-      interval: 10s
-      timeout: 5s
-      retries: 3
-
-  app:
-    depends_on:
-      db:
-        condition: service_healthy
-      redis:
-        condition: service_healthy
-```
-
-### Waiting for Health
+One-shot dependency installers should exit code 0:
 
 ```bash
-# Wait for all services to be healthy
-docker compose up -d --wait
+docker compose ps -a
+docker compose logs app-deps
 ```
+
+List one-shot service names in `ONE_SHOT_SERVICES` when using `scripts/health-check.sh` and names do not end in `-deps` or `-installer`.
+
+## Failure Reporting
+
+On failure, collect focused evidence:
+
+```bash
+docker compose ps -a
+docker compose logs --tail=150 <service>
+docker inspect <container-id>
+```
+
+Report the failing service, observed state or exit code, healthcheck output, and next diagnostic command. Do not print resolved env files, full container environment, or secret-bearing Compose output.
