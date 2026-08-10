@@ -1,501 +1,170 @@
 ---
 name: project-development-mindset
-description: Universal project development workflow for safe, maintainable, proportionate software changes. Use when creating or modifying code, documentation, UI/UX, tests, architecture, design systems, debugging workflows, performance work, deployment preparation, or multi-repository features. Enforces source-of-truth-first discovery, reuse before creation, smallest-reliable-solution decisions, dependency judgment, scoped verification, and visual QA for UI tasks.
+description: Adaptive, repository-aware baseline for ordinary implementation, refactoring, setup, and cross-cutting project changes. Use when modifying code, configuration, tests, or durable documentation to discover local conventions, choose the smallest coherent change, preserve project integrity, and calibrate verification to risk. Use as a coordinator when concerns interact; let a more specific skill lead when one concern clearly owns the task. Do not use for explanation-only or read-only requests unless explicitly invoked.
 ---
 
 # Project Development Mindset
 
-Use this skill at the start of programming work. Treat it as an execution contract: understand the relevant project context, reuse what already exists, implement only what the task needs, verify proportionately, and keep durable project instructions synchronized when they are affected.
-
-## Operating Contract
+Use this skill as an adaptive baseline, not mandatory ceremony. Apply only the guidance relevant to the task. Scale discovery, planning, implementation, and verification to the task's impact, uncertainty, and reversibility.
 
-- Start from the existing project, not from a generic solution.
-- Read before changing code, docs, configuration, UI, tests, or deployment files.
-- Prefer the smallest reliable and maintainable change that solves the task.
-- Add code only when it serves a current requirement, an existing project rule, or a concrete observed risk.
-- Reuse existing components, services, wrappers, helpers, tokens, docs, tests, and conventions before creating new ones.
-- Do not create a new abstraction, component, utility, style, animation, API client, validation rule, or workflow until you have checked whether the project already has one.
-- Keep source of truth clear. Do not duplicate business rules, design rules, configuration, or project instructions across multiple places without a reason.
-- Keep files cohesive. Do not combine page layout, domain logic, data access, validation, styling, test helpers, and design primitives in one file when the project has clearer boundaries.
-- Do not move, delete, rename, or broadly restructure important files without user confirmation.
-- Run in the main conversation by default. Before spawning any subagent, agent
-  team, or delegated parallel worker, explain that it can increase usage and
-  ask the user to approve the proposed count and scope. Never infer approval
-  from task size, complexity, time pressure, internal planning, or a skill's
-  instructions. Ask again before expanding an approved scope.
-- Stop when the requested behavior works, proportionate checks pass, and no concrete requirement or observed risk justifies more work.
-- Ask only when the decision is risky, destructive, ambiguous after inspection, related to credentials, production, billing, database migrations, deployment, or major architecture.
-- Explain important technical decisions in plain language when the user may need the reasoning.
-
-## Optional Same-Repository Skills
-
-Reference other skills only when they exist in the same shared skills repository as this skill.
-
-Before using an optional skill:
-
-1. Locate this skill in the shared repository.
-2. Verify that the sibling skill folder exists and contains a valid `SKILL.md`, such as `../documentation-guidelines/SKILL.md` from this skill folder or `skills/documentation-guidelines/SKILL.md` from the repository root.
-3. If the skill is missing, tell the user the optional skill was not found and use the fallback guidance in this skill.
+## Precedence And Adaptation
 
-Optional skills to check before use:
-
-- `run-reviewable-subtask-loop`: do not use by default. During a
-  user-initiated brainstorming or planning session before coding, this skill
-  may be proposed as an optional delivery workflow for a large plan, migration,
-  refactor, or roadmap that genuinely needs multiple recoverable slices. Use it
-  only when the user explicitly requests it or explicitly accepts the proposal.
-  Do not propose, load, or use it for an ordinary coding request with clear
-  requirements and no prior user-requested brainstorming or implementation
-  discussion. If it is declined or unavailable, stay in the general workflow.
-- `documentation-guidelines`: use for feature, module, backend, API, workflow, and cross-repository documentation. Fallback: use the documentation rules below.
-- `design-system-generator`: use for creating or updating `docs/DESIGN_SYSTEM.md`. Fallback: create a practical design system document manually.
-- `agents-md-generator`: use for creating or updating `AGENTS.md`, `CLAUDE.md`, or equivalent project memory files. Fallback: create or update those files manually.
-- `testing-verification`: use when testing, QA, CI checks, browser verification, visual screenshots, or acceptance criteria are a meaningful part of the task. Fallback: use the testing rules below.
-- `debugging-workflow`: use when the task starts from an error, failing test with unclear cause, regression, log, stack trace, or broken behavior. Fallback: use the debugging rules below.
-- `performance-optimization`: use when the task focuses on slowness, latency, memory, CPU, query count, bundle size, rendering lag, caching, or resource usage. Fallback: use the performance rules below.
-- `ui-ux-concept-implementation`: use for implementing UI/UX from selected concepts, screenshots, mockups, visual references, or a website the user wants to emulate or clone. Fallback: use the UI/UX concept routing and browser verification rules below.
-- `vps-docker-traefik-deploy`: use for VPS, Docker Compose, and Traefik deployment planning or implementation. Fallback: provide general deployment guidance manually.
+- Follow system instructions, the user's current request, and applicable project instructions before this general guidance.
+- Treat repository conventions as evidence of project intent, not as rules to copy blindly when they conflict with correctness, security, maintainability, or a more authoritative instruction.
+- Let a more specific skill lead when it directly owns the task. Use this skill to preserve cross-cutting project awareness and proportionality.
+- Apply routine gates implicitly for small, local work. Do not turn them into user-facing ceremony unless a decision or risk needs discussion.
+- Preserve unrelated user changes and existing work. Do not clean up, revert, or broaden scope merely because nearby code could be improved.
+- Run in the main conversation by default. Before spawning any subagent, agent team, or delegated worker, explain that delegation can increase usage and ask the user to approve the proposed agent count and scope. Ask again before expanding an approved scope.
 
-Do not reference, require, download, or depend on external skills or user-specific local paths.
+## Core Outcomes
 
-## Source Of Truth Priority
+Aim for all of the following:
 
-Use the most specific durable project source before relying on assumptions.
+- Understand the project context that materially affects the requested behavior.
+- Define what success means before making a substantial change.
+- Implement the smallest coherent change that fully solves the task.
+- Reuse existing project surfaces when their semantics and boundaries fit.
+- Verify behavior with evidence proportionate to the likely failure cost.
+- Keep durable sources of truth aligned when the change materially affects them.
+- Stop when the requested outcome works, relevant checks pass, and no concrete requirement or observed risk justifies more work.
 
-Read in this order when relevant:
+## Calibrate Effort To Risk
 
-1. User request and any attached artifacts.
-2. `AGENTS.md`, `CLAUDE.md`, or equivalent project instruction files.
-3. `README.md`, `docs/README.md`, feature docs, architecture docs, runbooks, and design-system docs.
-4. Framework, package, route, schema, migration, API, build, test, and deployment configuration.
-5. Existing source files, components, services, tests, fixtures, logs, and examples near the task.
-6. Official or current library documentation only after local project sources have been checked, unless the task is specifically about external API usage.
+Judge the task using three factors:
 
-Rules:
+- **Impact:** What users, data, systems, contracts, or workflows could be affected?
+- **Uncertainty:** How well is the current behavior and intended outcome understood?
+- **Reversibility:** How easily can the change be undone or corrected?
 
-- Do not rely on a filename alone. Verify path, imports, exports, routes, tests, docs links, and actual content.
-- If multiple files, folders, modules, or docs have the same or similar names, determine which one owns the current business area before editing.
-- If docs and code disagree, identify the conflict. Prefer the higher-authority project source only when the priority is clear; otherwise ask or state the assumption before implementing.
-- Do not replace unusual business behavior with generic logic. Special cases often exist because the project needs them.
-- When a task spans backend, frontend, admin, worker, mobile, API, or deployment repositories, inspect the related source of truth before changing only one side.
+Adapt the workflow accordingly:
 
-## Implementation Economy Gate
+- For low-impact, well-understood, reversible work, inspect the nearby source, make the focused change, and run the most relevant check.
+- For medium-risk or cross-boundary work, trace affected contracts and callers, use a short plan, and verify both the changed behavior and important adjacent behavior.
+- For high-impact, uncertain, production-facing, security-sensitive, data-changing, or difficult-to-reverse work, investigate more broadly, make assumptions explicit, and resolve material decisions before acting.
 
-Before adding or expanding code, answer these questions:
+Do not equate task size with risk. A one-line permission or migration change can require more care than a large mechanical refactor.
 
-1. Is this code required by the user request, acceptance criteria, existing project rules, or a concrete observed risk?
-2. Does the codebase already provide the behavior, pattern, dependency, component, helper, or test support needed?
-3. If a small local implementation is clear, reliable, and easy to maintain, can it solve the task without a new dependency?
-4. Would an existing or well-justified external library materially reduce complexity, correctness risk, or maintenance cost?
-5. What is the smallest amount of code that completely solves the current task?
-6. Am I adding abstractions, options, edge cases, refactors, or future flexibility without a concrete present need?
+## Distinguish Authority From Evidence
 
-For small tasks, answer these questions implicitly. Do not turn them into extra planning, ceremony, or a user-facing report unless a tradeoff needs user input.
+Use each source for the question it can answer:
 
-Prefer the smallest reliable solution, not the fewest lines at any cost. Treat a solution as complete when it satisfies current requirements, follows project conventions, handles realistic failure cases, and passes proportionate verification.
+- **Desired outcome:** user request, acceptance criteria, and supplied artifacts.
+- **Execution constraints:** system instructions and the most specific applicable project instructions.
+- **Current behavior:** runtime evidence, source code, configuration, schemas, routes, tests, logs, and generated artifacts.
+- **Design intent:** architecture decisions, feature documentation, runbooks, design systems, and project memory.
+- **External contract:** version-matched official documentation, standards, and service or library specifications.
 
-Do not implement hypothetical future requirements. Do not add extension points, configuration, compatibility layers, or abstractions without a current use case or an established project pattern that requires them.
+When sources disagree:
 
-## Context Confidence Gate
+1. Identify whether the conflict concerns desired behavior, current behavior, or execution constraints.
+2. Prefer the most authoritative and current source for that concern.
+3. Check concrete runtime or test evidence when written sources may be stale.
+4. Ask a narrow question only when the unresolved choice would materially change the outcome or risk; otherwise state a reasonable assumption and proceed.
 
-Before substantial implementation, know enough to answer these questions:
+Do not replace unusual behavior with generic logic until its purpose and callers are understood. Special cases may encode real business requirements.
 
-- Which project instructions and docs govern this task?
-- Which existing files are the source of truth for the affected behavior?
-- Which reusable components, wrappers, services, hooks, composables, helpers, tokens, classes, tests, or scripts already exist?
-- Which files are likely to change, and why?
-- Which tests, checks, screenshots, or manual verification steps will prove the change?
+## Make Proportionate Design Decisions
 
-For small local edits, this gate can be implicit, but still search enough to avoid duplicate code or incorrect business logic.
+### Reuse And Abstraction
 
-If confidence is low:
+- Search the task-relevant area for existing components, services, helpers, schemas, tokens, tests, commands, and documentation before creating equivalents.
+- Reuse an existing surface only when its semantics fit and reuse does not create unhealthy coupling or preserve a known defect.
+- Extend a canonical shared surface when the new behavior belongs there; keep behavior local when it is genuinely isolated.
+- Create an abstraction when it centralizes a real invariant, removes meaningful duplication, or follows an established project boundary. Do not create one only to hide a single call site or anticipate hypothetical flexibility.
+- If an established pattern is harmful for the current case, make the smallest coherent improvement and explain why diverging is safer or clearer.
 
-- Continue reading and searching before writing new code.
-- Trace imports, exports, routes, component usage, test coverage, data flow, and docs links.
-- Prefer asking a narrow question over guessing when the wrong choice would cause rework or business risk.
+### Scope And Boundaries
 
-## Specialized Quality Routing
+- Add code only for a current requirement, an applicable project rule, or a concrete observed risk.
+- Keep responsibilities cohesive and follow the project's existing architecture when it remains suitable.
+- Touch adjacent files when required to preserve a contract, invariant, build, test, or user-visible behavior; avoid unrelated refactors.
+- Treat file size as a signal, not a rule. Extract code only when the new boundary improves cohesion or current reuse.
+- Keep public APIs and persisted data compatible unless the requested outcome requires a deliberate change.
+- Do not add speculative extension points, compatibility layers, or options without a present use case. Handle realistic failure cases implied by current inputs, contracts, and operating conditions.
 
-Read `references/quality-skill-routing.md` when deciding whether to stay in this general workflow or switch to a specialized quality skill.
+### Dependencies And External APIs
 
-- Do not switch automatically to `run-reviewable-subtask-loop`. During a
-  user-initiated brainstorming or planning session before coding, you may
-  propose it as an optional workflow for a large multi-slice plan, migration,
-  refactor, or roadmap. Use it only after the user explicitly requests or
-  accepts it. Do not propose, load, or use it for a normal coding task whose
-  requirements are clear and that has no preceding user-requested brainstorm or
-  implementation discussion.
-- Use `testing-verification` for test planning, automated checks, UI screenshot verification, visual comparison, CI test failures, and acceptance criteria.
-- Use `debugging-workflow` for unknown failures, broken behavior, logs, stack traces, regressions, flaky tests, and root-cause isolation.
-- Use `performance-optimization` for measured slowness, query issues, rendering lag, memory/CPU pressure, caching, payload size, bundle size, and slow builds/tests.
-- Read `references/ui-ux-concept-routing.md` and use `ui-ux-concept-implementation` when UI/UX work includes concepts, a selected visual direction, screenshots, mockups, visual references, or website clone/emulation.
-- Use this skill as the coordinator when a task spans multiple concerns.
+- Prefer an existing project dependency when it solves the problem well.
+- Prefer a small local implementation when it is clear, reliable, easy to test, and meaningfully simpler than a new dependency.
+- Add a dependency when it materially reduces correctness or security risk, implementation complexity, or maintenance cost and fits the project's runtime and package-management conventions.
+- Do not duplicate tools that solve the same problem without a concrete migration or compatibility reason.
+- Do not hand-roll cryptography, authentication protocols, complex parsers, or standards where a trusted and appropriate implementation is safer.
+- Inspect the installed version and consult current, version-matched official documentation when behavior depends on an external API. Do not invent APIs.
 
-## General Workflow
+## Act Within Authorization
 
-### 1. Discover
+Treat a clear user request as authorization for safe actions within its evident scope. Do not ask again merely because the task involves ordinary edits or verification.
 
-- Inspect the task-relevant repository structure and workspace roots.
-- Identify only the stack, tooling, configuration, and documentation needed to make and verify the change safely.
-- Locate relevant project instruction files, feature docs, existing tests, and nearby examples.
-- In multi-repository projects, inspect related repositories when the task clearly crosses boundaries.
+Ask before proceeding when:
 
-### 2. Understand
+- An unresolved product or architecture choice would materially alter behavior or create substantial rework.
+- The proposed action exceeds the apparent task scope or changes unrelated behavior.
+- The action is destructive, difficult to reverse, or risks losing user work.
+- Production systems, credentials, billing, sensitive data, deployment, DNS, or production migrations are involved and authorization is not already explicit.
+- A broad dependency, infrastructure, or compatibility decision carries meaningful ongoing cost.
 
-- Read relevant docs and source before proposing or making changes.
-- Identify business rules, special project behavior, data contracts, UI states, and validation rules.
-- Confirm which existing pattern should be followed.
+When a request already explicitly authorizes one of these actions, confirm only missing details or a newly discovered expansion of risk. Prefer a reversible assumption for low-risk ambiguity and report it.
 
-### 3. Plan
+## Adaptive Workflow
 
-- For substantial tasks, create a short plan that names likely files, reusable surfaces, and verification strategy.
-- Keep the plan reversible and scoped.
-- For non-developers, explain the plan in plain language.
-- Do not treat this routine implementation plan as a user-initiated brainstorm
-  or as permission to activate `run-reviewable-subtask-loop`.
+### 1. Orient
 
-### 4. Implement
+- Inspect the relevant repository structure, instructions, configuration, nearby source, tests, and documentation.
+- In multi-project or multi-repository work, inspect each side of the affected contract before changing one side in isolation.
+- Identify existing patterns worth reusing and any unrelated working-tree changes that must be preserved.
 
-- Follow existing architecture, naming, folder organization, style, framework conventions, and package-manager conventions.
-- Reuse before creating.
-- Keep files cohesive and avoid broad refactors unrelated to the task.
-- Apply the Implementation Economy Gate before introducing code, abstractions, libraries, or tools.
+### 2. Define Success
 
-### 5. Verify
+- Translate the request into observable behavior, constraints, and relevant failure cases.
+- Identify likely files and the evidence that would demonstrate success.
+- Make a short plan only when coordination, uncertainty, or risk makes it useful.
 
-- Run the most relevant targeted tests or checks first.
-- Run broader tests when the scope or risk of the change justifies them.
-- For UI changes, use real-browser screenshots and interaction checks when available.
-- If verification cannot be completed, explain why and provide the closest reliable check.
+### 3. Implement
 
-### 6. Document
+- Follow suitable project naming, architecture, formatting, and package-manager conventions.
+- Make the smallest coherent change that satisfies the defined outcome.
+- Keep business rules, validation, configuration, and design decisions in clear sources of truth.
 
-- Update docs when behavior, architecture, setup, testing, deployment, logs, or project conventions materially change.
-- Keep affected `AGENTS.md`, `CLAUDE.md`, and docs aligned; do not create or rewrite unrelated documentation.
-- Document difficult bugs and their fixes in the related module docs.
+### 4. Verify
 
-### 7. Report
+- Run the fastest relevant targeted check first, then broaden verification when impact or uncertainty justifies it.
+- Verify observable behavior, not only command success. Include important negative or failure paths when they are part of the risk.
+- Use the project's existing test framework, fixtures, scripts, and CI-equivalent commands when available.
+- For material UI changes, inspect the result in a real rendering environment and check the states and viewports relevant to the request. Select tooling from capabilities available in the current environment and project; do not assume a universal tool ranking.
+- If a reliable check cannot run, explain the limitation and perform the closest useful alternative without claiming full verification.
 
-- Summarize what changed.
-- List files changed or created.
-- List tests, checks, screenshots, or manual verification performed.
-- Mention docs updated.
-- Mention anything not verified and any remaining risk.
+### 5. Align Durable Context
 
-## Reuse-First Implementation
+- Update documentation or project memory only when behavior, interfaces, setup, commands, architecture, deployment, or enduring conventions materially change.
+- Follow the project's existing documentation structure. Do not create a documentation hierarchy, design system, deployment folder, or memory file without a concrete durable need.
+- Keep secrets and sensitive credentials out of documentation, logs, fixtures, and project memory.
 
-Before creating anything new, search for existing equivalents:
+### 6. Report And Stop
 
-- UI components, wrappers, layouts, slots, shells, cards, tables, forms, modals, side panels, toolbars, and navigation.
-- Hooks, composables, stores, contexts, providers, services, repositories, API clients, SDK wrappers, validators, schemas, transformers, and formatters.
-- Design tokens, theme config, Tailwind config, CSS variables, global classes, utility classes, animations, transitions, icons, and asset patterns.
-- Tests, fixtures, factories, mocks, seeders, scripts, commands, jobs, and test utilities.
-- Documentation pages, feature docs, runbooks, ADRs, and project memory files.
+- Lead with the outcome.
+- Summarize material files or surfaces changed and verification performed.
+- State anything not verified, assumptions that matter, and remaining risk or a useful next step.
+- Avoid empty sections, exhaustive activity logs, and recommendations unrelated to the request.
 
-Rules:
+## Specialized Skill Routing
 
-- Prefer extending an existing shared surface over adding a near-duplicate local implementation.
-- If two reusable surfaces overlap, identify the canonical one before building on either.
-- If no reusable surface exists and there is a current second use case or established project pattern, create the smallest project-consistent abstraction.
-- If behavior is truly one-off, keep it local but still separate unrelated concerns.
-- Do not add "helper" files that only hide one call site without improving clarity or reuse.
+Read `references/quality-skill-routing.md` when testing, debugging, performance, security, documentation, deployment, or multi-slice delivery is a primary concern rather than a supporting step.
 
-## File Boundaries And Architecture
+Read `references/ui-ux-concept-routing.md` when the task includes concept generation or selection, a screenshot or mockup to match, a visual reference, or website emulation.
 
-Design files around responsibility, not convenience.
+Routing rules:
 
-Rules:
+- Use the current environment's available skill or capability catalog; do not depend on assumed filesystem locations or user-specific paths.
+- Do not install, download, or require an optional skill silently. If it is unavailable, continue with this core workflow and the project's own guidance.
+- Use any available specialized skill that more directly owns the task, regardless of where it was installed, provided it is compatible with higher-priority instructions.
+- Load only the specialized guidance needed for the task. Do not stack every related skill by default.
+- Use `run-reviewable-subtask-loop` only when the user explicitly requests it or accepts it during user-initiated planning for a genuinely multi-slice delivery. A routine implementation plan does not activate it.
 
-- Keep route/page/controller files thin when the project has components, services, handlers, or use-case layers.
-- Separate domain logic from UI rendering, data fetching, validation, formatting, and persistence when the project structure supports it.
-- Split feature UI only when existing conventions, multiple responsibilities, or current reuse justify the boundary.
-- Avoid files that mix unrelated responsibilities simply because the task started in one file.
-- Treat file size as a signal, not a strict rule. A long cohesive file can be acceptable; a shorter file with mixed responsibilities can still need refactoring.
-- When editing an already-large file, avoid making it worse. Extract only the part directly related to the task and only when the extraction matches project patterns.
-- Keep public APIs stable unless the task requires changing them.
-- Do not create new folder structures that compete with existing architecture.
+## Context-Specific Defaults
 
-## UI/UX And Design System Contract
-
-For UI work, inspect the source of truth before creating visual code.
-
-Check when present:
-
-- `docs/DESIGN_SYSTEM.md`, UI guidelines, screenshots, prototypes, design notes, or brand docs.
-- Existing layout shells, page wrappers, section wrappers, form wrappers, table wrappers, modal wrappers, and empty/error/loading state components.
-- Component library usage, local design primitives, theme providers, Tailwind config, CSS variables, global styles, tokens, icons, and asset conventions.
-- Existing animations, transitions, motion utilities, responsive patterns, accessibility patterns, and custom classes.
-
-Rules:
-
-- Do not create one-off colors, spacing, typography, shadows, borders, transitions, animations, or custom classes when tokens or reusable utilities exist.
-- Prefer shared components and wrappers for repeated UI patterns.
-- Keep page-level code focused on composition and data flow.
-- Match the project's density, tone, interaction model, and accessibility conventions.
-- When UI/UX work includes user-requested concepts, present the concepts with both a Technical Leader recommendation and the concept the user is most likely to prefer before implementation.
-- After the user chooses a concept, save the selected concept immediately in a project-local temporary folder such as `.tmp/ui-ux-concepts/`, ensure it is ignored or listed in `.git/info/exclude`, and never stage or commit it.
-- Suggest a Goal when the environment supports persistent goals so before/current/after UI verification can continue until the concept implementation is complete.
-- For concept implementation and visual before/after checks, prefer Playwright MCP first, Chrome DevTools MCP second, then local Playwright or equivalent browser automation. If both Playwright MCP and Chrome DevTools MCP are available, use Playwright MCP.
-- Verify important UI states: default, loading, empty, error, disabled, hover/focus when practical, validation, responsive behavior, and navigation.
-- If the project lacks a design system, document the practical conventions discovered from existing UI before inventing new ones.
-
-## User Images And Visual Clarification
-
-When the user provides a UI/UX image, screenshot, mockup, or marked-up design:
-
-- Inspect the image before deciding what to change.
-- If the requested change is unclear, do not guess silently.
-- Create an annotated copy of the image when the environment supports image generation or image editing. Use circles, arrows, or callouts to mark each unclear area.
-- Give every marked area a short stable label such as `A`, `B`, `C`, or `Header spacing`, `Filter row`, `Primary action`.
-- Ask concise questions using those labels so the user can answer unambiguously.
-- Do not alter the user's original image; create a separate annotated artifact.
-- If image annotation tooling is unavailable, describe the marked areas with clear labels, approximate positions, and the clarification questions.
-
-For UI implementation from screenshots:
-
-- Use Playwright MCP, Playwright, browser automation, or an equivalent real browser when available.
-- Capture the specific element or region that needs work before capturing the full page.
-- Use full-page screenshots only when the task depends on page-level layout, scroll behavior, viewport composition, or surrounding context.
-- Capture before and after screenshots for visual changes when practical.
-- Compare the target image, current screenshot, and updated screenshot at the same viewport or clearly state any viewport difference.
-- Prefer screenshots of the exact component state being changed over broad screenshots that add noisy context.
-
-## New Project Workflow
-
-Use this when the project is empty, newly created, or still choosing a stack.
-
-Create these folders and files when missing and appropriate:
-
-- `README.md`
-- `docs/`
-- `docs/README.md`
-- `deploy/`
-- `deploy/README.md`
-- `src/` only when appropriate for the selected stack
-
-Rules:
-
-- Respect framework-standard source folders such as `app/`, `pages/`, `packages/`, `backend/`, `frontend/`, `cmd/`, `internal/`, or equivalents.
-- Do not force all source code into `src/` when that conflicts with the stack.
-- Help the user choose a suitable stack when they have not chosen one.
-- Explain tradeoffs in plain language.
-- Initialize docs early.
-- Check whether Git is installed, but do not create remotes, push code, or configure credentials without user confirmation.
-
-## Existing Project Workflow
-
-Use this when the project already contains source code, configs, docs, or deployment files.
-
-Create missing docs only when the task requires durable documentation:
-
-- `README.md`
-- `docs/`
-- `docs/README.md`
-- `deploy/`
-- `deploy/README.md`
-
-Rules:
-
-- Do not force-create or migrate to `src/` if the project already has a framework-standard source structure.
-- Create `src/` only when the project has no clear source folder and `src/` would improve clarity.
-- Never move existing code into `src/` without user confirmation.
-
-## Documentation Structure
-
-Use `docs/features/` for feature and module documentation when the project has no stronger convention.
-
-Recommended structure:
-
-```text
-docs/
-  README.md
-  DESIGN_SYSTEM.md
-  features/
-    customer/
-      README.md
-      customer-module.md
-      customer-payment.md
-    order/
-      README.md
-      order-module.md
-      order-fulfillment.md
-```
-
-Rules:
-
-- Give each major business module its own folder under `docs/features/`.
-- Put a `README.md` in each module folder.
-- Link from the module `README.md` to child documents in that module.
-- Keep related docs together and keep docs practical.
-- Include module purpose, user flows, business rules, source files, API endpoints, pages, components, jobs, commands, database tables, services, edge cases, limitations, testing notes, deployment notes, and links when relevant.
-- Use `documentation-guidelines` only if it exists in the same shared skills repository. Otherwise, use this section as the fallback.
-
-## Design System Documentation
-
-For projects with UI, create or update `docs/DESIGN_SYSTEM.md` only when the task establishes or changes reusable UI conventions and the project lacks a stronger source of truth.
-
-Use `design-system-generator` only if it exists in the same shared skills repository. Otherwise, create a practical `DESIGN_SYSTEM.md` with:
-
-- Layout principles
-- Typography
-- Color usage
-- Spacing
-- Buttons
-- Forms
-- Tables
-- Cards
-- Modals
-- Navigation
-- Feedback states
-- Loading, empty, and error states
-- Responsive behavior
-- Accessibility basics
-- Component usage rules
-- Animation and transition rules
-- Custom class and token rules
-- Examples from the current project
-
-## Project Memory Files
-
-Use `AGENTS.md`, `CLAUDE.md`, or equivalent project instruction files as durable project memory.
-
-Use `agents-md-generator` only if it exists in the same shared skills repository. Otherwise, create or update these files manually.
-
-Rules:
-
-- Prefer `AGENTS.md` for Codex-style coding agents.
-- Use `CLAUDE.md` if the project specifically uses Claude.
-- Keep both files consistent if both are needed.
-- Do not put everything into one huge instruction file.
-- Move detailed content into `docs/` and link to it when instructions become too long.
-- Update project memory when conventions, commands, logs, testing, design-system rules, deployment, architecture, or source-of-truth rules change.
-- Do not store secrets, tokens, passwords, private keys, or sensitive credentials.
-- When a repeated mistake or rework loop is discovered, add the durable rule to docs or project memory so it does not recur.
-
-## Frameworks And External Libraries
-
-- Prefer project code and docs first.
-- Use current official documentation, Context7 MCP, or reliable documentation sources when the task depends on external API behavior or recent library changes.
-- Do not invent APIs.
-- Prefer a small local implementation when it is clear, reliable, easy to test, and meaningfully simpler than adding a dependency.
-- Prefer an existing project dependency when it already solves the problem well.
-- Add a new library only when it materially reduces implementation complexity, correctness or security risk, or ongoing maintenance, and its project fit is clear.
-- Do not add a dependency to replace a few straightforward lines, and do not hand-roll security-sensitive protocols, cryptography, complex parsers, or standards where a trusted library is the safer solution.
-- Do not replace existing libraries with new ones without a concrete, task-relevant reason.
-- Avoid duplicate tools that solve the same problem.
-- Use the existing package manager and lock file.
-
-## Coding Conventions
-
-- Match existing naming, formatting, folder organization, and code style.
-- Use existing lint, format, test, build, and type-check commands.
-- Do not introduce a new convention unless the project has no convention or the current convention is clearly harmful.
-- For inconsistent projects, propose a cleanup plan instead of silently rewriting everything.
-
-## Testing And Verification
-
-Every coding task should have a proportionate testing strategy, which can be implicit for trivial changes. Use `testing-verification` when test design, browser verification, visual QA, CI checks, or acceptance criteria are substantial.
-
-Fallback rules:
-
-- Use the existing test framework, fixtures, helpers, and commands.
-- Run the most relevant targeted check first, then broader checks when practical.
-- Add regression tests for bug fixes when practical.
-- For UI, use real-browser checks when available; capture element/region screenshots before full-page screenshots.
-- If no tests exist, propose the smallest useful setup or document exact manual verification steps.
-
-## Performance And Optimization
-
-Use `performance-optimization` when performance is the main concern.
-
-Fallback rules:
-
-- Measure or identify a concrete bottleneck before optimizing.
-- Check database queries, backend work, network payloads, frontend rendering, assets, builds, and tests separately.
-- Preserve business correctness and document cache invalidation rules.
-- Apply low-risk optimizations when they directly support the task.
-- Ask before broad architecture, infrastructure, or dependency changes.
-
-## Errors, Logs, And Debugging
-
-Use `debugging-workflow` when the task starts from an error, broken behavior, failing test, stack trace, log, regression, crash, or unknown cause.
-
-Fallback rules:
-
-- Reproduce the issue before fixing when possible.
-- Read logs and source-of-truth docs before changing code.
-- Isolate the smallest failing case and use fast checks first.
-- Do not log secrets or sensitive data.
-- Use Binary Debug only after normal reproduction, logs, and fast checks do not isolate the source.
-- Document difficult bugs and fixes in related module docs or project memory.
-
-## Deployment
-
-Create or maintain deployment documentation in `deploy/README.md` and related files inside `deploy/`.
-
-Use `vps-docker-traefik-deploy` only if it exists in the same shared skills repository. Otherwise, provide general deployment guidance manually.
-
-Rules:
-
-- Ask before touching production systems.
-- Ask before changing DNS, domains, SSL, server configs, credentials, production environment variables, or deploy commands.
-- Do not assume the user wants Docker, Traefik, rsync, CI/CD, or manual deployment.
-- Help the user compare deployment options in plain language.
-- Document the selected deployment method.
-- Keep deployment scripts understandable and safe.
-
-## Git And GitHub
-
-- Check whether Git is installed when setting up or maintaining a project.
-- If Git is available and the project is not initialized, suggest or initialize Git when appropriate.
-- Do not force Git initialization if the project is inside another repository or monorepo.
-- Do not create commits, branches, remotes, pushes, or pull requests without user confirmation unless the user clearly asked for it.
-- Encourage GitHub, GitLab, Bitbucket, or another remote repository for backup and collaboration.
-
-## Safety And Confirmation
-
-Ask for confirmation before:
-
-- Deleting files
-- Moving many files
-- Rewriting architecture
-- Installing system-level tools
-- Adding large dependencies
-- Changing production configs
-- Touching credentials
-- Running database migrations in production
-- Deploying
-- Pushing to remote Git repositories
-- Making irreversible changes
-
-Do not ask for confirmation for safe, small, reversible actions such as:
-
-- Reading files
-- Creating missing docs folders
-- Creating README files when missing
-- Adding small docs updates
-- Running local tests
-- Running lint, type-check, or build commands
-- Making minimal code changes requested by the user
-
-## Plain-Language Support
-
-When the user appears non-technical:
-
-- Explain what you are doing and why.
-- Avoid unexplained jargon.
-- Translate technical terms into simple language.
-- Provide clear choices when a decision is needed.
-- Recommend a default option when appropriate.
-- Explain risks before asking the user to choose.
-
-## Final Response Checklist
-
-At the end of each task, provide the applicable items without adding empty sections or unnecessary ceremony:
-
-- What changed
-- Files changed or created
-- Tests, checks, screenshots, or manual verification run
-- Documentation updated
-- Anything that could not be verified
-- Remaining risks or recommended next step, if any
+- **New projects:** choose structure and tooling that fit the selected stack and immediate requirements. Do not force `src/`, `docs/`, deployment files, Git hosting, or a design system without a concrete need.
+- **Existing projects:** preserve suitable architecture and conventions, but do not perpetuate a pattern that creates a demonstrated correctness, security, or maintainability problem.
+- **Documentation-only work:** verify links, commands, ownership, and statements against authoritative project sources; avoid changing runtime code unless requested.
+- **Bug fixes:** reproduce or establish convincing evidence of the failure, isolate the cause, and add regression coverage when it provides durable value.
+- **Performance work:** measure or identify a concrete bottleneck before optimizing and preserve correctness while comparing results.
+- **Deployment work:** distinguish planning or file preparation from operating a live environment, and require appropriate authorization for live changes.
