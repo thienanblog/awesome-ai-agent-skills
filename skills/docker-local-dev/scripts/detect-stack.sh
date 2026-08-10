@@ -30,6 +30,7 @@ REDIS_DETECTED=false
 QUEUE_DETECTED=false
 EXISTING_DOCKER=false
 SUPPORTED=true
+DETECTED=false
 
 # Helper function to check file exists
 file_exists() {
@@ -78,7 +79,7 @@ detect_node_version() {
 detect_python_version() {
     # Check pyproject.toml
     if file_exists "pyproject.toml"; then
-        local py_version=$(grep -E 'python[[:space:]]*=' "$PROJECT_ROOT/pyproject.toml" 2>/dev/null | grep -oE '[0-9]+\.[0-9]+' | head -1)
+        local py_version=$(grep -E 'requires-python[[:space:]]*=|python[[:space:]]*=' "$PROJECT_ROOT/pyproject.toml" 2>/dev/null | grep -oE '[0-9]+\.[0-9]+' | head -1)
         if [[ -n "$py_version" ]]; then
             echo "$py_version"
             return
@@ -133,6 +134,8 @@ detect_database() {
 
 # Detect Redis usage
 detect_redis() {
+    local dependency_file
+
     # Check .env
     if file_exists ".env"; then
         if grep -qE 'REDIS_HOST|CACHE_DRIVER=redis|SESSION_DRIVER=redis|QUEUE_CONNECTION=redis' "$PROJECT_ROOT/.env" 2>/dev/null; then
@@ -149,19 +152,21 @@ detect_redis() {
         fi
     fi
 
-    # Check requirements.txt
-    if file_exists "requirements.txt"; then
-        if grep -qiE '^redis|^celery|^django-redis' "$PROJECT_ROOT/requirements.txt" 2>/dev/null; then
+    # Check Python dependency declarations
+    for dependency_file in requirements.txt pyproject.toml; do
+        if file_exists "$dependency_file" && grep -qiE 'redis|celery|django-redis' "$PROJECT_ROOT/$dependency_file" 2>/dev/null; then
             echo "true"
             return
         fi
-    fi
+    done
 
     echo "false"
 }
 
 # Detect queue usage
 detect_queue() {
+    local dependency_file
+
     # Laravel queues
     if file_exists ".env" && grep -qE 'QUEUE_CONNECTION=redis|QUEUE_CONNECTION=database' "$PROJECT_ROOT/.env" 2>/dev/null; then
         echo "true"
@@ -181,10 +186,12 @@ detect_queue() {
     fi
 
     # Celery for Python
-    if file_exists "requirements.txt" && grep -qi "^celery" "$PROJECT_ROOT/requirements.txt" 2>/dev/null; then
-        echo "true"
-        return
-    fi
+    for dependency_file in requirements.txt pyproject.toml; do
+        if file_exists "$dependency_file" && grep -qi 'celery' "$PROJECT_ROOT/$dependency_file" 2>/dev/null; then
+            echo "true"
+            return
+        fi
+    done
 
     echo "false"
 }
@@ -194,7 +201,11 @@ detect_queue() {
 echo -e "${BLUE}Detecting project tech stack...${NC}" >&2
 
 # Check for existing Docker files
-if file_exists "docker-compose.yml" || file_exists "docker-compose.yaml" || file_exists "Dockerfile"; then
+if find "$PROJECT_ROOT" -maxdepth 2 -type f \( \
+    -name 'compose*.yml' -o -name 'compose*.yaml' \
+    -o -name 'docker-compose*.yml' -o -name 'docker-compose*.yaml' \
+    -o -name 'Dockerfile*' \
+\) -print -quit 2>/dev/null | grep -q .; then
     EXISTING_DOCKER=true
 fi
 
@@ -271,7 +282,7 @@ if file_exists "package.json" && [[ -z "$LANGUAGE" ]]; then
         PACKAGE_MANAGER="pnpm"
     elif file_exists "yarn.lock"; then
         PACKAGE_MANAGER="yarn"
-    elif file_exists "bun.lockb"; then
+    elif file_exists "bun.lockb" || file_exists "bun.lock"; then
         PACKAGE_MANAGER="bun"
     else
         PACKAGE_MANAGER="npm"
@@ -304,6 +315,10 @@ if (file_exists "requirements.txt" || file_exists "pyproject.toml" || file_exist
     # Detect package manager
     if file_exists "poetry.lock"; then
         PACKAGE_MANAGER="poetry"
+    elif file_exists "uv.lock"; then
+        PACKAGE_MANAGER="uv"
+    elif file_exists "pdm.lock"; then
+        PACKAGE_MANAGER="pdm"
     elif file_exists "Pipfile.lock"; then
         PACKAGE_MANAGER="pipenv"
     else
@@ -311,7 +326,7 @@ if (file_exists "requirements.txt" || file_exists "pyproject.toml" || file_exist
     fi
 
     # Detect framework
-    local req_file=""
+    req_file=""
     if file_exists "requirements.txt"; then
         req_file="requirements.txt"
     elif file_exists "pyproject.toml"; then
@@ -337,10 +352,17 @@ DATABASE=$(detect_database)
 REDIS_DETECTED=$(detect_redis)
 QUEUE_DETECTED=$(detect_queue)
 
+if [[ -n "$LANGUAGE" || -n "$CMS" ]]; then
+    DETECTED=true
+fi
+
 # ============================================
 # Check if stack is officially supported
 # ============================================
 SUPPORTED_STACKS="laravel|wordpress|drupal|joomla|nextjs|nestjs|express|fastify|django|fastapi|flask"
+if [[ "$DETECTED" == false ]]; then
+    SUPPORTED=false
+fi
 if [[ -n "$FRAMEWORK" ]] && ! echo "$FRAMEWORK" | grep -qE "$SUPPORTED_STACKS"; then
     SUPPORTED=false
 fi
@@ -353,7 +375,7 @@ fi
 # ============================================
 cat <<EOF
 {
-  "detected": true,
+  "detected": $DETECTED,
   "language": "$LANGUAGE",
   "languageVersion": "$LANGUAGE_VERSION",
   "framework": "$FRAMEWORK",

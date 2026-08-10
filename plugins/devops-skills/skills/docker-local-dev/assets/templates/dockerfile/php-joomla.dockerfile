@@ -1,9 +1,10 @@
 # Joomla PHP-FPM Dockerfile
 
+# syntax=docker/dockerfile:1
 FROM php:{{PHP_VERSION}}-fpm
 
 # Install system dependencies
-RUN apt-get update && apt-get install -y \
+RUN apt-get update && apt-get install -y --no-install-recommends \
     git \
     curl \
     zip \
@@ -56,6 +57,8 @@ WORKDIR /var/www/html
 
 # Set proper permissions
 RUN chown -R www-data:www-data /var/www/html
+
+USER www-data
 
 EXPOSE 9000
 

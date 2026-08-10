@@ -1,11 +1,12 @@
 {
   "name": "awesome-ai-agent-skills",
-  "version": "1.25.1",
+  "version": "1.26.0",
   "description": "Community-shared skills for AI coding agents",
   "private": true,
   "type": "module",
   "scripts": {
     "test:agent-context": "node scripts/test-agent-context-detector.mjs",
+    "test:docker-local-dev": "node scripts/test-docker-local-dev.mjs",
     "validate": "node scripts/validate-skills.js",
     "sync": "node scripts/sync-marketplace.js"
   },

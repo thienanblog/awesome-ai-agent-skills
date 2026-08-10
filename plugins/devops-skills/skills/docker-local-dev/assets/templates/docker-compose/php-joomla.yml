@@ -3,46 +3,36 @@
 # Template variables: {{PROJECT_NAME}}, {{PHP_VERSION}}, {{DB_IMAGE}}, {{DB_PORT}}, etc.
 # Note: No 'version' field needed - deprecated in Docker Compose v2
 
+name: {{PROJECT_NAME}}
+
 services:
   # Joomla Application with PHP-FPM
   app:
     build:
       context: .
       dockerfile: Dockerfile
-    container_name: {{PROJECT_NAME}}_app
-    restart: unless-stopped
     working_dir: /var/www/html
     volumes:
       - ./:/var/www/html
-      - ./docker/php/local.ini:/usr/local/etc/php/conf.d/local.ini:ro
     environment:
       JOOMLA_DB_HOST: db
-      JOOMLA_DB_NAME: {{DB_DATABASE}}
-      JOOMLA_DB_USER: {{DB_USER}}
-      JOOMLA_DB_PASSWORD: {{DB_PASSWORD}}
+      JOOMLA_DB_NAME: ${DB_DATABASE:?set DB_DATABASE}
+      JOOMLA_DB_USER: ${DB_USERNAME:?set DB_USERNAME}
+      JOOMLA_DB_PASSWORD: ${DB_PASSWORD:?set DB_PASSWORD}
     depends_on:
       db:
         condition: service_healthy
     networks:
       - {{PROJECT_NAME}}_network
-    healthcheck:
-      test: ["CMD-SHELL", "php-fpm-healthcheck || exit 1"]
-      interval: 10s
-      timeout: 5s
-      retries: 3
 
   # Nginx Web Server
   nginx:
-    image: nginx:alpine
-    container_name: {{PROJECT_NAME}}_nginx
-    restart: unless-stopped
+    image: {{NGINX_IMAGE}}
     ports:
-      - "${APP_PORT:-8080}:80"
-      - "${APP_SSL_PORT:-8443}:443"
+      - "127.0.0.1:${APP_PORT:-8080}:80"
     volumes:
       - ./:/var/www/html:ro
       - ./docker/nginx/joomla.conf:/etc/nginx/conf.d/default.conf:ro
-      - ./docker/nginx/ssl:/etc/nginx/ssl:ro
     depends_on:
       - app
     networks:
@@ -51,22 +41,20 @@ services:
   # Database Server
   db:
     image: {{DB_IMAGE}}
-    container_name: {{PROJECT_NAME}}_db
-    restart: unless-stopped
-    ports:
-      - "${DB_PORT:-3306}:3306"
+    # Publish to loopback only when a host SQL client needs access:
+    # ports:
+    #   - "127.0.0.1:${DB_PORT:-3306}:3306"
     environment:
-      MYSQL_ROOT_PASSWORD: {{DB_ROOT_PASSWORD}}
-      MYSQL_DATABASE: {{DB_DATABASE}}
-      MYSQL_USER: {{DB_USER}}
-      MYSQL_PASSWORD: {{DB_PASSWORD}}
+      MYSQL_ROOT_PASSWORD: ${DB_ROOT_PASSWORD:?set DB_ROOT_PASSWORD}
+      MYSQL_DATABASE: ${DB_DATABASE:?set DB_DATABASE}
+      MYSQL_USER: ${DB_USERNAME:?set DB_USERNAME}
+      MYSQL_PASSWORD: ${DB_PASSWORD:?set DB_PASSWORD}
     volumes:
       - db_data:/var/lib/mysql
-      - ./docker/mysql/my.cnf:/etc/mysql/conf.d/my.cnf:ro
     networks:
       - {{PROJECT_NAME}}_network
     healthcheck:
-      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-p{{DB_ROOT_PASSWORD}}"]
+      test: ["CMD-SHELL", "mysqladmin ping -h 127.0.0.1 -u root --password=$${MYSQL_ROOT_PASSWORD} --silent"]
       interval: 10s
       timeout: 5s
       retries: 5
@@ -76,7 +64,7 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
-    container_name: {{PROJECT_NAME}}_cli
+    profiles: ["tools"]
     working_dir: /var/www/html
     volumes:
       - ./:/var/www/html
@@ -84,9 +72,9 @@ services:
       - db
     environment:
       JOOMLA_DB_HOST: db
-      JOOMLA_DB_NAME: {{DB_DATABASE}}
-      JOOMLA_DB_USER: {{DB_USER}}
-      JOOMLA_DB_PASSWORD: {{DB_PASSWORD}}
+      JOOMLA_DB_NAME: ${DB_DATABASE:?set DB_DATABASE}
+      JOOMLA_DB_USER: ${DB_USERNAME:?set DB_USERNAME}
+      JOOMLA_DB_PASSWORD: ${DB_PASSWORD:?set DB_PASSWORD}
     networks:
       - {{PROJECT_NAME}}_network
     entrypoint: ["php", "cli/joomla.php"]
@@ -95,12 +83,9 @@ services:
 
   # Email Testing
   mailpit:
-    image: axllent/mailpit:latest
-    container_name: {{PROJECT_NAME}}_mailpit
-    restart: unless-stopped
+    image: {{MAILPIT_IMAGE}}
     ports:
-      - "${MAIL_UI_PORT:-8025}:8025"
-      - "${MAIL_SMTP_PORT:-1025}:1025"
+      - "127.0.0.1:${MAIL_UI_PORT:-8025}:8025"
     networks:
       - {{PROJECT_NAME}}_network
 

@@ -40,6 +40,9 @@ jobs:
       - name: Test agent context detector
         run: npm run test:agent-context
 
+      - name: Test Docker local development helpers
+        run: npm run test:docker-local-dev
+
       - name: Check generated files are synced
         run: |
           npm run sync

@@ -1,467 +1,94 @@
 # CMS Configuration Guide
 
-Detailed setup instructions for WordPress, Drupal, and Joomla.
+Apply this reference only to WordPress, Drupal, or Joomla projects. Preserve the repository's installation layout and project-local tooling.
 
-## WordPress Setup
+## Contents
 
-### Docker Compose Service
+- [Shared rules](#shared-rules)
+- [WordPress](#wordpress)
+- [Drupal](#drupal)
+- [Joomla](#joomla)
+- [Verification](#verification)
+
+## Shared Rules
+
+- Detect whether the project is a full CMS tree, Composer-managed application, Bedrock-style layout, or custom document root before choosing paths.
+- Match the CMS-supported PHP and database versions from project constraints.
+- Keep uploads, generated files, and database data in deliberate bind mounts or named volumes; do not hide tracked source with an unintended volume.
+- Run PHP-FPM and the web server as separate services only when the project needs that topology.
+- Add Redis, Mailpit, database administration, and debug tooling only when requested or evidenced.
+- Do not download plugins, modules, CLI launchers, or CMS core at container startup without explicit approval.
+- Do not import production databases or uploads automatically. Sanitize data before local use.
+- Keep debug output local and prevent secrets or personal data from appearing in generated documentation.
+
+## WordPress
+
+Determine whether WordPress core is tracked, downloaded by Composer, or supplied by an image. Preserve `WP_HOME`, `WP_SITEURL`, document-root, salts, and content-directory conventions.
+
+For database connectivity, use the Compose service name:
 
 ```yaml
-app:
-  build:
-    context: .
-    dockerfile: Dockerfile
-  volumes:
-    - ./:/var/www/html
-  depends_on:
-    - db
-    - redis
-  environment:
-    WORDPRESS_DB_HOST: db
-    WORDPRESS_DB_NAME: ${DB_DATABASE:-wordpress}
-    WORDPRESS_DB_USER: ${DB_USERNAME:-wordpress}
-    WORDPRESS_DB_PASSWORD: ${DB_PASSWORD:-wordpress}
+environment:
+  WORDPRESS_DB_HOST: db:3306
+  WORDPRESS_DB_NAME: ${DB_DATABASE:?set DB_DATABASE}
+  WORDPRESS_DB_USER: ${DB_USERNAME:?set DB_USERNAME}
+  WORDPRESS_DB_PASSWORD_FILE: /run/secrets/db_password
 ```
 
-### Dockerfile
+Prefer a one-off WP-CLI service based on a pinned compatible image or the project's own image. Do not install WP-CLI dynamically into a running app container.
 
-```dockerfile
-FROM php:8.2-fpm
-
-# Install WordPress required extensions
-RUN apt-get update && apt-get install -y \
-    libpng-dev libjpeg-dev libfreetype6-dev \
-    libzip-dev libicu-dev libxml2-dev \
-    && docker-php-ext-configure gd --with-freetype --with-jpeg \
-    && docker-php-ext-install -j$(nproc) \
-        gd mysqli pdo_mysql zip intl xml exif
-
-# Install ImageMagick (optional but recommended)
-RUN apt-get install -y libmagickwand-dev \
-    && pecl install imagick \
-    && docker-php-ext-enable imagick
-
-# Install Redis extension
-RUN pecl install redis && docker-php-ext-enable redis
-
-# Opcache for development
-RUN docker-php-ext-install opcache
-COPY docker/php/opcache-dev.ini /usr/local/etc/php/conf.d/opcache.ini
-
-# Install WP-CLI
-RUN curl -O https://raw.githubusercontent.com/wp-cli/builds/gh-pages/phar/wp-cli.phar \
-    && chmod +x wp-cli.phar \
-    && mv wp-cli.phar /usr/local/bin/wp
-
-WORKDIR /var/www/html
-```
-
-### wp-config.php for Docker
+Enable development flags only in ignored local configuration:
 
 ```php
-<?php
-// Database settings
-define('DB_NAME', getenv('WORDPRESS_DB_NAME') ?: 'wordpress');
-define('DB_USER', getenv('WORDPRESS_DB_USER') ?: 'wordpress');
-define('DB_PASSWORD', getenv('WORDPRESS_DB_PASSWORD') ?: 'wordpress');
-define('DB_HOST', getenv('WORDPRESS_DB_HOST') ?: 'db');
-define('DB_CHARSET', 'utf8mb4');
-define('DB_COLLATE', '');
-
-// Authentication Keys and Salts
-// Generate at: https://api.wordpress.org/secret-key/1.1/salt/
-define('AUTH_KEY',         'put-your-unique-phrase-here');
-define('SECURE_AUTH_KEY',  'put-your-unique-phrase-here');
-define('LOGGED_IN_KEY',    'put-your-unique-phrase-here');
-define('NONCE_KEY',        'put-your-unique-phrase-here');
-define('AUTH_SALT',        'put-your-unique-phrase-here');
-define('SECURE_AUTH_SALT', 'put-your-unique-phrase-here');
-define('LOGGED_IN_SALT',   'put-your-unique-phrase-here');
-define('NONCE_SALT',       'put-your-unique-phrase-here');
-
-$table_prefix = 'wp_';
-
-// ============================================
-// Development Settings
-// ============================================
 define('WP_DEBUG', true);
 define('WP_DEBUG_LOG', true);
-define('WP_DEBUG_DISPLAY', true);
+define('WP_DEBUG_DISPLAY', false);
 define('SCRIPT_DEBUG', true);
-define('SAVEQUERIES', true);
-
-// Memory
-define('WP_MEMORY_LIMIT', '256M');
-define('WP_MAX_MEMORY_LIMIT', '512M');
-
-// Disable auto-updates in Docker
-define('AUTOMATIC_UPDATER_DISABLED', true);
-define('WP_AUTO_UPDATE_CORE', false);
-
-// File editing in admin (optional, disable for security)
-// define('DISALLOW_FILE_EDIT', true);
-
-// ============================================
-// Redis Object Cache (if using Redis)
-// ============================================
-define('WP_REDIS_HOST', 'redis');
-define('WP_REDIS_PORT', 6379);
-// define('WP_REDIS_PASSWORD', 'secret');
-define('WP_REDIS_DATABASE', 0);
-
-// For production, add:
-// define('WP_DEBUG', false);
-// define('WP_DEBUG_LOG', false);
-// define('WP_DEBUG_DISPLAY', false);
-
-if (!defined('ABSPATH')) {
-    define('ABSPATH', __DIR__ . '/');
-}
-
-require_once ABSPATH . 'wp-settings.php';
 ```
 
-### Debug Plugins
+Enable `SAVEQUERIES` only during focused query debugging because it increases memory usage. Install Query Monitor or similar plugins only when the user requests them.
 
-Install these plugins for development:
+Ensure Nginx or Apache routes front-controller requests to `index.php`, blocks hidden/config files, sets upload limits consistently with PHP, and serves the actual detected document root.
 
-1. **Query Monitor** - Database queries, hooks, conditionals
-   ```bash
-   wp plugin install query-monitor --activate
-   ```
+## Drupal
 
-2. **Debug Bar** - Debug information in admin bar
-   ```bash
-   wp plugin install debug-bar --activate
-   ```
+Use Composer-installed Drush from `vendor/bin/drush`. Avoid the retired global Drush Launcher pattern.
 
-3. **Log Deprecated Notices** - Track deprecated functions
-   ```bash
-   wp plugin install log-deprecated-notices --activate
-   ```
+Keep local overrides in an ignored `settings.local.php` and include it conditionally from the project's tracked settings. Development services may enable:
 
-### Nginx Configuration for WordPress
+- Twig debug and auto-reload
+- verbose errors
+- development cache settings
 
-```nginx
-server {
-    listen 80;
-    server_name localhost;
-    root /var/www/html;
-    index index.php;
+Do not globally disable every cache unless the user needs it; Drupal development remains usable with targeted cache and Twig settings.
 
-    client_max_body_size 100M;
+Ensure writable paths such as `sites/default/files` are writable by the runtime user without recursively changing ownership of the whole repository.
 
-    # WordPress permalinks
-    location / {
-        try_files $uri $uri/ /index.php?$args;
-    }
+## Joomla
 
-    # PHP handling
-    location ~ \.php$ {
-        fastcgi_pass app:9000;
-        fastcgi_index index.php;
-        fastcgi_param SCRIPT_FILENAME $document_root$fastcgi_script_name;
-        include fastcgi_params;
-        fastcgi_read_timeout 300;
-    }
+Preserve the detected CLI entrypoint and version-specific directory layout. Keep database host, debug mode, logging, and temporary paths in local configuration rather than rewriting tracked production settings.
 
-    # Deny access to sensitive files
-    location ~ /\.ht {
-        deny all;
-    }
+Ensure writable cache, log, tmp, and media paths are scoped narrowly. Do not make the entire document root world-writable.
 
-    location = /wp-config.php {
-        deny all;
-    }
-
-    # Static file caching
-    location ~* \.(js|css|png|jpg|jpeg|gif|ico|svg|woff|woff2)$ {
-        expires 30d;
-        add_header Cache-Control "public, no-transform";
-    }
-}
-```
-
-## Drupal Setup
-
-### Docker Compose Service
-
-```yaml
-app:
-  build:
-    context: .
-    dockerfile: Dockerfile
-  volumes:
-    - ./:/var/www/html
-  depends_on:
-    - db
-  environment:
-    DRUPAL_DB_HOST: db
-    DRUPAL_DB_NAME: ${DB_DATABASE:-drupal}
-    DRUPAL_DB_USER: ${DB_USERNAME:-drupal}
-    DRUPAL_DB_PASSWORD: ${DB_PASSWORD:-drupal}
-```
-
-### Dockerfile
-
-```dockerfile
-FROM php:8.2-fpm
-
-# Install Drupal required extensions
-RUN apt-get update && apt-get install -y \
-    libpng-dev libjpeg-dev libfreetype6-dev \
-    libzip-dev libicu-dev libxml2-dev \
-    && docker-php-ext-configure gd --with-freetype --with-jpeg \
-    && docker-php-ext-install -j$(nproc) \
-        gd pdo_mysql zip intl xml opcache
-
-# Install Drush globally
-RUN curl -OL https://github.com/drush-ops/drush-launcher/releases/latest/download/drush.phar \
-    && chmod +x drush.phar \
-    && mv drush.phar /usr/local/bin/drush
-
-WORKDIR /var/www/html
-```
-
-### settings.local.php for Docker
-
-Create `sites/default/settings.local.php`:
-
-```php
-<?php
-
-// Database configuration
-$databases['default']['default'] = [
-    'database' => getenv('DRUPAL_DB_NAME') ?: 'drupal',
-    'username' => getenv('DRUPAL_DB_USER') ?: 'drupal',
-    'password' => getenv('DRUPAL_DB_PASSWORD') ?: 'drupal',
-    'host' => getenv('DRUPAL_DB_HOST') ?: 'db',
-    'port' => '3306',
-    'driver' => 'mysql',
-    'prefix' => '',
-    'collation' => 'utf8mb4_general_ci',
-];
-
-// Development settings
-$settings['container_yamls'][] = DRUPAL_ROOT . '/sites/development.services.yml';
-$config['system.logging']['error_level'] = 'verbose';
-$config['system.performance']['css']['preprocess'] = FALSE;
-$config['system.performance']['js']['preprocess'] = FALSE;
-
-// Disable caching for development
-$settings['cache']['bins']['render'] = 'cache.backend.null';
-$settings['cache']['bins']['page'] = 'cache.backend.null';
-$settings['cache']['bins']['dynamic_page_cache'] = 'cache.backend.null';
-
-// Trusted host patterns (adjust for your domain)
-$settings['trusted_host_patterns'] = [
-    '^localhost$',
-    '^127\.0\.0\.1$',
-    '^.+\.localhost$',
-];
-```
-
-### development.services.yml
-
-Create `sites/development.services.yml`:
-
-```yaml
-parameters:
-  http.response.debug_cacheability_headers: true
-  twig.config:
-    debug: true
-    auto_reload: true
-    cache: false
-
-services:
-  cache.backend.null:
-    class: Drupal\Core\Cache\NullBackendFactory
-```
-
-### Drush Commands
+Use the project image for Joomla CLI commands when possible:
 
 ```bash
-# Clear cache
-drush cr
-
-# Run database updates
-drush updb
-
-# Install a module
-drush en module_name
-
-# Generate one-time login link
-drush uli
+docker compose run --rm cli <command>
 ```
 
-## Joomla Setup
+## Verification
 
-### Docker Compose Service
-
-```yaml
-app:
-  build:
-    context: .
-    dockerfile: Dockerfile
-  volumes:
-    - ./:/var/www/html
-  depends_on:
-    - db
-  environment:
-    JOOMLA_DB_HOST: db
-    JOOMLA_DB_NAME: ${DB_DATABASE:-joomla}
-    JOOMLA_DB_USER: ${DB_USERNAME:-joomla}
-    JOOMLA_DB_PASSWORD: ${DB_PASSWORD:-joomla}
-```
-
-### Dockerfile
-
-```dockerfile
-FROM php:8.2-fpm
-
-# Install Joomla required extensions
-RUN apt-get update && apt-get install -y \
-    libpng-dev libjpeg-dev libfreetype6-dev \
-    libzip-dev libicu-dev libxml2-dev \
-    && docker-php-ext-configure gd --with-freetype --with-jpeg \
-    && docker-php-ext-install -j$(nproc) \
-        gd mysqli pdo_mysql zip intl xml opcache
-
-WORKDIR /var/www/html
-```
-
-### configuration.php for Docker
-
-```php
-<?php
-class JConfig {
-    // Database
-    public $dbtype = 'mysqli';
-    public $host = 'db';
-    public $user = 'joomla';
-    public $password = 'joomla';
-    public $db = 'joomla';
-    public $dbprefix = 'jos_';
-    public $dbencryption = 0;
-    public $dbsslverifyservercert = false;
-    public $dbsslkey = '';
-    public $dbsslcert = '';
-    public $dbsslca = '';
-    public $dbsslcipher = '';
-
-    // Site
-    public $sitename = 'Joomla Development';
-    public $secret = 'change-this-secret-key';
-
-    // Debug
-    public $debug = true;
-    public $debug_lang = true;
-
-    // Error reporting
-    public $error_reporting = 'maximum';
-
-    // Logging
-    public $log_path = '/var/www/html/administrator/logs';
-    public $tmp_path = '/var/www/html/tmp';
-
-    // Cache
-    public $caching = 0;
-    public $cache_handler = 'file';
-    public $cachetime = 15;
-    public $cache_platformprefix = false;
-
-    // Session
-    public $session_handler = 'database';
-    public $lifetime = 15;
-
-    // Mail (use Mailpit)
-    public $mailer = 'smtp';
-    public $mailfrom = 'admin@localhost';
-    public $fromname = 'Joomla';
-    public $sendmail = '/usr/sbin/sendmail';
-    public $smtpauth = false;
-    public $smtpuser = '';
-    public $smtppass = '';
-    public $smtphost = 'mailpit';
-    public $smtpsecure = 'none';
-    public $smtpport = 1025;
-}
-```
-
-### Nginx Configuration for Joomla
-
-```nginx
-server {
-    listen 80;
-    server_name localhost;
-    root /var/www/html;
-    index index.php index.html;
-
-    client_max_body_size 100M;
-
-    # Joomla SEF URLs
-    location / {
-        try_files $uri $uri/ /index.php?$args;
-    }
-
-    # PHP handling
-    location ~ \.php$ {
-        fastcgi_pass app:9000;
-        fastcgi_index index.php;
-        fastcgi_param SCRIPT_FILENAME $document_root$fastcgi_script_name;
-        include fastcgi_params;
-    }
-
-    # Deny access to sensitive files
-    location ~ /\.ht {
-        deny all;
-    }
-
-    location = /configuration.php {
-        deny all;
-    }
-
-    location ~ ^/administrator/logs/ {
-        deny all;
-    }
-}
-```
-
-## Common CMS Tips
-
-### File Permissions
+Run only non-destructive checks by default:
 
 ```bash
-# Inside container, set proper permissions
-chown -R www-data:www-data /var/www/html
-find /var/www/html -type d -exec chmod 755 {} \;
-find /var/www/html -type f -exec chmod 644 {} \;
+# WordPress
+docker compose run --rm wpcli core version
 
-# Writable directories
-chmod -R 775 /var/www/html/wp-content/uploads      # WordPress
-chmod -R 775 /var/www/html/sites/default/files     # Drupal
-chmod -R 775 /var/www/html/images                  # Joomla
-chmod -R 775 /var/www/html/tmp                     # Joomla
+# Drupal
+docker compose exec app ./vendor/bin/drush status
+
+# Joomla (adapt to detected CLI)
+docker compose run --rm cli --version
 ```
 
-### Database Import
-
-```bash
-# MySQL/MariaDB
-docker compose exec db mysql -u root -p database_name < dump.sql
-
-# Or using the app container
-docker compose exec app mysql -h db -u root -p database_name < dump.sql
-```
-
-### WP-CLI in Docker
-
-```bash
-# Run WP-CLI commands
-docker compose exec app wp plugin list
-docker compose exec app wp core update
-docker compose exec app wp cache flush
-
-# Import database
-docker compose exec app wp db import dump.sql
-```
+Then verify the HTTP route, static assets, upload path permissions, database connectivity, and local debug logging. Require explicit approval before installation, updates, database imports, cache-wide destructive operations, or content mutations.

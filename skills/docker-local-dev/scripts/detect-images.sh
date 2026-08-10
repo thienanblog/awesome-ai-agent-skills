@@ -16,9 +16,7 @@ get_images_json() {
     local pattern=$1
     local first=true
 
-    while IFS='|' read -r repo_tag size; do
-        repo=$(echo "$repo_tag" | cut -d':' -f1)
-        tag=$(echo "$repo_tag" | cut -d':' -f2)
+    while IFS='|' read -r repo tag size; do
 
         if [ "$first" = true ]; then
             first=false
@@ -26,7 +24,7 @@ get_images_json() {
             echo ","
         fi
         echo -n "    {\"repository\": \"$repo\", \"tag\": \"$tag\", \"size\": \"$size\"}"
-    done < <(docker images --format '{{.Repository}}:{{.Tag}}|{{.Size}}' 2>/dev/null | grep -E "^($pattern):" || true)
+    done < <(docker images --format '{{.Repository}}|{{.Tag}}|{{.Size}}' 2>/dev/null | grep -E "^($pattern)\\|" || true)
 }
 
 # Start JSON output
