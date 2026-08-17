@@ -1,6 +1,6 @@
 # Branch cleanup safety
 
-Read this reference immediately before deleting any task, recovery,
+Read this reference immediately before deleting any subtask, recovery,
 finalization, backup, replacement, or integration branch created by the series.
 
 Delete a branch only when cleanup was authorized and all of these checks pass:
@@ -11,7 +11,7 @@ Delete a branch only when cleanup was authorized and all of these checks pass:
    Inspect the repository worktree list first.
 3. The branch tip is the exact commit recorded by this series. If it moved,
    someone else may have written to it; keep it and report the discrepancy.
-4. For a completed task branch, its exact tip is integrated into the intended
+4. For a completed subtask branch, its exact tip is integrated into the intended
    integration branch and the required checkpoint checks passed.
 5. The target is not the protected base, a remote branch, another session's
    branch, or the integration branch before final merge.
@@ -26,4 +26,4 @@ discard. If any ownership or safety check fails, keep the branch and report its
 name and the failed check.
 
 Apply the same rules to the integration branch after final merge. By then every
-normal task branch should already have been handled at its integration step.
+normal subtask branch should already have been handled at its integration step.
