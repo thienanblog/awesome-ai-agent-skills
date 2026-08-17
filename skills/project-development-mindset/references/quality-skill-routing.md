@@ -27,9 +27,9 @@ Use names such as `testing-verification`, `debugging-workflow`, `performance-opt
 
 Do not keep multiple full workflows active after the primary risk changes. Retain only the cross-cutting constraints and the workflow that best matches the current problem.
 
-## Multi-Slice Delivery
+## Multi-Subtask Delivery
 
-Consider `run-reviewable-subtask-loop` only for a large plan, migration, refactor, or roadmap that genuinely benefits from multiple independently reviewable and recoverable slices.
+Consider `run-reviewable-subtask-loop` only for a large plan, migration, refactor, or roadmap that genuinely benefits from multiple independently reviewable and recoverable subtasks.
 
 Use it only when the user explicitly requests it or explicitly accepts it during user-initiated planning before implementation. Do not activate it from routine internal planning, task size alone, or the existence of subtask boundaries. If it is unavailable or declined, use a proportionate plan in the main workflow.
 
