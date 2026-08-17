@@ -1,6 +1,6 @@
 ---
 name: project-development-mindset
-description: Adaptive, repository-aware baseline for ordinary implementation, refactoring, setup, and cross-cutting project changes. Use when modifying code, configuration, tests, or durable documentation to discover local conventions, choose the smallest coherent change, preserve project integrity, and calibrate verification to risk. Use as a coordinator when concerns interact; let a more specific skill lead when one concern clearly owns the task. Do not use for explanation-only or read-only requests unless explicitly invoked.
+description: Adaptive, repository-aware baseline for ordinary implementation, refactoring, setup, and cross-cutting project changes. Use when modifying code, configuration, tests, or durable documentation to discover local conventions, choose the smallest coherent change, preserve project integrity, calibrate verification to risk, and assess final requirement fit with evidence. Use as a coordinator when concerns interact; let a more specific skill lead when one concern clearly owns the task. Do not use for explanation-only or read-only requests unless explicitly invoked.
 ---
 
 # Project Development Mindset
@@ -116,6 +116,7 @@ When a request already explicitly authorizes one of these actions, confirm only 
 ### 2. Define Success
 
 - Translate the request into observable behavior, constraints, and relevant failure cases.
+- Preserve the agreed requirement baseline and acceptance criteria so the final result can be checked against what the user actually approved, including any later approved changes.
 - Identify likely files and the evidence that would demonstrate success.
 - Make a short plan only when coordination, uncertainty, or risk makes it useful.
 
@@ -131,6 +132,7 @@ When a request already explicitly authorizes one of these actions, confirm only 
 - Verify observable behavior, not only command success. Include important negative or failure paths when they are part of the risk.
 - Use the project's existing test framework, fixtures, scripts, and CI-equivalent commands when available.
 - For material UI changes, inspect the result in a real rendering environment and check the states and viewports relevant to the request. Select tooling from capabilities available in the current environment and project; do not assume a universal tool ranking.
+- For material code changes, inspect the complete final diff against the latest verified task base, and against `origin/main` when it is the repository's canonical base, for regressions, missing requirements, accidental artifacts, and unsafe changes. Fix actionable findings and rerun affected checks before claiming completion.
 - If a reliable check cannot run, explain the limitation and perform the closest useful alternative without claiming full verification.
 
 ### 5. Align Durable Context
@@ -143,12 +145,14 @@ When a request already explicitly authorizes one of these actions, confirm only 
 
 - Lead with the outcome.
 - Summarize material files or surfaces changed and verification performed.
-- State anything not verified, assumptions that matter, and remaining risk or a useful next step.
+- Re-read the agreed requirement baseline and map each criterion to delivered behavior and evidence. Report a **requirement-fit confidence** score from 0 to 100, including deductions, anything not verified, assumptions that matter, and remaining mismatches. Use 100 only when every agreed criterion is satisfied and verified with no known gap.
+- When the first comparison reveals an in-scope actionable gap, fix it, rerun affected verification, and reassess the score. Do not hide a mismatch behind a high score or repeatedly experiment without new evidence.
+- If the request is materially ambiguous, internally conflicting, infeasible, inadvisable, or too large for one safe implementation, do not guess or force an implementation. Explain the concrete constraint or risk, separate completed work from unmet requirements, propose a bounded option or next decision, and ask for direction when that choice would materially change the outcome.
 - Avoid empty sections, exhaustive activity logs, and recommendations unrelated to the request.
 
 ## Specialized Skill Routing
 
-Read `references/quality-skill-routing.md` when testing, debugging, performance, security, documentation, deployment, or multi-slice delivery is a primary concern rather than a supporting step.
+Read `references/quality-skill-routing.md` when testing, debugging, performance, security, documentation, deployment, or multi-subtask delivery is a primary concern rather than a supporting step.
 
 Read `references/ui-ux-concept-routing.md` when the task includes concept generation or selection, a screenshot or mockup to match, a visual reference, or website emulation.
 
@@ -158,7 +162,7 @@ Routing rules:
 - Do not install, download, or require an optional skill silently. If it is unavailable, continue with this core workflow and the project's own guidance.
 - Use any available specialized skill that more directly owns the task, regardless of where it was installed, provided it is compatible with higher-priority instructions.
 - Load only the specialized guidance needed for the task. Do not stack every related skill by default.
-- Use `run-reviewable-subtask-loop` only when the user explicitly requests it or accepts it during user-initiated planning for a genuinely multi-slice delivery. A routine implementation plan does not activate it.
+- Use `run-reviewable-subtask-loop` only when the user explicitly requests it or accepts it during user-initiated planning for a genuinely multi-subtask delivery. A routine implementation plan does not activate it.
 
 ## Context-Specific Defaults
 

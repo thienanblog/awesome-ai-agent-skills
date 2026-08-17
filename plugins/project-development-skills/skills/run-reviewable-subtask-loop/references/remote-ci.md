@@ -29,7 +29,7 @@ implement, commit, push, publish, open a review request, merge, or release does
 not by itself authorize Remote CI. If a push or review request starts checks
 automatically, obtain authorization before that action.
 
-Authorization never implies per-slice Remote CI. Ask again before expanding the
+Authorization never implies per-subtask Remote CI. Ask again before expanding the
 approved trigger, jobs, branch, or cancellation scope. A materially changed
 candidate may require renewed authorization when the prior approval did not
 cover reruns.
