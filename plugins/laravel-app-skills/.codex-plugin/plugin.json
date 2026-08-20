@@ -1,6 +1,6 @@
 {
   "name": "laravel-app-skills",
-  "version": "1.27.0",
+  "version": "1.28.0",
   "description": "Version-aware guidelines for building and upgrading Laravel 11, 12, and 13 applications across common stacks and tooling.",
   "homepage": "https://github.com/thienanblog/awesome-ai-agent-skills",
   "repository": "https://github.com/thienanblog/awesome-ai-agent-skills",
