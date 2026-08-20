@@ -1,6 +1,6 @@
 {
   "name": "awesome-ai-agent-skills",
-  "version": "1.27.0",
+  "version": "1.28.0",
   "description": "Community-shared skills for AI coding agents",
   "private": true,
   "type": "module",
