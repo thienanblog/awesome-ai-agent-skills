@@ -167,10 +167,31 @@ Use three proportionate gates:
 - **Final gate:** the complete locally runnable matrix required for all affected
   and contract-connected surfaces on the exact integration tip.
 
-Prefer focused subtask gates, but allow a broader or full suite when it is cheap,
-repository-required, or justified by the subtask's risk. Do not use lint or
-formatting alone as evidence for a behavior change. Avoid repeatedly running an
-expensive full matrix when a focused check gives reliable intermediate
+At each Subtask gate, run only the focused commands recorded for that subtask
+and any applicable Phase gate. Do not run the Final gate or a repository-wide
+suite merely because the subtask changes source, generated files, plans or other
+documentation, is about to be committed, has been integrated, or must be marked
+last-known-good.
+
+Treat repository-wide verification commands described generically as required
+before delivery, review, merge, or "after changing" files as Final-gate checks.
+Do not infer per-subtask cadence from those descriptions. A broader or full
+suite before the Final gate is exceptional: run it only when a higher-priority
+repository rule explicitly requires that exact per-commit, per-subtask, or per-
+integration cadence, or when the subtask changes a repository-wide harness or
+shared contract for which no focused check can provide meaningful evidence.
+Record the specific trigger and command before running it. Do not use low
+runtime, general caution, or the bare label "required checks" as sufficient
+justification.
+
+This cadence rule applies only to verification. Run generators, schema or code
+generation, and synchronization commands at the subtask boundary when needed to
+keep source changes and their generated artifacts in the same delivery. Use a
+focused generated-output check when the repository provides one; defer only the
+broader verification matrix to the Final gate.
+
+Do not use lint or formatting alone as evidence for a behavior change. Avoid
+repeatedly running a full matrix when focused checks give reliable intermediate
 evidence.
 
 Run local checks before Remote CI unless the user explicitly requests a remote-
@@ -216,16 +237,20 @@ Repeat sequentially:
    accidental artifacts, and unrelated changes.
 5. Fix every actionable finding, rerun affected checks, and review the final
    diff again.
-6. Commit only when required local checks pass and no actionable finding
-   remains. Follow repository commit conventions and prefer one final commit per
-   subtask; consolidate local checkpoints when policy permits.
+6. Commit only when the recorded Subtask gate and any applicable Phase gate pass
+   and no actionable finding remains. Do not substitute Final-gate commands for
+   these checks unless the explicit exception above applies. Follow repository
+   commit conventions and prefer one final commit per subtask; consolidate local
+   checkpoints when policy permits.
 7. Return to integration and merge the reviewed commit locally, preferring
    fast-forward-only when the branch contains the intended single commit. Do not
    start another subtask first. If execution resumed after review, confirm the
    exact commit/tree still matches the reviewed diff before integration.
-8. Verify the new integration tip and run a cheap smoke check when shared
-   contracts or build boundaries changed. Mark it last-known-good only after
-   required checks pass.
+8. Verify that the new integration tip contains the reviewed commit and run a
+   cheap smoke check when shared contracts or build boundaries changed. Do not
+   rerun the Final gate at this integration boundary unless the explicit
+   exception above applies. Mark the tip last-known-good after these integration
+   checks pass.
 9. Record the commit, checks, findings, fixes, integration result, and recovery
    boundary. If cleanup was authorized, read
    [references/branch-cleanup.md](references/branch-cleanup.md) and delete only
