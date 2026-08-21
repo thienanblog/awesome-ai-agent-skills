@@ -151,7 +151,8 @@ Check for:
 Prefer:
 
 - Targeted commands during development.
-- Broader checks before handoff.
+- After implementation and targeted checks are complete, offering broader checks
+  for the user's approval before running them.
 - CI caching that matches lock files.
 - Separating smoke, unit, integration, and E2E suites when the project supports it.
 - Batching deterministic fixture setup and reusing validated sessions or tokens
@@ -186,10 +187,11 @@ smallest reproducing concurrent group. Distinguish:
 - Resource starvation or an infrastructure restart.
 - A genuinely insufficient timeout after the expected state was proven.
 
-Fix the focused failure before rerunning the full suite. Prefer semantic
-readiness assertions and bounded overall test time. Raising timeouts or enabling
-retries without identifying the cause can hide incorrect state and invalidate
-the benchmark.
+Fix the focused failure and rerun the smallest reproducing check. After the fix
+and focused verification are complete, ask the user whether to rerun the full
+suite. Prefer semantic readiness assertions and bounded overall test time.
+Raising timeouts or enabling retries without identifying the cause can hide
+incorrect state and invalidate the benchmark.
 
 ### Stateful Runner Guardrails
 
@@ -235,7 +237,8 @@ Also verify:
 - Expected service health and restart counts.
 - No orphan runner, browser, worker, lock, or temporary snapshot remains.
 - Persistent data and temporary resource limits were restored.
-- Focused regression tests pass before the full suite is rerun after a failure.
+- Focused regression tests pass. After the work is complete, ask the user whether
+  to rerun the full suite.
 
 Report both the metric and the practical user impact. Include sample count,
 representative value and spread when repeated, intentional benchmark-envelope

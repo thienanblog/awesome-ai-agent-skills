@@ -34,14 +34,16 @@ approved trigger, jobs, branch, or cancellation scope. A materially changed
 candidate may require renewed authorization when the prior approval did not
 cover reruns.
 
-## Run local first
+## Complete focused local checks first
 
 Unless the user explicitly requests a remote-first exception:
 
-1. Run every applicable locally runnable final check on the exact integration
+1. Run the focused locally runnable checks selected for the exact integration
    tip.
-2. Fix local failures and repeat the stable final gate.
-3. Trigger only the approved remote checks on the current review head.
+2. Fix local failures and repeat the focused final gate.
+3. After implementation is complete, list any broader or full local suite and
+   ask the user whether to run it.
+4. Trigger only the approved remote checks on the current review head.
 
 Remote checks may provide:
 
@@ -50,10 +52,12 @@ Remote checks may provide:
 - repository-required branch-protection status; or
 - trusted remote attestation of a check already reproduced locally.
 
-Do not shorten the local gate merely because an equivalent remote check is
-authorized. When the user explicitly requests remote-first or remote-only
-execution, confirm the trigger and scope, record why local execution is being
-replaced, and follow that instruction.
+Do not replace focused local evidence merely because an equivalent remote check
+is authorized. Do not run a broader or full local suite without the user's
+explicit post-implementation approval unless a higher-priority repository
+instruction requires it. When the user explicitly requests remote-first or
+remote-only execution, confirm the trigger and scope, record why local execution
+is being replaced, and follow that instruction.
 
 ## Minimize duplicate runs
 

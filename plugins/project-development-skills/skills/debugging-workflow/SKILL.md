@@ -65,7 +65,10 @@ Read `references/debugging-playbook.md` for deeper isolation patterns.
 
 - Rerun the failing check first.
 - Run related targeted tests.
-- Run broader checks when practical.
+- After the diagnosis or fix and targeted verification are complete, list any
+  broader or full-suite checks and ask the user whether to run them. Do not run
+  them without explicit approval unless higher-priority repository instructions
+  require them.
 - Add or update a regression test when possible.
 - Document difficult bugs in feature docs or project memory when the project would benefit.
 

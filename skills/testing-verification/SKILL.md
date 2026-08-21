@@ -43,6 +43,10 @@ before expanding an approved scope.
 
 ### 4. Run And Report
 
-- Run the smallest useful target first, rerun failures, then broaden when practical.
+- Run the smallest useful target and rerun focused failures. Keep automatic
+  verification scoped to the affected behavior. After the requested work and
+  focused checks are complete, list any broader or full-suite options and ask
+  the user whether to run them; do not run them without explicit approval unless
+  higher-priority repository instructions require them.
 - Use `debugging-workflow` for unclear failures and `performance-optimization` for performance validation.
 - Report the strategy, exact commands and results, UI verification surface, screenshots, gaps, residual risk, and next highest-value test.

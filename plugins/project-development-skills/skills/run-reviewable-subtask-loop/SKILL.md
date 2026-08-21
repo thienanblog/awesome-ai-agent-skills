@@ -1,13 +1,14 @@
 ---
 name: run-reviewable-subtask-loop
-description: Deliver a large implementation plan, migration, refactor, or roadmap as a sequential series of right-sized, locally reviewed subtask commits on one integration branch, with resumable per-subtask plan files by default and one aggregate delivery. Use only when the user explicitly requests this workflow or accepts it during user-initiated brainstorming or planning before coding; do not use it for ordinary coding requests with clear requirements. Subtasks are not subagents, so work stays in the main conversation unless the user separately approves the proposed agent count and scope after being warned that delegation can increase usage. Ask again before expanding the approved scope. Remote CI requires separate explicit authorization.
+description: Deliver a large implementation plan, migration, refactor, or roadmap quickly as a sequential series of right-sized, locally reviewed subtask commits on one integration branch, using a lightweight ledger by default and durable plan files only when their resumability is needed. Use only when the user explicitly requests this workflow or accepts it during user-initiated brainstorming or planning before coding; do not use it for ordinary coding requests with clear requirements. Subtasks are not subagents, so work stays in the main conversation unless the user separately approves the proposed agent count and scope after being warned that delegation can increase usage. Ask again before expanding the approved scope. Remote CI requires separate explicit authorization.
 ---
 
 # Run Reviewable Subtask Loop
 
 Deliver a large change as ordered, recoverable commits on a local integration
-branch. Review and verify every subtask before integration, then run one complete
-local gate and use one agreed aggregate publication path.
+branch. Review and verify every subtask before integration, then run focused
+aggregate checks and use one agreed aggregate publication path. After the work is
+complete, let the user decide whether to run a broader or full local suite.
 
 Use **task** for the user's complete requested outcome, **subtask** for one
 independently reviewable and recoverable delivery unit, and **phase** only for an
@@ -32,10 +33,10 @@ optional group of related subtasks. Do not use these terms interchangeably.
    [references/remote-ci.md](references/remote-ci.md) when Remote CI is required,
    requested, or could start automatically.
 5. Treat planning as read-only except for exact temporary plan artifacts the
-   user requested or the durable-plan default below authorizes. Create branches,
-   commits, merges, pushes, review requests, or branch deletions only when the
-   user's execution request or repository workflow authorizes them. Never infer
-   final-merge authorization from permission to implement or publish.
+   user requested or the durable-plan mode selected under the criteria below.
+   Create branches, commits, merges, pushes, review requests, or branch deletions
+   only when the user's execution request or repository workflow authorizes them.
+   Never infer final-merge authorization from permission to implement or publish.
 
 ## Initialize the series
 
@@ -57,10 +58,12 @@ Before the first edit:
    required.
 5. Record the initial base and integration commit SHAs. Confirm the integration
    branch is not used by another worktree and starts clean.
-6. Agree on the subtask ledger, plan-persistence mode, verification budget, final
-   local gate, publication path, Remote CI decision, and whether cleanup of this
-   series' exact local branches is authorized. Disclose any push or review-
-   request action that would automatically trigger Remote CI before taking it.
+6. Agree on the subtask ledger, focused verification budget, publication path,
+   Remote CI decision, and whether cleanup of this series' exact local branches
+   is authorized. Use the lightweight plan mode unless the user requests durable
+   artifacts or the work has a concrete multi-session recovery need. Disclose any
+   push or review-request action that would automatically trigger Remote CI before
+   taking it.
 
 Use this normal topology:
 
@@ -78,20 +81,20 @@ current verified integration tip.
 
 ## Choose and maintain the plan artifacts
 
-Before the first source edit, present these execution modes once as a non-
-blocking choice and state that durable subtask plans are the default:
+Before the first source edit, choose the lightest execution mode that preserves
+the required recovery boundary:
 
-- **Durable subtask plans:** create the master and all subtask plans first so the
-  series can pause and resume between subtasks.
-- **Continuous execution:** keep the ordered ledger in the conversation or an
-  existing repository-owned progress surface and run the approved subtasks
-  sequentially through the final gate without creating temporary plan files.
+- **Continuous execution (default):** keep a compact ordered ledger in the
+  conversation or an existing repository-owned progress surface and run the
+  approved subtasks sequentially without creating temporary plan files.
+- **Durable subtask plans:** create the master and subtask plans only when the
+  user requests persisted plans or the series is expected to cross sessions and
+  cannot be reconstructed reliably from Git and the existing ledger.
 
-When execution is authorized and the user has not explicitly selected continuous
-execution, proceed immediately with durable subtask plans. Do not issue a
-blocking question solely to resolve this choice. Treat `docs/plans` as a
-repository-relative path, but obey a higher-priority repository rule that
-requires another planning location or forbids temporary tracked plans.
+Do not issue a blocking question solely to resolve this choice. Treat
+`docs/plans` as a repository-relative path when durable plans are selected, but
+obey a higher-priority repository rule that requires another planning location
+or forbids temporary tracked plans.
 
 For durable subtask plans:
 
@@ -137,13 +140,21 @@ As work proceeds, add the actual branch, commit SHA, review findings and fixes,
 verification evidence, integration result, last-known-good tip, and cleanup
 state. Do not require runtime values before they exist.
 
-Choose the fewest subtasks that preserve meaningful boundaries. A good subtask
-is a coherent delivery slice that:
+Split the work into fast, coherent subtasks at meaningful boundaries without
+creating mechanical micro-subtasks. A good subtask should normally fit one
+implementation pass, one focused verification pass, and one concise code-review
+pass. It:
 
 1. implements one complete responsibility without a broken intermediate state;
 2. tells one coherent review story;
 3. has checks that can detect failure of that responsibility; and
 4. would justify an independent keep, revert, or rebuild decision.
+
+If a proposed subtask needs several unrelated implementation passes, multiple
+unrelated test surfaces, or a diff that cannot be reviewed as one concise story,
+split it before coding. If it is only a mechanical fragment with no independent
+review or recovery value, merge it with an adjacent subtask. Do not inflate a
+subtask with optional cleanup, speculative hardening, or unrelated refactoring.
 
 Merge adjacent work when the boundary is only a file, route, rename, checklist
 row, mechanical edit, or shared verification command. Split work when it mixes
@@ -164,8 +175,8 @@ Use three proportionate gates:
   a cheap integration smoke when shared boundaries changed.
 - **Phase gate:** an occasional focused cross-subtask contract check when several
   subtasks change the same boundary.
-- **Final gate:** the complete locally runnable matrix required for all affected
-  and contract-connected surfaces on the exact integration tip.
+- **Final gate:** focused aggregate checks that reliably cover the affected and
+  contract-connected surfaces on the exact integration tip.
 
 At each Subtask gate, run only the focused commands recorded for that subtask
 and any applicable Phase gate. Do not run the Final gate or a repository-wide
@@ -173,22 +184,20 @@ suite merely because the subtask changes source, generated files, plans or other
 documentation, is about to be committed, has been integrated, or must be marked
 last-known-good.
 
-Treat repository-wide verification commands described generically as required
-before delivery, review, merge, or "after changing" files as Final-gate checks.
-Do not infer per-subtask cadence from those descriptions. A broader or full
-suite before the Final gate is exceptional: run it only when a higher-priority
-repository rule explicitly requires that exact per-commit, per-subtask, or per-
-integration cadence, or when the subtask changes a repository-wide harness or
-shared contract for which no focused check can provide meaningful evidence.
-Record the specific trigger and command before running it. Do not use low
-runtime, general caution, or the bare label "required checks" as sufficient
-justification.
+Do not treat repository-wide verification commands described generically as
+automatically authorized by this workflow. After implementation and the focused
+Final gate are complete, report the available broader or full-suite commands,
+their expected value and cost, and ask the user whether to run them. Run them
+only after explicit approval, unless a higher-priority repository instruction
+already requires them. Do not infer per-subtask cadence from generic verification
+descriptions or use low runtime, general caution, or the bare label "required
+checks" as sufficient justification.
 
 This cadence rule applies only to verification. Run generators, schema or code
 generation, and synchronization commands at the subtask boundary when needed to
 keep source changes and their generated artifacts in the same delivery. Use a
-focused generated-output check when the repository provides one; defer only the
-broader verification matrix to the Final gate.
+focused generated-output check when the repository provides one; offer broader
+verification to the user only after the completed implementation is ready.
 
 Do not use lint or formatting alone as evidence for a behavior change. Avoid
 repeatedly running a full matrix when focused checks give reliable intermediate
@@ -232,11 +241,13 @@ Repeat sequentially:
 2. Implement the complete subtask with its focused tests, documentation, and
    generated artifacts.
 3. Run its subtask gate and any justified phase gate.
-4. Review the complete integration-to-subtask diff for correctness, regressions,
-   contracts, authorization and data safety, validation, tests, documentation,
-   accidental artifacts, and unrelated changes.
-5. Fix every actionable finding, rerun affected checks, and review the final
-   diff again.
+4. Perform one focused code-review pass over the complete integration-to-subtask
+   diff. Check correctness, regressions, affected contracts, authorization and
+   data safety, validation, tests, documentation, accidental artifacts, and
+   unrelated changes without expanding into a repository-wide audit.
+5. Fix every actionable finding and rerun affected checks. Re-inspect the changed
+   lines and affected contracts; repeat the full subtask review only when a fix
+   materially changes the subtask's responsibility or review story.
 6. Commit only when the recorded Subtask gate and any applicable Phase gate pass
    and no actionable finding remains. Do not substitute Final-gate commands for
    these checks unless the explicit exception above applies. Follow repository
@@ -272,15 +283,14 @@ rebuilding the suffix.
    advanced, use the repository-approved integration method; obtain direction
    before an unapproved merge, rebase, or history rewrite. Resolve conflicts and
    invalidate prior aggregate evidence before retesting the changed tree.
-4. Inventory repository instructions, package scripts, test configuration,
-   workflow files, changed components, and every suite or harness introduced by
-   the series. Mark each surface locally runnable, remote-only, or inapplicable
-   with a reason.
-5. Run the final local gate on the exact integration tip. Include all required
-   affected lint, type, test, build, packaging, database, API, automated E2E,
-   and manual UI/visual surfaces that are locally runnable and applicable. For
-   material UI/UX work, perform the desktop/mobile visual pass defined above.
-   Keep manual browser review distinct from automated E2E.
+4. Identify the smallest aggregate checks that cover the changed responsibilities
+   and contract connections on the exact integration tip. Do not inventory or run
+   every available suite merely because it exists.
+5. Run that focused final local gate. For material UI/UX work, perform the
+   relevant desktop/mobile visual pass defined above and keep manual browser
+   review distinct from automated E2E. After implementation, focused verification,
+   and aggregate review are complete, list any broader or full-suite commands,
+   their expected value and cost, and ask the user whether to run them.
 6. Fix failures with affected checks, then repeat the exact final gate once the
    candidate is stable. Record the commit and tree SHAs with the final evidence.
 7. Fetch again, then review the complete diff against the latest fetched
@@ -288,7 +298,7 @@ rebuilding the suffix.
    `origin/main...integration` explicitly for bugs, regressions, missing
    requirements, accidental artifacts, and unsafe changes. Fix every actionable
    finding through the normal finalization loop, rerun affected checks, and
-   repeat the complete Final gate because the candidate tree changed.
+   repeat the focused Final gate because the candidate tree changed.
 8. Re-read the agreed requirement baseline and map every criterion to delivered
    behavior and evidence. Report a **requirement-fit confidence** score from 0
    to 100, with deductions and remaining mismatches. Use 100 only when every

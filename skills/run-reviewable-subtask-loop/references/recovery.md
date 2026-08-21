@@ -49,9 +49,10 @@ rewrite shared history by default.
 
 ## Revalidate and clean up
 
-Run compact affected checks after each rebuilt subtask and the full final gate on
-the completed replacement tree. Bind all new evidence to the replacement commit
-and tree SHAs.
+Run compact affected checks after each rebuilt subtask and focused aggregate
+checks on the completed replacement tree. Then report any broader or full suite
+and ask the user whether to run it. Bind all new evidence to the replacement
+commit and tree SHAs.
 
 Delete failed, backup, replacement, or superseded integration branches only
 after recovery succeeds and cleanup is authorized. Read
