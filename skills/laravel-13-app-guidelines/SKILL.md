@@ -33,8 +33,9 @@ again before expanding the approved scope.
    Laravel Boost `search-docs` when Boost is installed and available; otherwise
    use Laravel 13.x or the installed package's official documentation.
 6. Follow existing architecture and naming. Implement the smallest coherent
-   change, add or update focused tests, then run all checks relevant to the
-   affected surface.
+   change, add or update focused tests, and run focused checks for the affected
+   surface. After implementation is complete, ask the user whether to run any
+   broader or full suite.
 
 Do not install, upgrade, or replace packages merely because this skill lists
 them. Confirm a task requirement and compatibility first.
@@ -132,11 +133,14 @@ new Laravel 13 feature or upgrading an application from Laravel 12.
 - Confirm generator flags with `php artisan help make:test` before using them.
   For upgrades, expect Pest 4 or PHPUnit 12 only after dependency compatibility
   has been verified.
-- Run the smallest relevant test target first, then the complete affected suite.
-  Use the repository wrapper and test database; never point tests at production.
-- Run `vendor/bin/pint --dirty` when Pint is configured. Also run applicable
-  static analysis, frontend lint, type-check, build, and browser or E2E checks
-  defined by the repository or CI.
+- Run the smallest relevant test target. Use the repository wrapper and test
+  database; never point tests at production.
+- Run focused formatting, static analysis, frontend lint, type-check, build, and
+  browser or E2E checks when they can fail for the changed surface. After
+  implementation and focused verification are complete, list the broader
+  affected or full-suite commands and ask the user whether to run them. Do not
+  run them without explicit approval unless higher-priority repository
+  instructions require it.
 - Report the exact checks run, results, and any checks that could not run.
 
 ## Use Laravel Boost Safely

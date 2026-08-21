@@ -128,7 +128,11 @@ When a request already explicitly authorizes one of these actions, confirm only 
 
 ### 4. Verify
 
-- Run the fastest relevant targeted check first, then broaden verification when impact or uncertainty justifies it.
+- Run the fastest relevant targeted checks and keep automatic verification
+  scoped to the affected behavior. After the requested work and focused checks
+  are complete, list any broader or full-suite options and ask the user whether
+  to run them. Do not run them without explicit approval unless higher-priority
+  repository instructions require them.
 - Verify observable behavior, not only command success. Include important negative or failure paths when they are part of the risk.
 - Use the project's existing test framework, fixtures, scripts, and CI-equivalent commands when available.
 - For material UI changes, inspect the result in a real rendering environment and check the states and viewports relevant to the request. Select tooling from capabilities available in the current environment and project; do not assume a universal tool ranking.

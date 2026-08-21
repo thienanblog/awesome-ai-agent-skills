@@ -118,8 +118,10 @@ unless they encode a durable operational requirement.
    ownership, or cross-boundary context changed.
 6. Remove contradictory copies; search for stale names, paths, IDs, links, contracts,
    and consumers.
-7. Run repository checks and report changed durable context, unresolved gaps, or why
-   no docs update was needed.
+7. Run focused documentation checks. After the documentation work is complete,
+   list any broader repository or full-suite checks and ask the user whether to
+   run them. Report changed durable context, unresolved gaps, or why no docs
+   update was needed.
 
 ## Verification
 

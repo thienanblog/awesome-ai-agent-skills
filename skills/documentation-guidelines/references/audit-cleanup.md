@@ -25,7 +25,9 @@ When the user requested cleanup or documentation changes:
 6. Choose one owner for every duplicated durable fact before changing files.
 7. Move still-valid facts into their owners, replace copies with links when useful,
    update incoming routes, and then remove obsolete files.
-8. Run repository checks and re-trace the affected context paths.
+8. Run focused documentation checks and re-trace the affected context paths.
+   After the cleanup is complete, list any broader repository or full-suite
+   checks and ask the user whether to run them.
 
 Do not redesign the entire documentation tree merely because a different layout is
 possible. Require evidence of ambiguity, missing context, duplication, or excessive
