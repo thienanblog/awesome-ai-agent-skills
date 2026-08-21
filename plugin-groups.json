@@ -7,9 +7,10 @@
     {
       "name": "project-development-skills",
       "displayName": "Project Development Skills",
-      "description": "A cohesive workflow bundle for project setup, source-of-truth development, reviewable multi-subtask delivery, UI/UX concept implementation, testing, debugging, performance, documentation, design systems, and production deployment planning.",
+      "description": "A cohesive workflow bundle for reality-checked brainstorming, project setup, source-of-truth development, reviewable multi-subtask delivery, UI/UX concept implementation, testing, debugging, performance, documentation, design systems, and production deployment planning.",
       "skills": [
         "project-development-mindset",
+        "brainstorm-first",
         "run-reviewable-subtask-loop",
         "testing-verification",
         "debugging-workflow",
