@@ -7,7 +7,12 @@
     {
       "name": "project-development-skills",
       "displayName": "Project Development Skills",
-      "description": "A cohesive workflow bundle for reality-checked brainstorming, project setup, source-of-truth development, reviewable multi-subtask delivery, UI/UX concept implementation, testing, debugging, performance, documentation, design systems, and production deployment planning.",
+      "description": "A coordinator-first development bundle: project-development-mindset routes to one specialist at a time, while brainstorm-first remains an independent pre-implementation decision workflow.",
+      "defaultPrompts": [
+        "Use brainstorm-first independently for a pre-implementation decision phase; otherwise start with project-development-mindset and route to at most one specialist for the current primary concern.",
+        "Apply project-development-skills to review this repository and select only the primary workflow for the current phase.",
+        "Use project-development-skills to plan documentation and delivery without activating an opt-in workflow unless the user requests or accepts it."
+      ],
       "skills": [
         "project-development-mindset",
         "brainstorm-first",
@@ -25,7 +30,11 @@
     {
       "name": "laravel-app-skills",
       "displayName": "Laravel App Skills",
-      "description": "Version-aware guidelines for building and upgrading Laravel 11, 12, and 13 applications across common stacks and tooling.",
+      "description": "Version-exclusive Laravel 11/12 and Laravel 13 implementation guidance, coordinator-routed when project-development-mindset is available and directly usable when installed alone.",
+      "defaultPrompts": [
+        "Inspect the installed or target laravel/framework major, then use exactly one matching Laravel guideline skill for this project task.",
+        "Apply laravel-app-skills to review this repository without loading both Laravel version skills."
+      ],
       "skills": [
         "laravel-11-12-app-guidelines",
         "laravel-13-app-guidelines"
@@ -34,7 +43,7 @@
     {
       "name": "devops-skills",
       "displayName": "DevOps Skills",
-      "description": "Skills for Docker-based local development environment configuration.",
+      "description": "Local-development Docker configuration, coordinator-routed when project-development-mindset is available and directly usable when installed alone.",
       "skills": [
         "docker-local-dev"
       ]
@@ -42,7 +51,7 @@
     {
       "name": "office-web-ui-skills",
       "displayName": "Office Web UI Skills",
-      "description": "Skills for designing and refactoring admin, internal, and back-office web interfaces.",
+      "description": "Operational dashboard and back-office UI implementation, coordinator-routed when project-development-mindset is available and directly usable when installed alone.",
       "skills": [
         "office-web-ui-system"
       ]

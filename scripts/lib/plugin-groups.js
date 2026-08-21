@@ -61,6 +61,16 @@ export function loadPluginGroups(skillFolderNames, onError) {
       onError(`${PLUGIN_GROUPS_FILE}: Plugin "${plugin.name}" missing "skills" array`);
       continue;
     }
+    if (plugin.skills.length > 1 && (
+      !Array.isArray(plugin.defaultPrompts) ||
+      plugin.defaultPrompts.length === 0 ||
+      plugin.defaultPrompts.some(prompt => typeof prompt !== 'string' || prompt.trim() === '')
+    )) {
+      onError(
+        `${PLUGIN_GROUPS_FILE}: Multi-skill plugin "${plugin.name}" must define non-empty ` +
+        `"defaultPrompts" without assuming its first skill always applies`
+      );
+    }
 
     for (const skillName of plugin.skills) {
       if (!knownSkills.has(skillName)) {

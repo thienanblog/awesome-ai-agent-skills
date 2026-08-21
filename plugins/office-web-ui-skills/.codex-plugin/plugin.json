@@ -1,7 +1,7 @@
 {
   "name": "office-web-ui-skills",
-  "version": "1.30.0",
-  "description": "Skills for designing and refactoring admin, internal, and back-office web interfaces.",
+  "version": "1.31.0",
+  "description": "Operational dashboard and back-office UI implementation, coordinator-routed when project-development-mindset is available and directly usable when installed alone.",
   "homepage": "https://github.com/thienanblog/awesome-ai-agent-skills",
   "repository": "https://github.com/thienanblog/awesome-ai-agent-skills",
   "license": "MIT",
@@ -13,8 +13,8 @@
   "skills": "./skills/",
   "interface": {
     "displayName": "Office Web UI Skills",
-    "shortDescription": "Skills for designing and refactoring admin, internal, and back-office web interfaces.",
-    "longDescription": "Skills for designing and refactoring admin, internal, and back-office web interfaces.",
+    "shortDescription": "Operational dashboard and back-office UI implementation, coordinator-routed when project-development-mindset is available and directly usable when installed alone.",
+    "longDescription": "Operational dashboard and back-office UI implementation, coordinator-routed when project-development-mindset is available and directly usable when installed alone.",
     "developerName": "Ân Vũ",
     "category": "Productivity",
     "capabilities": [

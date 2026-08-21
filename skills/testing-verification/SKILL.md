@@ -1,6 +1,6 @@
 ---
 name: testing-verification
-description: Plan, add, repair, and run tests and verification for software changes. Use for test strategy, coverage, QA, acceptance criteria, regressions, CI failures, browser verification, Playwright E2E, visual comparison, or focused frontend, backend, API, and full-stack checks.
+description: Coordinator-routed specialist when test strategy, coverage, QA, acceptance verification, CI-check design, browser verification, Playwright E2E, or visual comparison is the primary work. Use after project-development-mindset routes here, or directly when explicitly invoked or installed standalone. Do not use merely because implementation needs focused tests; unexplained failures route to debugging first.
 ---
 
 # Testing Verification
@@ -48,5 +48,7 @@ before expanding an approved scope.
   focused checks are complete, list any broader or full-suite options and ask
   the user whether to run them; do not run them without explicit approval unless
   higher-priority repository instructions require them.
-- Use `debugging-workflow` for unclear failures and `performance-optimization` for performance validation.
+- For unclear failures or performance bottlenecks, return routing control to
+  `project-development-mindset` and replace this workflow with the relevant
+  specialist when available; do not keep both full workflows active.
 - Report the strategy, exact commands and results, UI verification surface, screenshots, gaps, residual risk, and next highest-value test.
