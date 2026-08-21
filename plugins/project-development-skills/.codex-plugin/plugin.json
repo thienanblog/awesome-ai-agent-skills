@@ -1,7 +1,7 @@
 {
   "name": "project-development-skills",
-  "version": "1.30.0",
-  "description": "A cohesive workflow bundle for reality-checked brainstorming, project setup, source-of-truth development, reviewable multi-subtask delivery, UI/UX concept implementation, testing, debugging, performance, documentation, design systems, and production deployment planning.",
+  "version": "1.31.0",
+  "description": "A coordinator-first development bundle: project-development-mindset routes to one specialist at a time, while brainstorm-first remains an independent pre-implementation decision workflow.",
   "homepage": "https://github.com/thienanblog/awesome-ai-agent-skills",
   "repository": "https://github.com/thienanblog/awesome-ai-agent-skills",
   "license": "MIT",
@@ -16,8 +16,8 @@
   "skills": "./skills/",
   "interface": {
     "displayName": "Project Development Skills",
-    "shortDescription": "A cohesive workflow bundle for reality-checked brainstorming, project setup, source-of-truth development, reviewable multi-subtask delivery, UI/UX concept implementation, testing, debugging, performance, documentation, design systems, and production deployment planning.",
-    "longDescription": "A cohesive workflow bundle for reality-checked brainstorming, project setup, source-of-truth development, reviewable multi-subtask delivery, UI/UX concept implementation, testing, debugging, performance, documentation, design systems, and production deployment planning.",
+    "shortDescription": "A coordinator-first development bundle: project-development-mindset routes to one specialist at a time, while brainstorm-first remains an independent pre-implementation decision workflow.",
+    "longDescription": "A coordinator-first development bundle: project-development-mindset routes to one specialist at a time, while brainstorm-first remains an independent pre-implementation decision workflow.",
     "developerName": "Ân Vũ",
     "category": "Productivity",
     "capabilities": [
@@ -26,9 +26,9 @@
     ],
     "websiteURL": "https://github.com/thienanblog/awesome-ai-agent-skills",
     "defaultPrompt": [
-      "Use project-development-mindset to guide this project task.",
-      "Apply project-development-skills to review this repository.",
-      "Use project-development-skills to plan docs and delivery."
+      "Use brainstorm-first independently for a pre-implementation decision phase; otherwise start with project-development-mindset and route to at most one specialist for the current primary concern.",
+      "Apply project-development-skills to review this repository and select only the primary workflow for the current phase.",
+      "Use project-development-skills to plan documentation and delivery without activating an opt-in workflow unless the user requests or accepts it."
     ],
     "brandColor": "#10A37F"
   }

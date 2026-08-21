@@ -1,6 +1,6 @@
 ---
 name: laravel-13-app-guidelines
-description: Guidelines and workflow for creating, upgrading, and changing Laravel 13 applications. Use when a task targets laravel/framework ^13.0 or a Laravel 12-to-13 upgrade, including API-only apps and Blade, Livewire 4, or Inertia 3 with React, Vue, or Svelte, plus starter kits, Tailwind CSS 4, Fortify or WorkOS AuthKit, Wayfinder, Pest 4 or PHPUnit 12, Pint, Laravel Boost 2, the Laravel AI SDK, JSON:API resources, and search. Detect installed versions and repository conventions before applying version-specific guidance.
+description: Coordinator-routed implementation and upgrade guidance for confirmed Laravel 13 repositories or Laravel 12-to-13 upgrades when framework conventions materially own the work. Use after project-development-mindset inspects the installed or target laravel/framework major, or directly when explicitly invoked or installed standalone. Never load both Laravel version skills; do not use merely for supporting Docker, test, frontend, or Artisan commands.
 ---
 
 # Laravel 13 App Guidelines
@@ -10,6 +10,12 @@ description: Guidelines and workflow for creating, upgrading, and changing Larav
 Use a repository-first workflow for Laravel 13 work. Detect the actual framework,
 packages, frontend, command runner, and local conventions before selecting a
 Laravel pattern; do not turn optional Laravel 13 capabilities into dependencies.
+
+This skill owns version-specific Laravel implementation and upgrade guidance,
+not the whole task lifecycle. Keep routine testing, documentation, Docker
+command execution, and UI reuse as supporting work. Return routing control to
+`project-development-mindset` if debugging, test strategy, local container
+topology, UI concept work, or deployment becomes the primary concern.
 
 Run this skill in the main conversation. Do not spawn subagents, agent teams, or
 delegated parallel workers unless the user explicitly approves the proposed

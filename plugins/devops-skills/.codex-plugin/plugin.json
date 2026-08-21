@@ -1,7 +1,7 @@
 {
   "name": "devops-skills",
-  "version": "1.30.0",
-  "description": "Skills for Docker-based local development environment configuration.",
+  "version": "1.31.0",
+  "description": "Local-development Docker configuration, coordinator-routed when project-development-mindset is available and directly usable when installed alone.",
   "homepage": "https://github.com/thienanblog/awesome-ai-agent-skills",
   "repository": "https://github.com/thienanblog/awesome-ai-agent-skills",
   "license": "MIT",
@@ -13,8 +13,8 @@
   "skills": "./skills/",
   "interface": {
     "displayName": "DevOps Skills",
-    "shortDescription": "Skills for Docker-based local development environment configuration.",
-    "longDescription": "Skills for Docker-based local development environment configuration.",
+    "shortDescription": "Local-development Docker configuration, coordinator-routed when project-development-mindset is available and directly usable when installed alone.",
+    "longDescription": "Local-development Docker configuration, coordinator-routed when project-development-mindset is available and directly usable when installed alone.",
     "developerName": "Ân Vũ",
     "category": "Productivity",
     "capabilities": [

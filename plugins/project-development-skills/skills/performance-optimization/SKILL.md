@@ -1,6 +1,6 @@
 ---
 name: performance-optimization
-description: Diagnose and improve performance with measurements and source-of-truth constraints. Use when the user reports slowness, latency, high CPU, high memory, slow queries, N+1 issues, large payloads, slow builds, slow tests, rendering lag, bundle size, Core Web Vitals, caching, pagination, image/font loading, queues, background jobs, or asks to profile, optimize, speed up, or reduce resource usage.
+description: Coordinator-routed specialist for measured latency, CPU, memory, query, payload, rendering, bundle, caching, or build/test bottlenecks. Use after project-development-mindset establishes performance as the primary work, or directly when explicitly invoked or installed standalone. Use debugging first for unexplained failures; do not use for routine performance-aware implementation.
 ---
 
 # Performance Optimization
@@ -24,8 +24,12 @@ before expanding an approved scope.
 - Treat infrastructure health as part of correctness. Reject measurements with
   crashes, OOM kills, unexpected restarts, failed cleanup, or orphan processes.
 - Avoid adding dependencies or infrastructure unless measurement justifies them.
-- If the issue is actually a bug or regression with unclear cause, switch to `debugging-workflow`.
-- If the issue requires benchmarks, regression tests, or browser visual checks, coordinate with `testing-verification`.
+- If the issue is actually a bug or regression with unclear cause, return
+  routing control to `project-development-mindset` and replace this workflow
+  with `debugging-workflow` when available.
+- Keep benchmarks, regression checks, and browser measurements inside this
+  workflow when they support performance work. Route to `testing-verification`
+  only if test or QA design becomes the primary deliverable.
 
 ## Workflow
 

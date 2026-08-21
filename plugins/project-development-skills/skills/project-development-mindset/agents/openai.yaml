@@ -1,4 +1,4 @@
 interface:
   display_name: "Project Development Mindset"
-  short_description: "Adaptive, repository-aware change workflow"
-  default_prompt: "Use $project-development-mindset to make a project-aware change with effort and verification calibrated to risk."
+  short_description: "Primary coordinator for repository changes"
+  default_prompt: "Use $project-development-mindset to inspect this repository change, keep supporting work in the core workflow, and route to at most one specialist when needed."

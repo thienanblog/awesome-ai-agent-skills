@@ -1,6 +1,6 @@
 ---
 name: project-development-mindset
-description: Adaptive, repository-aware baseline for ordinary implementation, refactoring, setup, and cross-cutting project changes. Use when modifying code, configuration, tests, or durable documentation to discover local conventions, choose the smallest coherent change, preserve project integrity, calibrate verification to risk, and assess final requirement fit with evidence. Use as a coordinator when concerns interact; let a more specific skill lead when one concern clearly owns the task. Do not use for explanation-only or read-only requests unless explicitly invoked.
+description: Primary coordinator for repository implementation, diagnosis, verification, and durable changes to code, configuration, tests, or documentation. Use first for ordinary project work; inspect before routing to at most one specialist for the current primary concern. Do not use for general explanations, passive inspection with no project-work outcome, or the independent brainstorm-first decision phase unless explicitly invoked.
 ---
 
 # Project Development Mindset
@@ -11,7 +11,11 @@ Use this skill as an adaptive baseline, not mandatory ceremony. Apply only the g
 
 - Follow system instructions, the user's current request, and applicable project instructions before this general guidance.
 - Treat repository conventions as evidence of project intent, not as rules to copy blindly when they conflict with correctness, security, maintainability, or a more authoritative instruction.
-- Let a more specific skill lead when it directly owns the task. Use this skill to preserve cross-cutting project awareness and proportionality.
+- Start with this coordinator instead of preloading every possibly relevant
+  specialist. After initial orientation, load at most one specialist for the
+  current primary concern. Keep this skill only as the cross-cutting baseline,
+  and switch specialists rather than stacking workflows when the primary
+  concern changes.
 - Apply routine gates implicitly for small, local work. Do not turn them into user-facing ceremony unless a decision or risk needs discussion.
 - Preserve unrelated user changes and existing work. Do not clean up, revert, or broaden scope merely because nearby code could be improved.
 - Run in the main conversation by default. Before spawning any subagent, agent team, or delegated worker, explain that delegation can increase usage and ask the user to approve the proposed agent count and scope. Ask again before expanding an approved scope.
@@ -156,17 +160,34 @@ When a request already explicitly authorizes one of these actions, confirm only 
 
 ## Specialized Skill Routing
 
-Read `references/quality-skill-routing.md` when testing, debugging, performance, security, documentation, deployment, or multi-subtask delivery is a primary concern rather than a supporting step.
+Read `references/quality-skill-routing.md` only after initial orientation when
+debugging, testing, performance, documentation, repository instructions, design
+systems, UI implementation, Docker, deployment, Laravel, security, or
+multi-subtask delivery may be the primary concern rather than a supporting step.
 
 Read `references/ui-ux-concept-routing.md` when the task includes concept generation or selection, a screenshot or mockup to match, a visual reference, or website emulation.
 
 Routing rules:
 
+- Do not preload specialists alongside this skill from broad task wording such
+  as implement, fix, test, Docker, Laravel, UI, or deploy. Orient first and
+  establish which concern, if any, needs a specialist workflow.
 - Use the current environment's available skill or capability catalog; do not depend on assumed filesystem locations or user-specific paths.
 - Do not install, download, or require an optional skill silently. If it is unavailable, continue with this core workflow and the project's own guidance.
 - Use any available specialized skill that more directly owns the task, regardless of where it was installed, provided it is compatible with higher-priority instructions.
-- Load only the specialized guidance needed for the task. Do not stack every related skill by default.
+- Load only the one specialized workflow that owns the current primary concern.
+  Routine testing, documentation alignment, browser checks, framework use, or
+  container use remain supporting steps here and do not independently justify
+  another skill.
+- When routing changes, stop applying the prior specialist's workflow except for
+  constraints that remain materially relevant. Do not keep multiple complete
+  specialist workflows active as insurance.
 - Use `run-reviewable-subtask-loop` only when the user explicitly requests it or accepts it during user-initiated planning for a genuinely multi-subtask delivery. A routine implementation plan does not activate it.
+
+`brainstorm-first` is independent rather than a child workflow. When its
+decision gate applies, use it before this coordinator and stop for selection.
+After the user chooses, exit the brainstorming workflow and begin implementation
+with this coordinator.
 
 ## Context-Specific Defaults
 
