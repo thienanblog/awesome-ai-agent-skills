@@ -32,7 +32,8 @@ Use this as a selection guide, not as mandatory boilerplate. Omit headings with 
 ## Verification
 
 - For `[change type]`, run `[targeted check]`.
-- Before `[merge/release condition]`, run `[broader check]`.
+- After implementation and targeted checks are complete, ask whether to run
+  `[broader check]` before `[merge/release condition]`.
 
 ## Safety and approvals
 

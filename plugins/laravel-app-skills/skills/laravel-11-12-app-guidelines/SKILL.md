@@ -81,8 +81,11 @@ before expanding an approved scope.
 - Preserve the repository's Pest or PHPUnit test runner. Confirm generator flags
   with `php artisan help make:test`; generally prefer feature tests for behavior
   that crosses framework boundaries.
-- Run the smallest relevant test target first (`php artisan test <file>` or
-  `--filter=`), then run the complete affected suite.
+- Run the smallest relevant test target (`php artisan test <file>` or
+  `--filter=`). After implementation and focused verification are complete,
+  identify the broader affected or full suite and ask the user whether to run it.
+  Do not run it without explicit approval unless higher-priority repository
+  instructions require it.
 - Run `vendor/bin/pint --dirty` before finalizing code changes.
 
 ## Laravel Boost MCP Tools (when available)
