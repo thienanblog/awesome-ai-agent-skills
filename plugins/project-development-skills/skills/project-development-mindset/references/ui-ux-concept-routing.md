@@ -1,6 +1,9 @@
 # UI/UX Concept Routing
 
-Use this reference when the task centers on generating or selecting UI concepts, implementing a screenshot or mockup, following a visual reference, or emulating a website's look and interaction patterns.
+Use this reference when the task centers on generating or selecting UI concepts,
+implementing a screenshot or mockup, following a visual reference, or emulating
+a website's look and interaction patterns. Apply the routing gate before loading
+an implementation specialist.
 
 Stay in the general workflow for small local UI fixes that do not depend on concept selection or visual matching. Use an available specialized UI/UX skill when it directly owns the requested workflow; continue with the guidance below when none is available.
 
@@ -14,14 +17,25 @@ Stay in the general workflow for small local UI fixes that do not depend on conc
 
 ## Concepts And Selection
 
-When the user asks for multiple concepts:
+When the user asks for multiple concepts, exit the coordinator and use
+`brainstorm-first` as an independent pre-implementation phase when available:
 
 - Give each concept a stable name and explain its meaningful tradeoffs.
 - Recommend one concept using technical, usability, accessibility, consistency, and implementation evidence.
 - Predict user preference only when prior user choices or explicit criteria provide evidence; do not invent a preference.
 - Ask the user to choose before implementation only when the concepts differ in a consequential way.
 
-Preserve the selected concept outside committed source when it is needed for later comparison. Use an existing ignored artifact location or another environment-supported mechanism. Do not modify ignore configuration or create project files solely to store a transient concept unless that persistence is necessary and authorized.
+After selection, begin a fresh implementation phase with the coordinator. Route
+to `office-web-ui-system` for an operational admin, internal, CRM/ERP, CRUD,
+reporting, or back-office surface when available. Route to
+`ui-ux-concept-implementation` for other selected concepts, screenshots,
+mockups, visual references, or reference sites. Do not load both by default.
+
+Preserve the selected concept outside committed source when it is needed for
+later comparison. Use an existing ignored artifact location or another
+environment-supported mechanism. Do not modify ignore configuration or create
+project files solely to store a transient concept unless that persistence is
+necessary and authorized.
 
 ## Implementation And Verification
 
@@ -33,4 +47,8 @@ Preserve the selected concept outside committed source when it is needed for lat
 - Use a real rendering environment for material visual work. Select among built-in browser control, project-owned end-to-end tests, browser automation, screenshots, or manual checks according to current capabilities and project policy.
 - Distinguish exploratory browser verification from repeatable source-controlled regression tests in the final report.
 
-If the task establishes a durable visual convention, update the project's existing design-system source or use an available design-system skill. Do not create a new design-system document for a one-off visual change.
+If the task's primary deliverable becomes a new or substantially revised durable
+design-system artifact, return routing control to the coordinator and switch to
+an available design-system skill. Otherwise update the project's existing source
+as supporting work; do not load another full workflow or create a new
+design-system document for a one-off visual change.

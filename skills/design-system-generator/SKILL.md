@@ -1,6 +1,6 @@
 ---
 name: design-system-generator
-description: Generate or update a project-specific DESIGN_SYSTEM.md that enforces consistent UI/UX across SPAs, traditional server-rendered sites, and hybrid systems. Use for design tokens, reusable component rules, UI source-of-truth conventions, animation/transition/custom class rules, accessibility gates, visual QA, Playwright screenshot guidance, and production asset/manifest requirements.
+description: Coordinator-routed specialist for generating or substantially updating DESIGN_SYSTEM.md and its durable token, component, accessibility, motion, visual-QA, and asset rules. Use after project-development-mindset routes that primary deliverable here, or directly when explicitly invoked or installed standalone. Do not use for one-off UI implementation, visual polish, screenshot matching, or consuming an existing design system.
 ---
 
 # Design System Generator

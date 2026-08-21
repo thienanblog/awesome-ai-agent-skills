@@ -1,7 +1,7 @@
 {
   "name": "laravel-app-skills",
-  "version": "1.30.0",
-  "description": "Version-aware guidelines for building and upgrading Laravel 11, 12, and 13 applications across common stacks and tooling.",
+  "version": "1.31.0",
+  "description": "Version-exclusive Laravel 11/12 and Laravel 13 implementation guidance, coordinator-routed when project-development-mindset is available and directly usable when installed alone.",
   "homepage": "https://github.com/thienanblog/awesome-ai-agent-skills",
   "repository": "https://github.com/thienanblog/awesome-ai-agent-skills",
   "license": "MIT",
@@ -14,8 +14,8 @@
   "skills": "./skills/",
   "interface": {
     "displayName": "Laravel App Skills",
-    "shortDescription": "Version-aware guidelines for building and upgrading Laravel 11, 12, and 13 applications across common stacks and tooling.",
-    "longDescription": "Version-aware guidelines for building and upgrading Laravel 11, 12, and 13 applications across common stacks and tooling.",
+    "shortDescription": "Version-exclusive Laravel 11/12 and Laravel 13 implementation guidance, coordinator-routed when project-development-mindset is available and directly usable when installed alone.",
+    "longDescription": "Version-exclusive Laravel 11/12 and Laravel 13 implementation guidance, coordinator-routed when project-development-mindset is available and directly usable when installed alone.",
     "developerName": "Ân Vũ",
     "category": "Productivity",
     "capabilities": [
@@ -24,9 +24,8 @@
     ],
     "websiteURL": "https://github.com/thienanblog/awesome-ai-agent-skills",
     "defaultPrompt": [
-      "Use laravel-11-12-app-guidelines to guide this project task.",
-      "Apply laravel-app-skills to review this repository.",
-      "Use laravel-app-skills to plan docs and delivery."
+      "Inspect the installed or target laravel/framework major, then use exactly one matching Laravel guideline skill for this project task.",
+      "Apply laravel-app-skills to review this repository without loading both Laravel version skills."
     ],
     "brandColor": "#10A37F"
   }

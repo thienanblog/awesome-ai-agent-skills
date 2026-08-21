@@ -1,6 +1,6 @@
 ---
 name: run-reviewable-subtask-loop
-description: Deliver a large implementation plan, migration, refactor, or roadmap quickly as a sequential series of right-sized, locally reviewed subtask commits on one integration branch, using a lightweight ledger by default and durable plan files only when their resumability is needed. Use only when the user explicitly requests this workflow or accepts it during user-initiated brainstorming or planning before coding; do not use it for ordinary coding requests with clear requirements. Subtasks are not subagents, so work stays in the main conversation unless the user separately approves the proposed agent count and scope after being warned that delegation can increase usage. Ask again before expanding the approved scope. Remote CI requires separate explicit authorization.
+description: Explicit-opt-in delivery specialist for executing a large plan, migration, refactor, or roadmap as sequential reviewable commits on one integration branch. Use only when directly requested or explicitly accepted after a project-development-mindset proposal; never infer activation from size, an internal plan, or the word subtask. Subtasks are not subagents; delegation and Remote CI require separate approval.
 ---
 
 # Run Reviewable Subtask Loop

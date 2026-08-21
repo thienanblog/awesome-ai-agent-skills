@@ -1,6 +1,6 @@
 ---
 name: brainstorm-first
-description: Run a decision-first workflow before implementation when the user explicitly asks to brainstorm, compare three approaches, reality-check a request, investigate before choosing a fix, or create three visual UI/UX concepts, or when an ambiguous high-impact request has unresolved material choices. Produce exactly three practical options, recommend one, and stop for the user's choice. Do not use for ordinary bug-fix requests, simple fully specified tasks, or execution of an already approved approach.
+description: Independent pre-implementation workflow for explicit brainstorming, three-way comparison, reality checks, diagnosis options, UI concept generation, or ambiguous high-impact decisions. Produce exactly three practical options, recommend one, and stop for selection. Do not combine with project-development-mindset or implementation specialists before selection; do not use for ordinary fixes or an approved approach.
 ---
 
 # Brainstorm First
@@ -27,7 +27,12 @@ Choose the mode that owns the uncertainty:
 - **Diagnosis:** a bug, failure, regression, or unexpected behavior whose cause is not yet established.
 - **UI/UX concepts:** the user wants three visual interface directions before implementation.
 
-This skill owns only the pre-implementation decision phase. When a specialized debugging or UI implementation workflow is also applicable, use its investigation or concept-generation guidance only where it is compatible with these decision gates. Defer its fix or implementation phase until the user selects an option; after selection, let the specialized workflow own execution.
+This skill independently owns the pre-implementation decision phase. Do not
+preload `project-development-mindset`, debugging, UI implementation, or other
+implementation specialists alongside it. Gather the read-only evidence needed
+for the decision here. After the user selects an option, exit this workflow and
+start implementation with the available project coordinator, which may then
+route to one specialist if needed.
 
 Gather the minimum evidence needed to understand the current state. Separate observed facts, evidence-backed inferences, user preferences, and open questions.
 

@@ -1,6 +1,6 @@
 ---
 name: debugging-workflow
-description: Reproduce, isolate, and fix software bugs without guessing. Use when the user reports errors, stack traces, crashes, regressions, logs, broken behavior with unknown cause, flaky behavior, incorrect business logic, UI bugs, integration failures, failing tests or CI failures with unclear root cause, or asks to debug, investigate, diagnose, or find the root cause of a problem.
+description: Coordinator-routed specialist for reproducing and isolating unexplained failures before fixing the confirmed cause. Use after project-development-mindset routes root-cause work here, or directly when explicitly invoked or installed standalone. Do not use for known-cause fixes, routine implementation test failures, test strategy, or an established performance bottleneck.
 ---
 
 # Debugging Workflow
@@ -21,8 +21,12 @@ before expanding an approved scope.
 - Form one hypothesis at a time and test it with the fastest reliable check.
 - Keep temporary debug code local and remove it before completion.
 - Add or update a regression test when practical.
-- If the root cause is performance-related, switch to `performance-optimization`.
-- If the main work becomes test strategy, switch to `testing-verification`.
+- If the root cause is performance-related, return routing control to
+  `project-development-mindset` and replace this workflow with
+  `performance-optimization` when available.
+- If the main work becomes test strategy, return routing control to the
+  coordinator and replace this workflow with `testing-verification` when
+  available.
 
 ## Workflow
 

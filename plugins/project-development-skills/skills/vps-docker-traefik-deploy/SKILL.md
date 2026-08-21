@@ -1,6 +1,6 @@
 ---
 name: vps-docker-traefik-deploy
-description: Plan and implement secure production deployments of Docker Compose applications on self-hosted VPS or cloud servers using Docker Engine, Docker Compose, Traefik, private registries, SSH tunnels, least-privilege users, persistent volumes, backups, DNS, and storage growth planning. Use when an AI agent needs to design, review, document, or execute a real deploy for websites, APIs, websockets, workers, databases, and object storage integrations on Ubuntu or Debian style Linux hosts.
+description: Coordinator-routed specialist for production Docker Compose deployment on self-hosted VPS or cloud servers with Traefik, DNS, registries, storage, backups, rollback, and host hardening. Use after project-development-mindset makes production deployment primary, or directly when explicitly invoked or installed standalone. Do not use for local Docker development, deployment-adjacent app changes, or generic cloud hosting.
 ---
 
 # VPS Docker Traefik Deploy

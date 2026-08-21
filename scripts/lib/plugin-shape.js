@@ -139,17 +139,15 @@ export function buildClaudePluginManifest(plugin, version, owner) {
 }
 
 function codexDefaultPrompts(plugin) {
+  if (Array.isArray(plugin.defaultPrompts) && plugin.defaultPrompts.length > 0) {
+    return [...plugin.defaultPrompts];
+  }
+
   const primarySkill = plugin.skills[0] || plugin.name;
-  const prompts = [
+  return [
     `Use ${primarySkill} to guide this project task.`,
     `Apply ${plugin.name} to review this repository.`
   ];
-
-  if (plugin.skills.length > 1) {
-    prompts.push(`Use ${plugin.name} to plan docs and delivery.`);
-  }
-
-  return prompts;
 }
 
 export function buildCodexPluginManifest(plugin, version, owner) {

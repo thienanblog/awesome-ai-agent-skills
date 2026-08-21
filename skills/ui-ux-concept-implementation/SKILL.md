@@ -1,6 +1,6 @@
 ---
 name: ui-ux-concept-implementation
-description: Implement frontend UI/UX from user-approved concepts, mockups, screenshots, visual references, or a website the user wants to emulate or clone. Use when Codex must generate and compare UI concepts, recommend a concept as a technical leader, predict the user's likely preference, persist the chosen concept outside commits, recreate a reference site's look and interactions in an existing project, or verify before/after UI with Playwright, Playwright MCP, Chrome DevTools MCP, screenshots, and responsive checks.
+description: Coordinator-routed implementation specialist for a selected UI concept, single mockup/screenshot, visual reference, or reference site. Use after project-development-mindset makes visual matching primary, or directly when explicitly invoked or installed standalone. Multiple unselected concepts use independent brainstorm-first; operational dashboards use office-web-ui-system when available. Do not use for routine UI edits or supporting browser checks.
 ---
 
 # UI/UX Concept Implementation
@@ -20,19 +20,21 @@ before expanding an approved scope.
 - Use existing components, wrappers, layout primitives, icon libraries, typography, colors, spacing, motion, and accessibility patterns before inventing new ones.
 - For concept or screenshot tasks, collect the target concept, current rendered UI, relevant viewport sizes, states, and user constraints before editing.
 - For website clone requests, treat the target site as a visual and interaction reference. Do not copy proprietary source code, private assets, trademarks, logos, paid media, or brand-identifying content unless the user owns or supplies rights.
-- If the target is an admin, internal, dashboard, CRM, CRUD, reporting, or back-office surface, combine this skill with the repository's dashboard-specific UI skill when available.
+- If the target is an admin, internal, dashboard, CRM, CRUD, reporting, or
+  back-office surface and a dashboard-specific UI skill is available, return
+  routing control to `project-development-mindset` and use that specialist
+  instead of combining two full UI workflows.
 
-## Concept Decision Contract
+## Selection Gate
 
-When the task includes generating concepts or comparing multiple UI directions:
+This skill starts after the visual direction is selected. A user-supplied single
+mockup, screenshot, or reference site counts as a selected target.
 
-1. Present each concept with a short stable label such as `Concept A`, `Concept B`, or `Concept C`.
-2. Summarize the main layout, visual language, tradeoffs, implementation risk, and fit with the current project for each concept.
-3. Always include `Technical Leader recommendation`: choose the concept you would ship as the technical lead and explain the engineering reason.
-4. Always include `Likely user preference`: name the concept the user is most likely to prefer based on their request, product context, tone, and visual taste signals.
-5. Ask the user to choose before implementing when the concepts materially differ.
-
-If the user already chose a concept or provided a single target, skip concept generation and continue with implementation.
+When the user asks to generate or compare multiple unselected directions, stop
+before implementation and use `brainstorm-first` independently when available.
+Do not preload this implementation workflow during that decision phase. If
+`brainstorm-first` is unavailable, present the routing limitation and obtain a
+selection before implementing.
 
 ## Persist The Selected Concept
 
@@ -51,12 +53,13 @@ When the environment supports persistent Goals, suggest that the user create a G
 
 Use real-browser verification with this priority:
 
-1. Playwright MCP
-2. Chrome DevTools MCP
-3. Local Playwright CLI or another browser automation path
-4. Manual browser checks only when automation is unavailable
+1. the environment's built-in Browser and its instructions when available
+2. a project-owned source-controlled browser test for repeatable regression coverage
+3. another available browser automation path documented as a fallback
+4. manual browser checks only when automation is unavailable
 
-If both Playwright MCP and Chrome DevTools MCP are available, use Playwright MCP first.
+Keep an exploratory browser pass distinct from source-controlled automated E2E
+coverage in the final report.
 
 Before editing:
 

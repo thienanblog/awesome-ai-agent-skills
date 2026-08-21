@@ -34,7 +34,10 @@ When reviewing, creating, or updating a skill under `skills/`:
 ## Canonical Sources And Generated Outputs
 
 - Author skill content only in `skills/<skill-name>/`.
-- Use `plugin-groups.json` for marketplace ownership and each plugin's `name`, `displayName`, `description`, and skill membership.
+- Use `plugin-groups.json` for marketplace ownership and each plugin's `name`,
+  `displayName`, `description`, skill membership, and required multi-skill Codex
+  `defaultPrompts`. Multi-skill prompts must route without assuming the first
+  listed skill always applies.
 - Assign every skill to exactly one plugin group; merge overlapping skills instead of duplicating membership.
 - Use `scripts/lib/plugin-shape.js` as the sole definition of generated marketplace and manifest shapes.
 - Treat `.claude-plugin/marketplace.json`, `.agents/plugins/marketplace.json`, generated README tables, and `plugins/**` as `npm run sync` outputs.

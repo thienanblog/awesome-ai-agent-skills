@@ -1,6 +1,6 @@
 ---
 name: office-web-ui-system
-description: Design, verify, and refactor admin dashboard, internal dashboard, customer/user management dashboard, back-office console, and reporting UI. Use only for dashboard-style management systems with operational workflows such as metrics, stat cards, filters, data tables, CRUD/list/detail pages, forms, side panels, admin shells, Playwright/browser UI verification, screenshot-based dashboard fixes, or visual QA for operational interfaces. Do not use for general UI/UX design, marketing pages, landing pages, portfolios, product sites, games, or consumer app screens unless the task is specifically an admin or management dashboard.
+description: Coordinator-routed implementation specialist for admin dashboards, internal tools, CRM/ERP management, back-office, CRUD, and reporting UI. Use after project-development-mindset makes an operational dashboard primary, or directly when explicitly invoked or installed standalone. Owns dashboard screenshot/reference work; do not combine with general ui-ux-concept-implementation by default. Excludes marketing and consumer UI.
 ---
 
 # Office Web UI System
@@ -24,7 +24,7 @@ Prioritize two outcomes at the same time:
 - deliver a clear, high-density, professional interface
 - make important UI regions easy for humans and AI agents to identify by name
 
-This skill is not only for shells and navigation. Use it when the management product needs a polished:
+This skill is not only for shells and navigation. It owns implementation when the management product needs a polished:
 - admin dashboard or reporting page
 - customer, user, order, content, ticket, or account management page
 - CRUD/list page inside an admin or back-office system

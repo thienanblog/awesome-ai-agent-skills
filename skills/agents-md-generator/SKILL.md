@@ -1,6 +1,6 @@
 ---
 name: agents-md-generator
-description: Create, audit, compact, or update repository instruction files such as AGENTS.md, nested AGENTS.md, AGENTS.override.md, and optional CLAUDE.md compatibility files. Use when an agent should deterministically scan instruction sources, project manifests, declared commands, CI, documentation, and tool-specific precedence before producing concise project guidance instead of a large generic repository manual.
+description: Coordinator-routed specialist for creating, auditing, compacting, or restructuring AGENTS.md, AGENTS.override.md, nested instructions, or optional CLAUDE.md compatibility files. Use after project-development-mindset identifies repository instructions as the primary deliverable, or directly when explicitly invoked or installed standalone. Do not use for routine instruction reading or a small required update accompanying code.
 ---
 
 # AGENTS.md Generator

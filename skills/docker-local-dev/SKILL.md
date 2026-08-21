@@ -1,6 +1,6 @@
 ---
 name: docker-local-dev
-description: Create, repair, or extend local Docker Compose and Dockerfile setups for PHP/Laravel and CMS projects, Node.js, Python, and monorepos. Use when Dockerizing a project for development, adding local databases or supporting services, or safely merging existing development Compose configurations. Inspect the repository first, infer safe defaults, ask only about unresolved high-impact choices, preserve existing work, and verify generated files. Do not use as a production deployment workflow.
+description: Coordinator-routed specialist for creating, repairing, or materially extending local-development Docker Compose, Dockerfiles, databases, and supporting services. Use after project-development-mindset makes local container topology the primary work, or directly when explicitly invoked or installed standalone. Do not use merely to run existing container commands, or for production deployment and VPS operations.
 ---
 
 # Docker Local Development
