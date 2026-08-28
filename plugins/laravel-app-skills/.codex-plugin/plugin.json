@@ -1,6 +1,6 @@
 {
   "name": "laravel-app-skills",
-  "version": "1.31.0",
+  "version": "1.31.1",
   "description": "Version-exclusive Laravel 11/12 and Laravel 13 implementation guidance, coordinator-routed when project-development-mindset is available and directly usable when installed alone.",
   "homepage": "https://github.com/thienanblog/awesome-ai-agent-skills",
   "repository": "https://github.com/thienanblog/awesome-ai-agent-skills",

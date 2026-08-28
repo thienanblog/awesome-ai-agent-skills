@@ -1,101 +1,84 @@
 ---
 name: ui-ux-concept-implementation
-description: Coordinator-routed implementation specialist for a selected UI concept, single mockup/screenshot, visual reference, or reference site. Use after project-development-mindset makes visual matching primary, or directly when explicitly invoked or installed standalone. Multiple unselected concepts use independent brainstorm-first; operational dashboards use office-web-ui-system when available. Do not use for routine UI edits or supporting browser checks.
+description: Implement an already-selected visual direction from a mockup, screenshot, or reference site in an existing project, using project-owned code and equivalent-state browser comparison. Use when visual fidelity is primary, directly or after project-development-mindset routing. Do not use for concept generation, routine UI edits, or supporting browser checks; prefer a dashboard-specific workflow for operational dashboards when available.
 ---
 
 # UI/UX Concept Implementation
 
 ## Overview
 
-Use this skill to turn a selected visual direction into working UI while keeping concept decisions traceable, project-local, and verifiable in a real browser.
+Turn a selected visual direction into working UI while preserving the project's
+product identity and producing browser evidence against the target.
 
 Run this skill in the main conversation. Do not spawn subagents, agent teams, or
 delegated parallel workers unless the user explicitly approves the proposed
 count and scope after being told that doing so can increase usage. Ask again
 before expanding an approved scope.
 
-## Source Of Truth
+## Establish The Visual Contract
 
-- Start from the existing project instructions, design system, routes, components, tokens, global styles, assets, and UI conventions.
-- Use existing components, wrappers, layout primitives, icon libraries, typography, colors, spacing, motion, and accessibility patterns before inventing new ones.
-- For concept or screenshot tasks, collect the target concept, current rendered UI, relevant viewport sizes, states, and user constraints before editing.
-- For website clone requests, treat the target site as a visual and interaction reference. Do not copy proprietary source code, private assets, trademarks, logos, paid media, or brand-identifying content unless the user owns or supplies rights.
-- If the target is an admin, internal, dashboard, CRM, CRUD, reporting, or
-  back-office surface and a dashboard-specific UI skill is available, return
-  routing control to `project-development-mindset` and use that specialist
-  instead of combining two full UI workflows.
+- Confirm that one direction is selected. A single user-supplied mockup,
+  screenshot, or reference site is a selected target. If materially different
+  concepts remain unselected, return to the coordinator or obtain the user's
+  selection before implementation.
+- If the selected target is an operational dashboard and a dashboard-specific
+  workflow is available, return to the coordinator and use it. Otherwise
+  continue with this general visual-reference workflow.
+- Inspect the target and the current rendered UI at the relevant routes,
+  viewports, themes, data states, and interaction states. Ask a narrow question
+  only when unresolved ambiguity would produce materially different results.
+- Classify the target's visible decisions as **exact** (must match),
+  **adaptable** (translate into the product's visual language), or
+  **unspecified** (follow established project conventions). Record only the
+  distinctions needed to guide implementation and verification.
+- Treat existing project instructions, design-system sources, components,
+  tokens, content, assets, responsive conventions, and accessibility patterns
+  as constraints. Do not replace suitable project identity merely because the
+  reference uses a different system.
+- Preserve the selected concept outside committed source only when later
+  comparison genuinely needs a durable artifact. Prefer an existing ignored or
+  environment-managed location; do not create project files or modify ignore
+  configuration solely for transient persistence without authorization.
 
-## Selection Gate
+## Implement The Direction
 
-This skill starts after the visual direction is selected. A user-supplied single
-mockup, screenshot, or reference site counts as a selected target.
+- Map the visual contract to project-owned routes, components, styles, tokens,
+  assets, and representative content. Reuse existing surfaces when their
+  semantics fit; introduce new ones only for a concrete gap.
+- Recreate the target's structure, hierarchy, rhythm, responsive intent, and
+  interactions without copying proprietary source, private assets, tracking
+  code, or brand-identifying content that the user is not authorized to use.
+- Preserve product behavior and accessible semantics while adapting visual
+  details. Cover only the loading, empty, error, validation, focus, or other
+  states that the affected surface can meaningfully enter.
+- Add a dependency only when project tools cannot reasonably satisfy a material
+  part of the visual contract and the tradeoff is clear.
 
-When the user asks to generate or compare multiple unselected directions, stop
-before implementation and use `brainstorm-first` independently when available.
-Do not preload this implementation workflow during that decision phase. If
-`brainstorm-first` is unavailable, present the routing limitation and obtain a
-selection before implementing.
+## Compare In A Real Rendering Environment
 
-## Persist The Selected Concept
-
-After the user chooses a concept, save the selected concept immediately inside the target project, but keep it out of commits:
-
-1. Prefer an existing ignored temp folder if the project has one, such as `.tmp/`, `tmp/`, `.cache/`, or `.codex/`.
-2. Otherwise create `.tmp/ui-ux-concepts/` in the project root.
-3. Save the selected concept as a markdown file with the concept label, source request, decision rationale, target routes/components, visual notes, and verification plan.
-4. If the project is a Git repository, add the temp folder to `.git/info/exclude` when it is not already ignored. Avoid changing committed ignore files unless the user asks for a durable rule.
-5. Never stage, commit, or include files from the temp concept folder in a PR.
-6. Mention the saved concept path in progress updates and the final response.
-
-## Goal And Browser Verification
-
-When the environment supports persistent Goals, suggest that the user create a Goal to track the UI task from current state through completed after-state verification. Do not create a Goal unless the user explicitly agrees or the environment instructions allow it.
-
-Use real-browser verification with this priority:
-
-1. the environment's built-in Browser and its instructions when available
-2. a project-owned source-controlled browser test for repeatable regression coverage
-3. another available browser automation path documented as a fallback
-4. manual browser checks only when automation is unavailable
-
-Keep an exploratory browser pass distinct from source-controlled automated E2E
-coverage in the final report.
-
-Before editing:
-
-- Capture the current page, component, or region at the relevant viewport.
-- Prefer element or region screenshots before full-page screenshots unless page-level composition matters.
-- Record route, viewport, theme, data state, account state, and any interaction needed to reproduce the view.
-
-After editing:
-
-- Capture the same viewports and states.
-- Compare the selected concept, before screenshot, and after screenshot.
-- Verify responsive layout, overflow, text fit, hover/focus where practical, loading/empty/error states when relevant, and keyboard-visible focus.
-
-## Implementation Workflow
-
-1. Map the concept to project-owned source files, components, styles, tokens, routes, and assets.
-2. Identify reusable UI surfaces before creating new components or CSS.
-3. Translate the concept into concrete layout, typography, color, spacing, imagery, interaction, and responsive rules.
-4. Implement the smallest cohesive slice that proves the direction, then complete the remaining states.
-5. Keep page files focused on composition and keep domain logic, data fetching, styles, and reusable primitives in the project's established boundaries.
-6. Use real content, representative data, or project fixtures when available. Avoid placeholder-heavy UI unless the task is explicitly a prototype.
-7. Do not add a new dependency unless existing project tools cannot reasonably achieve the concept and the tradeoff is clear.
-
-For reference-site implementation:
-
-- Capture reference screenshots at the same viewport sizes used for the target project.
-- Recreate structure, hierarchy, rhythm, and interaction intent with project-owned code and assets.
-- Adapt visual details to the user's product, brand, content, accessibility requirements, and legal constraints.
-- Avoid copying tracking scripts, analytics, hidden implementation details, or vendor-specific markup from the reference site.
+- Follow the host and project browser-testing policy instead of assuming one
+  universal tool. Capture the smallest useful region, using full-page images
+  only when composition, scrolling, or surrounding context matters.
+- Compare the target, before state, and updated state at equivalent viewports,
+  theme, data, account, and interaction state when practical. Disclose any
+  mismatch in comparison conditions.
+- Iterate on material differences in layout, hierarchy, spacing, typography,
+  color, imagery, overflow, text fit, and interaction. Stop when the visual
+  contract is satisfied or when a concrete blocker requires user direction.
+- Verify relevant responsive behavior, keyboard-visible focus, and interaction
+  states. Keep exploratory browser evidence distinct from source-controlled
+  automated E2E coverage.
+- If no real rendering environment is available, perform the closest useful
+  source-level check, report the gap, and do not claim visual fidelity.
 
 ## Final Handoff
 
 Report:
 
-- Which concept was selected and where it was saved.
+- The selected target and any important exact-versus-adaptable decisions.
 - Files changed.
-- Browser verification performed, including screenshot paths when available.
-- Any states or viewports not verified.
-- Confirmation that the temporary concept artifact was not staged or committed.
+- Browser verification performed, including evidence paths when available.
+- Remaining visual mismatches, unverified states or viewports, and comparison
+  limitations.
+- The location and uncommitted status of any temporary concept artifact, only
+  when one was actually created.
