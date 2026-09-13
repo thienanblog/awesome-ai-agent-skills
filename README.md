@@ -114,6 +114,7 @@ The repeated skill folders under `plugins/<plugin-name>/skills/` are generated p
 
 ### Skills CLI
 
+- [mblode/agent-skills](https://github.com/mblode/agent-skills) - Nobody ships AI slop on purpose. These skills make sure you don't. UI audits, typography, docs, PR review, and releases. `npx skills add mblode/agent-skills`
 The open `skills` CLI works with Codex, Claude Code, Cursor, and many other agents.
 
 On macOS:
