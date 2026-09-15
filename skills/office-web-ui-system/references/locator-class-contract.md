@@ -6,11 +6,11 @@ Use this reference to make important UI regions easy to find and discuss.
 
 Users and agents should be able to say “the flyout header”, “the quote side panel”, or “the topbar tools pill” and land in the right file quickly.
 
-## Rule
+## When classes help
 
-Important UI regions must have readable semantic classes.
+Use readable semantic classes when existing semantic markup, accessible names, component boundaries, or project locators do not identify a region clearly. Keep working conventions; do not add classes to unrelated regions merely to satisfy this reference.
 
-Do not rely on raw utility strings alone for:
+Useful candidates include:
 - page roots
 - shell regions
 - topbars and sidebars
@@ -74,13 +74,9 @@ Do not rely on raw utility strings alone for:
   - repeated controls inside one component family
 - If a major-region class appears across unrelated files, rename it to be feature-specific.
 
-## Locator-first implementation rule
+## Applying a locator
 
-When editing a major UI region:
-1. add or confirm the semantic locator class
-2. group related markup under that class
-3. apply utilities or component-library props underneath it
-4. verify the class can be found by scanner and by repo search
+When a semantic class is useful, place it on the region's existing container where possible and verify that source search identifies it. Preserve accessible markup and existing tests; a locator does not replace an accessible name. Avoid introducing wrappers that change layout solely for naming.
 
 ## Practical heuristics
 
@@ -95,7 +91,7 @@ When editing a major UI region:
 Run:
 
 ```bash
-python3 scripts/scan_ui_locators.py /path/to/repo
+python3 "<skill-directory>/scripts/scan_ui_locators.py" "<project-root>"
 ```
 
-Use the scanner before asking the user where something lives.
+The optional scanner maps supported semantic classes to files and line numbers. Direct source search is sufficient when the location is already clear; scanner warnings alone are not design or accessibility failures.

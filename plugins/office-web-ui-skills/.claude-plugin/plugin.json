@@ -1,7 +1,7 @@
 {
   "name": "office-web-ui-skills",
-  "version": "1.31.1",
-  "description": "Operational dashboard and back-office UI implementation, coordinator-routed when project-development-mindset is available and directly usable when installed alone.",
+  "version": "1.32.0",
+  "description": "Operational dashboards and back-office interfaces with clear data hierarchy, reusable components, and practical visual verification.",
   "author": {
     "name": "Ân Vũ",
     "email": "8651688+thienanblog@users.noreply.github.com"

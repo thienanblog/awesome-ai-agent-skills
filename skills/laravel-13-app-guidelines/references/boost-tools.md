@@ -17,7 +17,7 @@ Official source: <https://laravel.com/docs/13.x/boost>
 
 ## Search Documentation
 
-- Use `search-docs` before changing Laravel or ecosystem behavior.
+- Use `search-docs` for version-sensitive or uncertain Laravel ecosystem behavior.
 - Send several short, topic-based queries instead of one package-heavy question;
   Boost already filters by installed package versions.
 - Search for the concept, feature, and failure mode. Example topics include
@@ -51,8 +51,9 @@ command runner.
   the user explicitly authorizes a specific non-local operation.
 - Never expose secrets, tokens, personal data, or full production rows in tool
   output. Select only the columns and rows needed for diagnosis.
-- Ask before destructive Artisan commands, migrations, queue operations, cache
-  flushes, or any mutation of shared data.
+- Require authorization covering the target and effects of destructive Artisan,
+  migrations, shared queue/cache operations, or shared-data mutations. Reuse
+  permission already given; inspection remains read-only.
 
 ## Keep Boost Current
 

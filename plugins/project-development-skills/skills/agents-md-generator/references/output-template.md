@@ -32,8 +32,8 @@ Use this as a selection guide, not as mandatory boilerplate. Omit headings with 
 ## Verification
 
 - For `[change type]`, run `[targeted check]`.
-- After implementation and targeted checks are complete, ask whether to run
-  `[broader check]` before `[merge/release condition]`.
+- For `[repository-specific integration or release condition]`, run `[required check]`.
+- `[Any explicit repository limit or approval requirement for broader checks.]`
 
 ## Safety and approvals
 

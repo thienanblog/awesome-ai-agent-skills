@@ -2,15 +2,15 @@
 
 Use this reference to decide how a page should be composed before choosing detailed styling.
 
-## Mandatory step
+## Composition guides
 
-Choose one page archetype before styling:
+Use the primary user task to guide layout. Common archetypes include:
 - dashboard/report
 - CRUD/list
 - workspace/detail
 - form/wizard
 
-This choice controls layout, density, action placement, and visual intensity.
+These guides inform density and action placement; combine useful patterns for mixed pages without requiring a classification step in the handoff.
 
 ## Visual intensity scale
 

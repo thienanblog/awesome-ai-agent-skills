@@ -1,86 +1,21 @@
-# Remote CI authorization and evidence
+# Remote CI scope and evidence
 
-Read this reference only when Remote CI is requested, required, or could be
-started automatically by a push or review request.
+Read workflow triggers and required-check policy before publishing the series. Read-only inspection of status is different from dispatching, rerunning, or cancelling jobs; respect an explicit no-remote-access instruction for both.
 
-## Separate observation from execution
+## Authorization
 
-- Inspect local workflow files and branch-protection configuration during normal
-  discovery.
-- Read live remote check metadata when needed to identify required status or
-  report a blocker. Read-only observation does not authorize a new run.
-- If the user explicitly chose no remote access, do not inspect, poll, monitor,
-  or download remote state.
-- Never dispatch, rerun, cancel, or intentionally trigger a remote job without
-  explicit authorization covering that action.
+A request to push, open a PR, or merge ordinarily covers the repository's normal validation triggered by that action. Reuse that authorization rather than adding a blanket second CI approval. Explicit user or repository limits still govern: if remote CI is prohibited, separately permissioned, unexpectedly costly, or triggers deployment or another consequential side effect outside the request, explain the actual trigger and resolve it before publishing.
 
-## Establish authorization
+Do not broaden the workflow matrix, manually dispatch extra jobs, rerun unrelated checks, cancel another person's run, or change branch protection as a routine part of delivery. Establish authorization for material additional cost or side effects. A routine rerun needed to verify an in-scope fix can use the existing delivery authorization unless a stricter limit applies.
 
-Before the first action that can trigger Remote CI, disclose:
+## Execution
 
-- the branch or review-request event that will trigger it;
-- the expected workflows or required checks;
-- why each remote surface is needed;
-- when it will run relative to the final local gate; and
-- whether duplicate-run cancellation may be needed.
+Complete focused local checks first when appropriate, except when remote-first work is requested or the needed environment exists only in CI. Remote results can cover unavailable platforms, hosted infrastructure, secrets, and provider-required attestations. Do not repeat every remote job locally just to claim parity.
 
-Obtain explicit approval for the current series and trigger. Permission to
-implement, commit, push, publish, open a review request, merge, or release does
-not by itself authorize Remote CI. If a push or review request starts checks
-automatically, obtain authorization before that action.
+Publish the aggregate candidate instead of triggering CI per subtask. Avoid manual duplicate runs; do not use skip annotations that leave required checks pending. Cancel a duplicate only within authorization and without losing required evidence.
 
-Authorization never implies per-subtask Remote CI. Ask again before expanding the
-approved trigger, jobs, branch, or cancellation scope. A materially changed
-candidate may require renewed authorization when the prior approval did not
-cover reruns.
+## Evidence
 
-## Complete focused local checks first
+Record the run URL, conclusion, tested commit, and relevant environment. Ensure required checks apply to the current PR head before merging. Reuse older results only for responsibilities whose inputs and conditions are unchanged, and only when provider policy permits it. Changed code or configuration requires affected checks again; it does not automatically invalidate unrelated local evidence.
 
-Unless the user explicitly requests a remote-first exception:
-
-1. Run the focused locally runnable checks selected for the exact integration
-   tip.
-2. Fix local failures and repeat the focused final gate.
-3. After implementation is complete, list any broader or full local suite and
-   ask the user whether to run it.
-4. Trigger only the approved remote checks on the current review head.
-
-Remote checks may provide:
-
-- platform or runtime matrices unavailable locally;
-- secret-dependent or hosted-infrastructure coverage;
-- repository-required branch-protection status; or
-- trusted remote attestation of a check already reproduced locally.
-
-Do not replace focused local evidence merely because an equivalent remote check
-is authorized. Do not run a broader or full local suite without the user's
-explicit post-implementation approval unless a higher-priority repository
-instruction requires it. When the user explicitly requests remote-first or
-remote-only execution, confirm the trigger and scope, record why local execution
-is being replaced, and follow that instruction.
-
-## Minimize duplicate runs
-
-Use the minimum repository-compliant run count. If push and review-request
-events unavoidably create duplicates, cancel a redundant run only when
-cancellation was authorized and required checks will still report correctly.
-Do not weaken branch protection, permanently rewrite workflows, or use skip
-annotations that leave required checks pending.
-
-Do not manually dispatch duplicate post-merge CI when tree-equivalent evidence
-is reusable. If repository automation starts a base-branch run automatically,
-cancel or skip it only when explicitly authorized and compatible with required
-checks.
-
-## Record evidence
-
-Record:
-
-- integration commit SHA, Git tree SHA, branch, and trigger;
-- CI run URL and approved check conclusions;
-- the current review-head SHA tested by each required check; and
-- the remote-only coverage or trusted attestation each check adds.
-
-Any change to the candidate tree invalidates this evidence. Re-run Remote CI
-only when existing authorization covers the updated candidate; otherwise ask
-before triggering it again.
+If a required remote check cannot run within the agreed scope, report the exact gap and obtain a decision when it makes delivery unsafe. Do not silently bypass it or claim completion.

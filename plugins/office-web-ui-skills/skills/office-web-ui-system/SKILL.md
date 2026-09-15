@@ -1,256 +1,53 @@
 ---
 name: office-web-ui-system
-description: Coordinator-routed implementation specialist for admin dashboards, internal tools, CRM/ERP management, back-office, CRUD, and reporting UI. Use after project-development-mindset makes an operational dashboard primary, or directly when explicitly invoked or installed standalone. Owns dashboard screenshot/reference work; do not combine with general ui-ux-concept-implementation by default. Excludes marketing and consumer UI.
+description: Build or improve operational dashboards, admin tools, CRM/ERP, CRUD, reporting, and record-management interfaces. Use for dense workflows and dashboard reference matching; excludes marketing and unrelated consumer UI.
 ---
 
 # Office Web UI System
 
-## Overview
+Create a clear operational interface that supports scanning, filtering, comparing, editing, and managing records. Preserve usable space and the product's visual identity.
 
-Use this skill to build or evolve dashboard-style management interfaces with office-style structure, strong visual hierarchy, and reusable composition while keeping the result portable across frameworks and component libraries.
+## Working agreement
 
-Run this skill in the main conversation. Do not spawn subagents, agent teams, or
-delegated parallel workers unless the user explicitly approves the proposed
-count and scope after being told that doing so can increase usage. Ask again
-before expanding an approved scope.
+Follow the user's request and applicable repository instructions over these defaults. Use existing authorization; ask only about missing decisions that materially affect scope, cost, safety, or the result. Continue independent authorized work while awaiting an answer.
 
-Activate this skill only for admin dashboards, internal dashboards, back-office consoles, reporting systems, customer/user management systems, CRM/ERP-style management pages, or similarly operational products where users repeatedly scan, filter, compare, edit, approve, or manage records.
+Run in the main conversation by default. Delegation can increase usage: obtain explicit approval for the proposed agent count and scope before using subagents. Reuse that approval within its bounds; ask again before expanding the approved count or scope.
 
-Do not activate this skill for general UI/UX polish, marketing pages, landing pages, portfolios, brand sites, editorial sites, ecommerce product pages, games, consumer app screens, or one-off visual redesigns unless the user explicitly says the work is for an admin, dashboard, internal tool, back-office, or management system.
+## Establish the page's job
 
-This skill is written as the source of truth in `SKILL.md` so it can be reused across AI tools that support skills, prompt packs, or custom instructions. Tool-specific metadata should stay in adapter files only and must not change the core workflow.
+Inspect the framework, component library, design-system sources, tokens, shared shell, and representative screens. Infer whether the work is an operational surface from the request and project; ask only if that distinction remains unclear and would change the design.
 
-Prioritize two outcomes at the same time:
-- deliver a clear, high-density, professional interface
-- make important UI regions easy for humans and AI agents to identify by name
+Identify the primary task and dominant region. Use dashboard/report, CRUD/list, workspace/detail, and form/wizard as composition guides, not a required classification exercise. Read [page-type-playbook.md](references/page-type-playbook.md) for an unfamiliar page type.
 
-This skill is not only for shells and navigation. It owns implementation when the management product needs a polished:
-- admin dashboard or reporting page
-- customer, user, order, content, ticket, or account management page
-- CRUD/list page inside an admin or back-office system
-- workspace/detail page for operational records
-- form or wizard page for internal workflows
-- stat card system tied to operational metrics
-- filter/search/action region for managing records
-- table-heavy admin page with stronger UI states
+For screenshot-driven work, establish what should match and what should adapt to the existing product. A supplied target already expresses a direction; do not require another concept-selection phase.
 
-When the user asks for a page to feel "beautiful", "modern", "premium", or "like a real web app", first confirm the task is an admin/dashboard/management surface before applying this skill. Do not turn unrelated UI work into generic dashboard boilerplate.
+## Compose for real work
 
-Default expectation:
-- choose a page archetype
-- choose a visual weight
-- define a clear hierarchy for title, summary, actions, filters, and main data
-- use only a few intentional visual ideas instead of decorating every surface
-- preserve usable width and dark-mode readability
+- Make title, context, primary action, filters, and data hierarchy clear. Preserve table and form width before adding supporting panels.
+- Keep dense CRUD surfaces restrained. Use expressive summary or hero treatments only when they help users understand the page.
+- Group metrics by their meaning and define date ranges, units, comparisons, and drilldowns where relevant. Avoid decorative statistics without a user task.
+- Reuse shared components, tokens, utilities, and motion rules. Add local exceptions only for a concrete visual or behavior gap.
+- Support relevant loading, empty, error, validation, selection, disabled, and focus states. Preserve keyboard access, touch usability, and readability in supported themes and viewports.
+- Adapt primitives to the installed framework and library; do not force a new shell, pill topbar, glass style, or dark theme onto a coherent existing product.
 
-## Workflow
+Consult [visual-language.md](references/visual-language.md), [navigation-and-panels.md](references/navigation-and-panels.md), and [component-recipes.md](references/component-recipes.md) for the component being designed. Use [framework-adaptation.md](references/framework-adaptation.md) for library internals or scoped-style issues.
 
-### 1. Inspect before designing
+## Keep regions discoverable
 
-Inspect the real project first:
-- identify the framework, CSS strategy, and component library
-- identify whether the app already has a shell pattern for topbar, sidebar, cards, panels, tables, filters, and page headers
-- read `AGENTS.md`, `CLAUDE.md`, `docs/DESIGN_SYSTEM.md`, component docs, screenshots, and UI source-of-truth files when present
-- inspect theme config, Tailwind config, CSS variables, global CSS, shared wrappers, custom classes, animations, and transitions before inventing new visual code
-- preserve the existing visual language when it is coherent
+Use semantic markup, accessible names, existing component boundaries, or stable project locators to identify important regions. Add readable semantic classes when they solve a real discovery problem; do not normalize unrelated markup just to satisfy a class scheme.
 
-Read these references as needed:
-- `references/visual-language.md`
-- `references/navigation-and-panels.md`
-- `references/page-type-playbook.md`
-- `references/framework-adaptation.md`
-
-### 2. Choose the page archetype before styling
-
-Before choosing gradients, cards, or hero treatments, classify the page into one of these archetypes:
-- dashboard/report
-- CRUD/list
-- workspace/detail
-- form/wizard
-
-This decision is mandatory. The page archetype controls density, action placement, and how expressive the page should be.
-
-Read:
-- `references/page-type-playbook.md`
-
-### 3. Choose the visual weight
-
-Decide whether the page should be:
-- restrained
-- balanced
-- expressive
-
-Use this to control how much gradient, glass, overlap, and decorative depth the page gets.
-
-Rules:
-- prefer restrained surfaces on table-heavy CRUD pages
-- use expressive hero or glass treatment only when it clarifies hierarchy
-- do not overuse hero sections on pages where the table or form is the real focus
-
-Read:
-- `references/visual-language.md`
-
-### 4. Add semantic locator structure early
-
-Before deeper UI changes, add or normalize semantic classes on important regions.
-
-Read `references/locator-class-contract.md` and apply these rules:
-- important UI regions must have readable semantic classes
-- do not rely on Tailwind-only class strings as the only way to identify a major region
-- keep semantic classes stable and specific enough that a user can point to the correct area
-
-Use utility classes freely for low-level styling, but pair them with semantic wrappers for:
-- page containers
-- shells
-- sidebars and topbars
-- flyouts
-- panels and docks
-- toolbar and filter rows
-- table wrappers
-- action bars
-
-### 5. Compose the shell and page regions
-
-After the archetype and visual weight are chosen, compose the page in this order:
-1. shell or page root
-2. page title and context
-3. actions, filters, and summary regions
-4. primary data surface
-5. optional support surfaces such as side panels or utility docks
-
-Use portable recipes for the recurring pieces:
-- page hero or header band
-- stats card grid
-- summary strip
-- action cluster
-- filter bar
-- search input
-- table wrapper
-- mobile record cards
-- empty, loading, and error states
-- utility side panels or inspector panels
-
-Read:
-- `references/component-recipes.md`
-
-Before implementing, be able to state:
-- what the page is for in one sentence
-- which region should dominate the screen
-- which 2 or 3 components are carrying the page's visual identity
-- which regions must remain restrained so the page stays usable
-- which existing wrappers, components, tokens, custom classes, animations, and transitions are the source of truth
-
-### 6. Build with office-web-app defaults
-
-When the project does not already define a better pattern, use these defaults:
-- topbar as a transparent shell with readable pill surfaces
-- desktop navigation with expanded sidebar or icon rail + flyout
-- a page header that explains context before controls
-- stats and summaries grouped near the page title, not scattered randomly
-- floating panels and docks that do not steal content width unless the UX requires it
-- large interaction targets for dense admin workflows
-- clear hover, focus, active, loading, and empty states
-- strong dark-mode readability, not color inversion for its own sake
-
-Read:
-- `references/visual-language.md`
-- `references/navigation-and-panels.md`
-- `references/component-recipes.md`
-
-### 7. Stay behavior-first, not library-first
-
-Describe and implement UI in terms of behavior and structure first.
-
-Do not overfit patterns to PrimeVue or any single library. Library-specific handling belongs in adaptation details only.
-
-Read `references/framework-adaptation.md` when:
-- the project uses PrimeVue
-- the project uses a different component library
-- scoped CSS or third-party internals make dark mode or overrides brittle
-
-### 8. Verify the page reads like a product, not a wireframe
-
-Before handoff, check:
-- the page has one obvious focal region
-- stat cards, filters, and table surfaces belong to one coherent family
-- the page does not look like interchangeable SaaS boilerplate
-- the decorative treatment stops before it hurts density or readability
-
-### 9. Verify with focused screenshots
-
-For dashboard UI work, use Playwright MCP, Playwright, Chrome DevTools MCP, or equivalent real-browser tooling when available.
-
-Screenshot policy:
-- capture the specific element or region that needs work before capturing the full page
-- use full-page screenshots only when page-level composition, scroll behavior, viewport balance, or neighboring regions matter
-- capture before and after screenshots for visual changes when practical
-- use the same viewport, theme, data state, and account state for comparison when possible
-- verify default, loading, empty, error, disabled, validation, hover/focus when practical, responsive, and dark/light states when relevant
-
-When the user provides an unclear dashboard screenshot or mockup:
-- create a separate annotated copy when image tooling is available
-- circle or arrow each unclear area
-- label each area with a stable name such as `A`, `B`, `Filter row`, `Table density`, or `Primary action`
-- ask concise questions using those labels before coding
-
-### 10. Verify density, dark mode, and locator clarity
-
-Run the bundled scanner before asking the user where a UI element lives:
+Read [locator-class-contract.md](references/locator-class-contract.md) when adding such classes. The optional scanner maps those classes to files:
 
 ```bash
-python3 scripts/scan_ui_locators.py /path/to/repo
+python3 "<skill-directory>/scripts/scan_ui_locators.py" "<project-root>" --match layout-sidebar
 ```
 
-Useful modes:
+Use direct source search when it already identifies the target. The scanner does not validate accessibility or replace browser inspection.
 
-```bash
-python3 scripts/scan_ui_locators.py /path/to/repo --match layout-sidebar
-python3 scripts/scan_ui_locators.py /path/to/repo --prefix quote-create-page__
-python3 scripts/scan_ui_locators.py /path/to/repo --json
-```
+## Verify the result
 
-Use the scanner to:
-- map semantic classes to files and line numbers
-- detect ambiguous major-region classes
-- confirm that a proposed class name is discoverable and specific enough
+Follow the host's browser policy and inspect the actual rendered page. Capture the region or page that demonstrates the change; use equivalent viewport, theme, account, and data for before/after or reference comparison. Annotate ambiguous images only when that helps resolve a consequential question.
 
-Also verify:
-- the chosen visual weight still fits the page archetype
-- table-heavy pages keep usable width
-- empty and loading states feel designed, not placeholder-only
-- dark mode readability is preserved on the true rendered nodes
+Check hierarchy, density, overflow, text fit, table interactions, keyboard-visible focus, and supported themes/responsive states. Inspect the real rendered library nodes when overrides affect dark mode. Fix material differences from the selected target or report the limitation when rendering is unavailable.
 
-## Rules
-
-- Preserve an existing good design language instead of forcing one visual language everywhere.
-- Treat `docs/DESIGN_SYSTEM.md`, theme config, shared components, wrappers, custom classes, animations, and transitions as source of truth when present.
-- Choose the page archetype before styling.
-- Choose the visual weight before adding expressive treatments.
-- Prefer semantic wrappers for important regions even in utility-first codebases.
-- Keep major interactive regions identifiable by class name.
-- Reuse existing dashboard components, wrappers, tokens, utility classes, and motion rules before creating new ones.
-- Avoid one-off custom classes, colors, spacing, shadows, transitions, or animations when reusable project rules exist.
-- Use modifiers like `--collapsed`, `--active`, `--open`, `--rail` for state, not entirely different base names.
-- Favor layout patterns that maximize usable width for table-heavy admin work.
-- Prefer restrained surfaces on CRUD and other dense table pages unless stronger expression clearly improves hierarchy.
-- Use hero sections, overlap cards, and glass surfaces deliberately, not by default.
-- Use a small number of strong visual ideas per page instead of many weak decorative effects.
-- Make the page feel product-specific through hierarchy, grouping, and summary design before adding more color or motion.
-- Keep hover/focus targets generous on dense interfaces.
-- Treat dark mode as a first-class state during design and verification.
-- Keep examples portable; adapt primitives to the host stack instead of cloning one framework's exact API.
-
-## References
-
-- `references/visual-language.md`
-- `references/navigation-and-panels.md`
-- `references/page-type-playbook.md`
-- `references/component-recipes.md`
-- `references/locator-class-contract.md`
-- `references/framework-adaptation.md`
-
-## Resources
-
-### scripts/
-
-- `scripts/scan_ui_locators.py`: scan semantic UI locator classes, report files and line numbers, and warn when major-region classes are ambiguous.
+Run focused project checks and relevant regression coverage. Report the user-visible change, evidence, browser surface, and remaining gaps; keep manual screenshots distinct from automated E2E coverage.

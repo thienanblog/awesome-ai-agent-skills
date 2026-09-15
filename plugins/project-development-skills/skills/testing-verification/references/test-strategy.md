@@ -70,8 +70,7 @@ When no tests exist:
 Before reporting completion:
 
 - Targeted checks passed, or the remaining failure is clearly unrelated and documented.
-- Broader or full-suite options are listed after the requested work is complete,
-  and are run only when the user approves or higher-priority repository
-  instructions require them.
+- Required checks are complete. Broaden only for changed contracts or unresolved
+  risks, respecting explicit suite limits; reuse evidence for unchanged work.
 - Manual verification is documented when automation is absent.
 - Any skipped checks have a clear reason.

@@ -1,6 +1,6 @@
 ---
 name: ui-ux-concept-implementation
-description: Implement an already-selected visual direction from a mockup, screenshot, or reference site in an existing project, using project-owned code and equivalent-state browser comparison. Use when visual fidelity is primary, directly or after project-development-mindset routing. Do not use for concept generation, routine UI edits, or supporting browser checks; prefer a dashboard-specific workflow for operational dashboards when available.
+description: Implement a selected mockup, screenshot, or visual reference in an existing project and compare the rendered result. Use when visual fidelity drives the work; use dashboard guidance for operational surfaces when it fits better.
 ---
 
 # UI/UX Concept Implementation
@@ -10,19 +10,20 @@ description: Implement an already-selected visual direction from a mockup, scree
 Turn a selected visual direction into working UI while preserving the project's
 product identity and producing browser evidence against the target.
 
-Run this skill in the main conversation. Do not spawn subagents, agent teams, or
-delegated parallel workers unless the user explicitly approves the proposed
-count and scope after being told that doing so can increase usage. Ask again
-before expanding an approved scope.
+## Working agreement
+
+Follow the user's request and applicable repository instructions over these defaults. Use existing authorization; ask only about missing decisions that materially affect scope, cost, safety, or the result. Continue independent authorized work while awaiting an answer.
+
+Run in the main conversation by default. Delegation can increase usage: obtain explicit approval for the proposed agent count and scope before using subagents. Reuse that approval within its bounds; ask again before expanding the approved count or scope.
 
 ## Establish The Visual Contract
 
 - Confirm that one direction is selected. A single user-supplied mockup,
   screenshot, or reference site is a selected target. If materially different
-  concepts remain unselected, return to the coordinator or obtain the user's
-  selection before implementation.
+  concepts remain unselected, obtain the user's selection unless they already
+  authorized choosing an approach.
 - If the selected target is an operational dashboard and a dashboard-specific
-  workflow is available, return to the coordinator and use it. Otherwise
+  workflow better fits the task, use that guidance directly. Otherwise
   continue with this general visual-reference workflow.
 - Inspect the target and the current rendered UI at the relevant routes,
   viewports, themes, data states, and interaction states. Ask a narrow question

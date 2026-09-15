@@ -1,7 +1,7 @@
 {
   "name": "devops-skills",
-  "version": "1.31.1",
-  "description": "Local-development Docker configuration, coordinator-routed when project-development-mindset is available and directly usable when installed alone.",
+  "version": "1.32.0",
+  "description": "Local Docker development configuration with project-compatible services, networking, persistence, and readiness checks.",
   "author": {
     "name": "Ân Vũ",
     "email": "8651688+thienanblog@users.noreply.github.com"

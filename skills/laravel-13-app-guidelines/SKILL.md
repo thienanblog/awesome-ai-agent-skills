@@ -1,6 +1,6 @@
 ---
 name: laravel-13-app-guidelines
-description: Coordinator-routed implementation and upgrade guidance for confirmed Laravel 13 repositories or Laravel 12-to-13 upgrades when framework conventions materially own the work. Use after project-development-mindset inspects the installed or target laravel/framework major, or directly when explicitly invoked or installed standalone. Never load both Laravel version skills; do not use merely for supporting Docker, test, frontend, or Artisan commands.
+description: Implement Laravel 13 changes or upgrade Laravel 12 to 13 using verified package versions and project conventions. Use only for the installed or requested major; optional framework features are not required dependencies.
 ---
 
 # Laravel 13 App Guidelines
@@ -11,16 +11,11 @@ Use a repository-first workflow for Laravel 13 work. Detect the actual framework
 packages, frontend, command runner, and local conventions before selecting a
 Laravel pattern; do not turn optional Laravel 13 capabilities into dependencies.
 
-This skill owns version-specific Laravel implementation and upgrade guidance,
-not the whole task lifecycle. Keep routine testing, documentation, Docker
-command execution, and UI reuse as supporting work. Return routing control to
-`project-development-mindset` if debugging, test strategy, local container
-topology, UI concept work, or deployment becomes the primary concern.
+## Working agreement
 
-Run this skill in the main conversation. Do not spawn subagents, agent teams, or
-delegated parallel workers unless the user explicitly approves the proposed
-agent count and scope after being told that delegation can increase usage. Ask
-again before expanding the approved scope.
+Follow the user's request and applicable repository instructions over these defaults. Use existing authorization; ask only about missing decisions that materially affect scope, cost, safety, or the result. Continue independent authorized work while awaiting an answer.
+
+Run in the main conversation by default. Delegation can increase usage: obtain explicit approval for the proposed agent count and scope before using subagents. Reuse that approval within its bounds; ask again before expanding the approved count or scope.
 
 ## Execute the Workflow
 
@@ -40,8 +35,8 @@ again before expanding the approved scope.
    use Laravel 13.x or the installed package's official documentation.
 6. Follow existing architecture and naming. Implement the smallest coherent
    change, add or update focused tests, and run focused checks for the affected
-   surface. After implementation is complete, ask the user whether to run any
-   broader or full suite.
+   surface, plus required repository checks. Broaden only when changed contracts
+   or unresolved risks justify it, within the authorized testing budget.
 
 Do not install, upgrade, or replace packages merely because this skill lists
 them. Confirm a task requirement and compatibility first.
@@ -83,8 +78,9 @@ them. Confirm a task requirement and compatibility first.
 - When changing a column with `change()`, restate every modifier that must be
   retained because omitted modifiers are dropped. Inspect the current schema
   first and make migrations reversible when practical.
-- Ask for explicit approval before destructive database commands or migrations,
-  including `migrate:fresh`, `db:wipe`, broad deletes, and irreversible drops.
+- Require authorization covering the target and data effects of destructive
+  operations such as `migrate:fresh`, `db:wipe`, broad deletes, and irreversible
+  drops. Reuse permission already given; a code edit alone does not grant it.
 
 ## Build APIs Deliberately
 
@@ -135,18 +131,16 @@ new Laravel 13 feature or upgrading an application from Laravel 12.
 - Preserve Pest or PHPUnit according to the repository. Laravel 13 supports both;
   do not force PHPUnit into a Pest project or vice versa.
 - Prefer feature tests for behavior crossing framework boundaries and focused
-  unit tests for isolated logic. Add regression tests for bug fixes.
+  unit tests for isolated logic. Add regression tests when they provide durable protection.
 - Confirm generator flags with `php artisan help make:test` before using them.
   For upgrades, expect Pest 4 or PHPUnit 12 only after dependency compatibility
   has been verified.
 - Run the smallest relevant test target. Use the repository wrapper and test
   database; never point tests at production.
 - Run focused formatting, static analysis, frontend lint, type-check, build, and
-  browser or E2E checks when they can fail for the changed surface. After
-  implementation and focused verification are complete, list the broader
-  affected or full-suite commands and ask the user whether to run them. Do not
-  run them without explicit approval unless higher-priority repository
-  instructions require it.
+  browser or E2E checks when they can fail for the changed surface. Complete
+  required checks and reuse passing results unless relevant changes invalidate
+  them. Follow explicit approval requirements for broader suites.
 - Report the exact checks run, results, and any checks that could not run.
 
 ## Use Laravel Boost Safely

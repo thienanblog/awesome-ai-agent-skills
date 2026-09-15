@@ -2,8 +2,7 @@
 
 Use this reference when the task centers on generating or selecting UI concepts,
 implementing a screenshot or mockup, following a visual reference, or emulating
-a website's look and interaction patterns. Apply the routing gate before loading
-an implementation specialist.
+a website's look and interaction patterns. Choose guidance that adds value to the current visual task.
 
 Stay in the general workflow for small local UI fixes that do not depend on concept selection or visual matching. Use an available specialized UI/UX skill when it directly owns the requested workflow; continue with the guidance below when none is available.
 
@@ -17,19 +16,17 @@ Stay in the general workflow for small local UI fixes that do not depend on conc
 
 ## Concepts And Selection
 
-When the user asks for multiple concepts, exit the coordinator and use
-`brainstorm-first` as an independent pre-implementation phase when available:
+When the user asks for multiple concepts, use `brainstorm-first` when available:
 
 - Give each concept a stable name and explain its meaningful tradeoffs.
 - Recommend one concept using technical, usability, accessibility, consistency, and implementation evidence.
 - Predict user preference only when prior user choices or explicit criteria provide evidence; do not invent a preference.
-- Ask the user to choose before implementation only when the concepts differ in a consequential way.
+- Wait for selection when requested. If the user authorized choosing and implementing a direction, explain the choice and continue.
 
-After selection, begin a fresh implementation phase with the coordinator. Route
-to `office-web-ui-system` for an operational admin, internal, CRM/ERP, CRUD,
+After selection, implement directly. Use `office-web-ui-system` for an operational admin, internal, CRM/ERP, CRUD,
 reporting, or back-office surface when available. Route to
 `ui-ux-concept-implementation` for other selected concepts, screenshots,
-mockups, visual references, or reference sites. Do not load both by default.
+mockups, visual references, or reference sites. Avoid duplicating their workflows; consult complementary guidance only for a concrete gap.
 
 Preserve the selected concept outside committed source when it is needed for
 later comparison. Use an existing ignored artifact location or another
@@ -48,7 +45,6 @@ necessary and authorized.
 - Distinguish exploratory browser verification from repeatable source-controlled regression tests in the final report.
 
 If the task's primary deliverable becomes a new or substantially revised durable
-design-system artifact, return routing control to the coordinator and switch to
-an available design-system skill. Otherwise update the project's existing source
-as supporting work; do not load another full workflow or create a new
-design-system document for a one-off visual change.
+design-system artifact, use an available design-system skill directly. Otherwise update the project's existing source
+as supporting work; consult additional guidance only for a concrete gap and avoid
+creating a new design-system document for a one-off visual change.

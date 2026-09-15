@@ -37,5 +37,6 @@ through the repository's command runner as a fallback.
   specific non-local operation is explicitly authorized.
 - Select only required columns and rows; do not expose secrets, personal data,
   or full production records.
-- Ask before destructive Artisan commands, migrations, cache flushes, queue
-  operations, or mutations of shared data.
+- Require authorization covering the target and effects of destructive Artisan,
+  migrations, shared cache/queue operations, or shared-data mutations. Reuse
+  permission already given; read-only inspection does not grant write access.

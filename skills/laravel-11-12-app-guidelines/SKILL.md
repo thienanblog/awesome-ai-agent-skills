@@ -1,6 +1,6 @@
 ---
 name: laravel-11-12-app-guidelines
-description: Coordinator-routed implementation guidance for confirmed Laravel 11 or 12 repositories when framework conventions materially own the work. Use after project-development-mindset inspects laravel/framework, or directly when explicitly invoked or installed standalone. Never load both Laravel version skills; Laravel 12-to-13 upgrades use the Laravel 13 skill. Do not use merely for supporting Sail, Docker, test, or frontend commands.
+description: Implement changes in Laravel 11 or 12 using the installed framework, frontend, and command runner. Select by composer evidence; Laravel 12-to-13 upgrades use laravel-13-app-guidelines.
 ---
 
 # Laravel 11/12 App Guidelines
@@ -9,20 +9,15 @@ description: Coordinator-routed implementation guidance for confirmed Laravel 11
 
 Apply a consistent workflow for Laravel 11/12 apps with optional frontend stacks, Dockerized commands, and Laravel Boost tooling.
 
-This skill owns version-specific Laravel implementation guidance, not the whole
-task lifecycle. Keep routine testing, documentation, Docker command execution,
-and UI reuse as supporting work. Return routing control to
-`project-development-mindset` if debugging, test strategy, local container
-topology, UI concept work, or deployment becomes the primary concern.
+## Working agreement
 
-Run this skill in the main conversation. Do not spawn subagents, agent teams, or
-delegated parallel workers unless the user explicitly approves the proposed
-count and scope after being told that doing so can increase usage. Ask again
-before expanding an approved scope.
+Follow the user's request and applicable repository instructions over these defaults. Use existing authorization; ask only about missing decisions that materially affect scope, cost, safety, or the result. Continue independent authorized work while awaiting an answer.
+
+Run in the main conversation by default. Delegation can increase usage: obtain explicit approval for the proposed agent count and scope before using subagents. Reuse that approval within its bounds; ask again before expanding the approved count or scope.
 
 ## Quick Start
 
-- Read repository instructions first: `AGENTS.md`. If `docs/` exists, read `docs/README.md` and relevant module docs before decisions.
+- Read applicable repository instructions and relevant documentation owners or indexes when present. Do not assume a `docs/README.md` exists.
 - Detect installed versions, the stack, and command locations; do not guess.
 - Use Laravel Boost `search-docs` for version-matched ecosystem guidance; use official versioned Laravel or package documentation if Boost is unavailable.
 - Follow repo conventions for naming, UI language, docs-first policies, and existing component patterns.
@@ -52,7 +47,7 @@ before expanding an approved scope.
 - Prefer named routes and `route()` for URL generation.
 - When modifying an existing column with `change()`, restate every modifier that
   must be retained because omitted modifiers are dropped.
-- Ask before destructive database operations (e.g., reset/rollback/fresh).
+- Destructive database operations such as reset, rollback, or fresh require authorization for the target and data loss; reuse explicit permission already given.
 
 ## API-Only Mode
 
@@ -87,17 +82,13 @@ before expanding an approved scope.
 - Preserve the repository's Pest or PHPUnit test runner. Confirm generator flags
   with `php artisan help make:test`; generally prefer feature tests for behavior
   that crosses framework boundaries.
-- Run the smallest relevant test target (`php artisan test <file>` or
-  `--filter=`). After implementation and focused verification are complete,
-  identify the broader affected or full suite and ask the user whether to run it.
-  Do not run it without explicit approval unless higher-priority repository
-  instructions require it.
-- Run `vendor/bin/pint --dirty` before finalizing code changes.
+- Run the smallest relevant test target (`php artisan test <file>` or `--filter=`), plus checks required by the repository. Add regression coverage when it protects meaningful behavior. Broaden only for an affected contract or unresolved risk, respecting explicit suite budgets.
+- Run the configured formatter on changed code; use `vendor/bin/pint --dirty` when Pint is installed and that scope fits. Reuse passing checks until relevant changes invalidate them.
 
 ## Laravel Boost MCP Tools (when available)
 
-- Read application information, then use `search-docs` before changing framework
-  behavior or using version-sensitive features.
+- Read application information, then use `search-docs` for uncertain or
+  version-sensitive framework behavior.
 - Discover the tools exposed by the installed Boost server; tool names and
   capabilities can vary by release.
 - Use available route, Artisan, schema, log, browser, and URL tools for
@@ -109,4 +100,4 @@ before expanding an approved scope.
 
 - Preserve existing architecture, structure, and dependencies unless the user explicitly requests changes.
 - Reuse existing components and follow local patterns.
-- Ask concise clarifying questions when repo guidance is missing or ambiguous.
+- Report changed behavior, verification, and any unresolved material assumption.

@@ -6,24 +6,11 @@ Use this reference for UI/UX tasks, screenshot-driven implementation, and ambigu
 
 If the user provides a screenshot, mockup, or marked-up image and it is unclear what to change:
 
-1. Inspect the image first.
-2. Create a separate annotated copy when image tooling is available.
-3. Use circles, arrows, or callouts for each unclear area.
-4. Label each area with a stable short name such as `A`, `B`, `Header spacing`, `Filter row`, or `Primary action`.
-5. Ask concise questions using those labels.
-6. Do not edit the user's original image.
+Inspect the image and project context first. Ask only if an unresolved visual choice would materially change the result. Use a separate annotated copy with short labels when it makes that question easier to answer; otherwise describe the region directly. Preserve the original image. Do not block ordinary visual work on annotation tooling.
 
-If annotation tooling is unavailable, describe the labeled areas by position and ask the same questions.
+## Screenshot Scope
 
-## Screenshot Order
-
-Prefer this order:
-
-1. Screenshot the exact element or region that needs work.
-2. Screenshot the surrounding component only if the region needs context.
-3. Screenshot the full page only if layout, scroll, viewport composition, or neighboring content is part of the requirement.
-
-Broad full-page screenshots add noise. Use them deliberately.
+Capture the element, region, or full page that demonstrates the relevant behavior. A component fix often needs a small region; composition, scroll, and neighboring layout need wider context. Choose scope by evidence needed, without a mandatory capture order.
 
 ## Before And After
 

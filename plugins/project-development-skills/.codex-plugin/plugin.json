@@ -1,7 +1,7 @@
 {
   "name": "project-development-skills",
-  "version": "1.31.1",
-  "description": "A coordinator-first development bundle: project-development-mindset routes to one specialist at a time, while brainstorm-first remains an independent pre-implementation decision workflow.",
+  "version": "1.32.0",
+  "description": "Focused development workflows for implementation, decisions, debugging, verification, documentation, UI, and deployment. Use the guidance that fits the task.",
   "homepage": "https://github.com/thienanblog/awesome-ai-agent-skills",
   "repository": "https://github.com/thienanblog/awesome-ai-agent-skills",
   "license": "MIT",
@@ -16,8 +16,8 @@
   "skills": "./skills/",
   "interface": {
     "displayName": "Project Development Skills",
-    "shortDescription": "A coordinator-first development bundle: project-development-mindset routes to one specialist at a time, while brainstorm-first remains an independent pre-implementation decision workflow.",
-    "longDescription": "A coordinator-first development bundle: project-development-mindset routes to one specialist at a time, while brainstorm-first remains an independent pre-implementation decision workflow.",
+    "shortDescription": "Focused development workflows for implementation, decisions, debugging, verification, documentation, UI, and deployment. Use the guidance that fits the task.",
+    "longDescription": "Focused development workflows for implementation, decisions, debugging, verification, documentation, UI, and deployment. Use the guidance that fits the task.",
     "developerName": "Ân Vũ",
     "category": "Productivity",
     "capabilities": [
@@ -26,9 +26,9 @@
     ],
     "websiteURL": "https://github.com/thienanblog/awesome-ai-agent-skills",
     "defaultPrompt": [
-      "Use brainstorm-first independently for a pre-implementation decision phase; otherwise start with project-development-mindset and route to at most one specialist for the current primary concern.",
-      "Apply project-development-skills to review this repository and select only the primary workflow for the current phase.",
-      "Use project-development-skills to plan documentation and delivery without activating an opt-in workflow unless the user requests or accepts it."
+      "Use the project-development skill that fits this task; start with project-development-mindset when the work needs general coordination.",
+      "Compare practical options with brainstorm-first when a decision is requested, or implement an already selected approach with the relevant skill.",
+      "Complete this project change with proportionate checks and existing authorization. Use run-reviewable-subtask-loop only when explicitly requested or accepted."
     ],
     "brandColor": "#10A37F"
   }

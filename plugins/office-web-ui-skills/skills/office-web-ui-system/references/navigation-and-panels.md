@@ -1,6 +1,6 @@
 # Navigation And Panels
 
-Use this reference when building shells, side navigation, flyouts, docks, and utility panels.
+Use this reference when building shells, side navigation, flyouts, docks, and utility panels. These recipes describe options within the product's chosen visual language; preserve an existing coherent shell rather than imposing pills, glass, or flyouts.
 
 ## Topbar contract
 
@@ -8,7 +8,7 @@ Use this reference when building shells, side navigation, flyouts, docks, and ut
 - Group actions into stable pill clusters.
 - Left pill usually contains brand and primary shell toggle.
 - Right pills usually contain status, quick toggles, notifications, and user actions.
-- Readability should come from pill surfaces, not from a single solid full-width bar.
+- When using pill clusters, keep each readable against its background. A solid full-width bar is also suitable when it fits the product.
 
 ## Sidebar contract
 
@@ -28,7 +28,7 @@ Use this reference when building shells, side navigation, flyouts, docks, and ut
 
 ## Flyout content
 
-- Use a floating card surface with blur, border, radius, and restrained shadow.
+- Use the product's overlay surface; add blur or shadow only when it improves separation without harming readability.
 - Include a small header with:
   - root group icon
   - group label

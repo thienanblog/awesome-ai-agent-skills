@@ -1,180 +1,54 @@
 ---
 name: agents-md-generator
-description: Coordinator-routed specialist for creating, auditing, compacting, or restructuring AGENTS.md, AGENTS.override.md, nested instructions, or optional CLAUDE.md compatibility files. Use after project-development-mindset identifies repository instructions as the primary deliverable, or directly when explicitly invoked or installed standalone. Do not use for routine instruction reading or a small required update accompanying code.
+description: Create, audit, or compact repository instructions in AGENTS.md, scoped overrides, and requested tool compatibility files. Use to preserve non-obvious project rules while removing stale, duplicated, or generic guidance.
 ---
 
 # AGENTS.md Generator
 
-Create a small, project-specific instruction layer that agents can load on every task. Treat context as a limited budget: include durable rules that materially change agent behavior, and leave general engineering knowledge or detailed documentation out.
+Produce a small instruction layer containing verified project facts that materially change agent behavior. General engineering knowledge belongs outside always-loaded instructions.
 
-Run this skill in the main conversation. Do not use subagents unless the user explicitly approves the proposed agent count and scope after being warned that delegation can increase usage. Ask again before expanding an approved scope.
+## Working agreement
 
-## Core contract
+Follow the user's request and applicable repository instructions over these defaults. Use existing authorization; ask only about missing decisions that materially affect scope, cost, safety, or the result. Continue independent authorized work while awaiting an answer.
 
-- Prefer `AGENTS.md` as the shared repository instruction file.
-- Generate only files the user requested. Ask before adding a compatibility file for another tool.
-- Keep the root file broadly applicable. Put subtree-specific rules in nested instruction files only when the target tool supports them.
-- Record verified facts, not assumptions or generic best practices.
-- Link to detailed project documentation with a task-specific read condition instead of copying it.
-- Never store secrets, credentials, private prompts, conversation transcripts, or the user's verbatim request.
-- Do not add tool configuration directories to `.gitignore` wholesale. Some contain intentionally versioned project configuration.
-- Do not modify global instruction files or user configuration while generating repository instructions.
+Run in the main conversation by default. Delegation can increase usage: obtain explicit approval for the proposed agent count and scope before using subagents. Reuse that approval within its bounds; ask again before expanding the approved count or scope.
 
-## Output budget
+## Discover the instruction chain
 
-Use these defaults unless the repository already has a stricter convention:
+Inspect existing instructions, their ownership, scopes, and symlinks before editing. Preserve a working shared source such as `AGENTS.md` pointing to `CLAUDE.md`; do not replace it solely to impose a preferred filename. Add compatibility files only when the requested tool support needs them. Keep global user configuration outside a repository-instruction task.
 
-- Root `AGENTS.md`: target 80-150 lines and at most 12 KiB.
-- Root hard review threshold: 200 lines or 16 KiB.
-- Nested instruction file: target at most 80 lines and include only differences from the parent scope.
-- `CLAUDE.md` compatibility file: normally one import line plus explicitly requested Claude-specific rules.
-
-If a generated or merged root file crosses either hard threshold, compact it before writing. Never justify an oversized file by raising Codex's `project_doc_max_bytes`; that setting is an escape hatch, not the default design.
-
-## Workflow
-
-### 1. Locate the instruction chain
-
-Resolve bundled resources relative to the directory containing this `SKILL.md`; never assume the skill exists under the target repository's `skills/` directory.
-
-Run the deterministic detector before manual exploration:
+For an unfamiliar or multi-tool repository, the bundled detector can locate instruction paths and declared framework/tool signals:
 
 ```bash
 "<skill-directory>/scripts/detect-agent-context" --root "<repository-root>" --format json
 ```
 
-On Windows, run `"<skill-directory>\\scripts\\detect-agent-context.cmd"` with the same arguments. The launchers prefer the full Python detector and fall back to a native Bash or PowerShell text report when Python is unavailable. Use text output for a human-readable report. Add `--include-global` only when user-level instruction conflicts matter and reading those paths is permitted. Add repeatable `--config-path` values for nonstandard agent or MCP config locations. The detector reads only selected public manifests and reports paths for instruction/config files; it never reads environment files, credentials, arbitrary source files, or instruction contents.
+On Windows use `scripts/detect-agent-context.cmd` with the same arguments. Python provides JSON; native Bash/PowerShell fallbacks emit a smaller text report. Resolve scripts relative to this skill, not the target project. Direct file inspection is sufficient for a known, narrow edit.
 
-Treat the report as an evidence index, not final authority. Verify commands and project rules in their cited source before writing them into persistent instructions. Framework and tool signals come from declared dependencies or explicit marker files; do not infer architecture from them.
+The detector indexes selected public manifests and instruction/config paths without reading credentials, environment files, or instruction contents. Treat it as an index: read the applicable instructions and verify commands in their source before persisting them. Include global paths only when that investigation is authorized and relevant.
 
-The detector indexes these relevant instruction sources:
+Read [discovery.md](references/discovery.md) for detector details or [tool-compatibility.md](references/tool-compatibility.md) when loading order and supported tool behavior affect the output.
 
-- Root and nested `AGENTS.md` and `AGENTS.override.md` files.
-- `CLAUDE.md`, `CLAUDE.local.md`, and `.claude/rules/` when Claude Code compatibility matters.
-- `.github/copilot-instructions.md` and `.github/instructions/` when GitHub Copilot compatibility matters.
-- `.cursor/rules/` and legacy `.cursorrules` when Cursor compatibility matters.
-- Project-scoped agent configuration such as `.codex/config.toml` when present.
-- Other tool-specific files only when the project uses that tool.
+## Select durable rules
 
-Read [references/tool-compatibility.md](references/tool-compatibility.md) when multiple agent tools are present or compatibility behavior affects the requested output.
+Keep a rule when it is non-obvious, supported by project evidence, useful across tasks, and concrete enough to follow. Good candidates include exact command runners, generated-file ownership, unusual business boundaries, required checks, and repository-specific deployment or approval constraints.
 
-Determine which file actually applies at the current working directory. In Codex, `AGENTS.override.md` wins over `AGENTS.md` in the same directory, only one file is loaded per directory, and files closer to the working directory appear later in the instruction chain.
+Remove or rewrite generic advice, personas, duplicated rules, obsolete commands, exhaustive inventories, mandatory questionnaires, unsupported scores, and procedures that conflict with current project intent. Describe actual authorization boundaries; do not invent new approval gates or weaken explicit ones.
 
-### 2. Discover repository facts
+Keep detailed design, API, testing, and deployment guidance in their existing owners, linked with a clear read condition. Exclude secrets, home-directory paths, prompt transcripts, task logs, and global tool inventories.
 
-Read local sources before asking questions:
+## Write or reconcile
 
-1. Existing instruction files and repository documentation.
-2. Package manifests, lockfiles, runtime/version files, container or devcontainer configuration.
-3. CI workflows and scripts that define the real lint, test, type-check, build, and validation commands.
-4. Top-level source layout and the nearest representative modules.
-5. Tests, fixtures, code-generation rules, deployment notes, and security policies when relevant.
+Default to one compact shared instruction source. Use nested files for meaningful scope differences supported by the target tools, without repeating parent rules. For Codex, check same-directory `AGENTS.override.md` precedence before proposing a layout. For requested Claude compatibility, an import or existing symlink can avoid duplicate rules.
 
-Use the smallest scan that can establish reliable facts. Do not offer time-based “quick/medium/deep” menus. Ask a concise question only when an unresolved choice would materially change the output, such as the intended runtime environment or whether a second agent tool must be supported.
+Use [output-template.md](references/output-template.md) as a menu. Classify existing content as keep, update, move, remove, or unresolved; resolve facts from source, and ask only about conflicts that require the user's decision. Read [merge-and-verify.md](references/merge-and-verify.md) for an existing file consolidation.
 
-Read [references/discovery.md](references/discovery.md) for detector output guidance, the evidence checklist, and confidence rules.
+Prefer roughly 80–150 lines for a root file and shorter scoped files, without padding to a target. Review a root above 200 lines or 16 KiB for duplication and misplaced detail; preserve justified requirements while respecting the target tool's actual loading limit. Do not raise a global context limit just to avoid editing.
 
-### 3. Decide what belongs in persistent instructions
+Use tracked diffs for recovery. Preserve untracked content that would otherwise be lost. Do not create routine backup copies, alter history, or ignore entire tool-configuration directories merely as part of generating instructions.
 
-Include a rule only if all are true:
+## Verify
 
-1. It is durable across many tasks.
-2. It is not obvious from a nearby standard config or common model knowledge.
-3. It changes what the agent should do, avoid, read, or verify.
-4. It can be written concretely enough to check.
+Check cited paths and commands, scope/precedence, symlinks, duplicate rules, and unresolved placeholders. Measure line/byte size and ensure the relevant instruction chain fits the target tool. Run repository validators when applicable. Static inspection of a command does not mean it was executed; do not run a destructive command to verify its spelling.
 
-Good content:
-
-- Exact environment and commands when choosing the wrong command would fail or alter state.
-- The authoritative docs, schemas, generated files, or modules for a business area.
-- Non-obvious architecture boundaries and reuse requirements.
-- Repository-specific Git, testing, security, deployment, or approval rules.
-- Known generated files that must not be edited directly.
-- Platform limitations or checks that cannot be inferred from the manifest.
-
-Exclude:
-
-- Role personas such as “You are a senior engineer.”
-- Generic workflows, programming advice, framework tutorials, or exhaustive folder inventories.
-- Tool-detection reports, MCP server inventories, home-directory paths, or global prompt summaries.
-- Full design-system, testing, debugging, performance, deployment, or API documentation.
-- Status logs, roadmaps, completed work, original prompts, or task memory.
-- Rules already enforced automatically by formatters or CI unless the agent must run a specific command.
-
-### 4. Choose the file layout
-
-Default to one root `AGENTS.md`.
-
-Add a nested `AGENTS.md` when a subproject has meaningfully different commands or conventions and the target tools load nested files. Add a nested `AGENTS.override.md` only when Codex should ignore the sibling `AGENTS.md` for that directory. Keep common rules at the root and write only the delta in nested files.
-
-Create `CLAUDE.md` only when the user asks for Claude Code support. For a shared instruction source, use:
-
-```markdown
-@AGENTS.md
-```
-
-Add Claude-specific content below the import only when it cannot live in shared instructions. A symlink is also supported by Claude Code, but prefer the import for cross-platform repositories unless the user chooses otherwise.
-
-For path-scoped Claude or Cursor rules, prefer their native scoped-rule mechanisms over expanding the always-loaded root file.
-
-### 5. Generate the minimum useful file
-
-Use the compact skeleton in [references/output-template.md](references/output-template.md). Include only sections that have verified content. Prefer bullets, exact paths, and exact commands.
-
-Write conditions explicitly:
-
-- Good: “When changing API schemas, update `api/openapi.yaml` before generated clients; run `pnpm generate:api`.”
-- Weak: “Keep API documentation up to date.”
-- Good: “Run `docker compose exec app php artisan test --filter=<affected test>`; PHP is not installed on the host.”
-- Weak: “Always test your changes.”
-
-Do not copy large documentation passages. Write a routed reference such as: “For public API changes, read `docs/api-versioning.md` before editing routes.”
-
-### 6. Reconcile existing files
-
-Do not preserve content merely because it already exists. Classify each rule as:
-
-- `keep`: current, specific, and useful.
-- `update`: useful but contradicted by current source-of-truth evidence.
-- `move`: useful only for a subdirectory or detailed project document.
-- `remove`: generic, duplicated, stale, unverifiable, or task-status content.
-- `confirm`: a real conflict whose owner cannot be determined from repository evidence.
-
-Preserve author intent, but prefer current source-of-truth facts. Ask only about `confirm` items. Do not append a fresh template below old content, do not add generated/preserved marker comments, and do not keep both sides of a conflict for the user to clean up later.
-
-When Git tracks the file, rely on the working-tree diff for recovery. Do not create backup files, delete older backups, commit, or modify Git history unless the user explicitly requests it.
-
-Read [references/merge-and-verify.md](references/merge-and-verify.md) before compacting or updating an existing file.
-
-### 7. Verify before finishing
-
-Check every generated or updated instruction file:
-
-- All paths and commands cited exist or are clearly labeled as user-provided.
-- No unresolved placeholders such as `TBD`, `[command]`, or template braces remain.
-- Rules do not contradict nearer instruction files or repository configuration.
-- Root and nested scopes do not repeat the same content.
-- No secret, personal home path, prompt transcript, task status, or tool inventory was added.
-- The root file stays within the line and byte budgets.
-- Optional compatibility files use behavior supported by the selected tool.
-
-Measure rather than estimate:
-
-```bash
-wc -l -c AGENTS.md
-```
-
-For an update, inspect the final diff and summarize what was kept, updated, moved, and removed. If the repository has its own validation command for generated files or documentation, run it.
-
-## Quick mode
-
-When the user requests quick mode:
-
-- Discover facts from repository sources without a questionnaire.
-- Use safe defaults and omit uncertain sections.
-- Never overwrite an existing instruction file with unresolved conflicts.
-- Produce the same compact, verified output as the normal workflow; quick mode changes interaction, not quality or size limits.
-
-## Maintainer note
-
-Do not bundle `ROADMAP.md`, `PROGRESS.md`, task logs, or archive helpers inside this runtime skill. Track future work in repository-level issues or maintainer documentation outside the packaged skill. Runtime skill contents should include only instructions and resources needed to perform the user-facing workflow.
+Report material rules kept, changed, moved, or removed, the evidence used, and unresolved conflicts. Avoid a separate discovery report unless the user requested it.

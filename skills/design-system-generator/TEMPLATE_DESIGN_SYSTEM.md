@@ -1,175 +1,31 @@
-# DESIGN_SYSTEM.md
+# Design System
 
-## 0. Scope
-- Product surfaces covered:
-- Out of scope:
+Use this skeleton as a topic menu. Replace prompts with project decisions, omit inapplicable sections, and link existing owners instead of copying their rules. Do not publish unresolved placeholders.
 
-## 1. Design principles
-- Clarity over cleverness
-- Consistency over variety
-- Accessibility is default
-- Performance is a feature
+## Scope
 
-## 2. Supported platforms & constraints
-- App type: (SPA / Traditional / Hybrid)
-- Frameworks:
-- Browser support:
-- i18n/RTL:
-- Theming: (Light / Light+Dark / Multi-theme)
+Name the product surfaces, supported devices/themes, language/RTL constraints, and the source of approved visual direction.
 
-## 3. Design tokens
-### 3.1 Token sources
-- Source of truth: (CSS variables / JSON tokens / both)
-- Files:
-  - `styles/tokens.css`
-  - `styles/design-tokens.json` (optional)
-- Generated token policy:
-- Manual token edit policy:
+## Tokens and foundations
 
-### 3.2 Color system
-- Brand colors:
-- Neutral palette:
-- Semantic colors:
-  - `--color-success`
-  - `--color-warning`
-  - `--color-danger`
-  - `--color-info`
+Identify token source files and whether they are edited or generated. Document the relevant color roles, type scale, spacing/layout, borders/shadows, and motion. Explain how to extend the system for a real gap without introducing competing token sources.
 
-Rules:
-- Never hardcode hex in components; use tokens.
-- Ensure contrast meets WCAG AA.
+## Components and behavior
 
-### 3.3 Typography
-- Font families:
-- Type scale (sizes + line-height):
-- Font weights:
-- Rules (headings/body/captions):
+Link shared components and their usage examples. State ownership, naming, extension rules, and relevant interaction states. Document local styling exceptions only where the project needs them. Cover only the frameworks and rendering modes the application uses.
 
-### 3.4 Spacing & layout
-- Spacing scale:
-- Grid/container rules:
-- Responsive breakpoints:
+## Accessibility
 
-### 3.5 Radius, borders, shadows
-- Radius scale:
-- Border rules:
-- Shadow scale:
+Specify the product's accessibility target and practical checks for semantics, keyboard operation, focus visibility, contrast, and reduced motion. Link existing standards or test owners. Do not claim compliance from this document alone.
 
-### 3.6 Motion
-- Duration scale:
-- Easing:
-- Reduced motion policy:
-- Transition source of truth:
-- Animation source of truth:
+## Assets and delivery
 
-## 4. UI foundations
-### 4.1 Base styles / reset
-- Reset/base approach:
-- Defaults (body, links, headings):
+Include only design-owned image, icon, font, and loading decisions. Link the actual asset/build pipeline for cache invalidation and production packaging. Document a manifest when the pipeline uses one; do not require a new bundler or manifest solely to fill this section.
 
-### 4.2 Focus & interaction states
-- Focus ring standard:
-- Hover/active behavior:
-- Disabled behavior:
+## Visual verification
 
-### 4.3 Iconography
-- Icon set:
-- Sizing rules:
-- Stroke/fill rules:
+Identify representative components, routes, states, and viewports. Follow the host browser policy, compare equivalent conditions, and capture the region or page needed to demonstrate the result. Annotate unclear references only when that helps resolve a material question. Keep manual visual evidence distinct from automated regression coverage.
 
-## 5. Component architecture
-### 5.1 Portability
-Components must be implementable in:
-- SPA components
-- server-rendered templates
+## Examples
 
-### 5.2 Naming & structure
-- Naming conventions:
-- Folder conventions:
-- Shared wrappers/components to prefer before creating new files:
-- Rules for extending existing components:
-
-### 5.3 Required component states
-All interactive components define:
-- default, hover, active, focus, disabled
-- loading (if async)
-- error (if validation)
-
-### 5.4 Custom classes and utilities
-- Source of truth for custom classes:
-- Semantic locator class policy:
-- Utility class policy:
-- One-off style policy:
-
-## 6. Component inventory (minimum)
-- Button (primary/secondary/ghost/destructive)
-- Input, Textarea, Select
-- Checkbox, Radio, Switch
-- Badge
-- Card
-- Modal/Dialog
-- Toast/Notification
-- Table (empty/loading states)
-- Navigation primitives (header/sidebar/tabs)
-
-## 7. CSS strategy & tooling
-### 7.1 SPA
-- Bundler:
-- CSS strategy:
-- Theming approach:
-
-### 7.2 Traditional server-rendered
-- CSS tooling:
-- Architecture layers:
-  - tokens
-  - base
-  - components
-  - utilities
-- Bundler recommendation:
-
-## 8. Production build & asset strategy
-### 8.1 Output folders
-- `dist/` structure:
-- Public assets:
-
-### 8.2 Manifest & cache busting (required)
-Build outputs a manifest mapping logical to hashed filenames.
-
-### 8.3 Optimization
-- CSS/JS minify:
-- Image optimization:
-- SVG optimization:
-- Font strategy:
-
-## 9. Accessibility checklist (ship gate)
-- Keyboard navigation verified
-- Focus visible
-- Contrast AA
-- Reduced motion supported
-- Semantic HTML first
-
-## 10. Visual QA and screenshot workflow
-- Use browser-based verification for UI changes when available.
-- Capture the specific element or region being changed before capturing the full page.
-- Use full-page screenshots only when page-level layout, scroll, or surrounding context matters.
-- Capture before/after screenshots for visual changes when practical.
-- If a provided UI image is unclear, create a labeled annotated copy with circles/arrows before implementation.
-- Verify default, loading, empty, error, disabled, validation, responsive, and theme states when relevant.
-
-## 11. Examples
-### 11.1 Token usage (CSS variables)
-```css
-:root {
-  --color-bg: #ffffff;
-  --color-fg: #0b0f17;
-  --radius-md: 12px;
-  --space-4: 16px;
-}
-```
-
-### 11.2 Component example
-```html
-<button class="btn btn-primary">
-  Submit
-</button>
-```
+Add a small project-valid token or component example when it clarifies correct use. Link maintained examples instead of duplicating a large component inventory.
