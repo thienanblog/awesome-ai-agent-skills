@@ -1,35 +1,31 @@
 ---
 name: performance-optimization
-description: Coordinator-routed specialist for measured latency, CPU, memory, query, payload, rendering, bundle, caching, or build/test bottlenecks. Use after project-development-mindset establishes performance as the primary work, or directly when explicitly invoked or installed standalone. Use debugging first for unexplained failures; do not use for routine performance-aware implementation.
+description: Measure and improve latency, resource use, queries, rendering, or build/test throughput. Use when performance is the primary problem; preserve correctness and compare equivalent workloads.
 ---
 
 # Performance Optimization
 
 Use this skill when performance is the main concern. Measure first, optimize the confirmed bottleneck, and verify improvement without changing business behavior accidentally.
 
-Run this skill in the main conversation. Do not spawn subagents, agent teams, or
-delegated parallel workers unless the user explicitly approves the proposed
-count and scope after being told that doing so can increase usage. Ask again
-before expanding an approved scope.
+## Working agreement
+
+Follow the user's request and applicable repository instructions over these defaults. Use existing authorization; ask only about missing decisions that materially affect scope, cost, safety, or the result. Continue independent authorized work while awaiting an answer.
+
+Run in the main conversation by default. Delegation can increase usage: obtain explicit approval for the proposed agent count and scope before using subagents. Reuse that approval within its bounds; ask again before expanding the approved count or scope.
 
 ## Operating Rules
 
 - Do not optimize blindly. Capture a baseline or concrete symptom first.
 - Define a benchmark envelope before comparing results: workload, starting data,
   cache state, command and flags, resource limits, and concurrent activity.
-- Read project docs, architecture notes, caching rules, database rules, design-system rules, and existing performance conventions.
+- Read the rules and instrumentation relevant to the measured path.
 - Preserve business logic and data correctness.
 - Prefer low-risk local improvements before broad architecture changes.
 - Treat caching as a contract: define invalidation, freshness, and user-specific data boundaries.
 - Treat infrastructure health as part of correctness. Reject measurements with
   crashes, OOM kills, unexpected restarts, failed cleanup, or orphan processes.
 - Avoid adding dependencies or infrastructure unless measurement justifies them.
-- If the issue is actually a bug or regression with unclear cause, return
-  routing control to `project-development-mindset` and replace this workflow
-  with `debugging-workflow` when available.
-- Keep benchmarks, regression checks, and browser measurements inside this
-  workflow when they support performance work. Route to `testing-verification`
-  only if test or QA design becomes the primary deliverable.
+- For an unexplained correctness failure, isolate it before optimizing. Consult debugging or testing guidance only when it adds useful depth to the work.
 
 ## Workflow
 
@@ -75,7 +71,8 @@ Read `references/performance-playbook.md` for domain-specific checks.
 - Verify service health, cleanup, state restoration, and process termination on
   success, failure, and handled interruption where the workflow mutates state.
 - Add regression coverage or guardrails when practical.
-- If performance improved by trading off freshness, correctness, accessibility, or UX, document and confirm that tradeoff.
+- Keep improvements within the agreed correctness, freshness, accessibility, and UX requirements. Obtain a decision for a material tradeoff not already accepted.
+- Complete required checks and reuse valid focused evidence. Broaden measurements or tests only when the performance claim or an unresolved regression risk needs them, within the agreed budget.
 
 ## Reporting
 

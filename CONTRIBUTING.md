@@ -58,6 +58,10 @@ description: Brief description of what the skill does and when to use it.
 ## Overview
 Explain what this skill does and when to use it.
 
+Run in the main conversation by default. Delegation can increase usage; obtain
+approval for the proposed agent count and scope before using subagents. Reuse
+existing approval within its bounds and ask again before expanding that scope.
+
 ## Workflow
 1. Step one
 2. Step two
@@ -232,15 +236,20 @@ description: Generate comprehensive API documentation from code. Use when docume
 ### Do
 
 - **Clear Purpose**: Solve a specific, well-defined problem
-- **Actionable Instructions**: Include step-by-step workflows
+- **Actionable Instructions**: Explain the goal, domain decisions, evidence, and completion criteria; use steps only when their order matters
 - **Reference Documentation**: Provide detailed references for complex topics
 - **Universal Compatibility**: Write instructions that work across different AI tools
 - **Examples**: Include examples where helpful
+- **Proportionate Guidance**: Reuse existing authorization and adapt checks to the changed behavior; preserve explicit project limits
+- **Consistent Resources**: Update references, templates, adapter prompts, and plugin metadata when changing workflow behavior
+- **Delegation Consent**: Run in the main conversation by default; explain usage impact and obtain approval for the proposed agent count and scope, with fresh approval before expansion
 
 ### Don't
 
 - Don't create skills that are too narrow or too broad
 - Don't duplicate existing skills
+- Don't impose arbitrary question counts, confidence scores, skill quotas, or repeated approval gates
+- Don't claim improvements on a specific model without evaluation evidence
 - Don't include sensitive or proprietary information
 - Don't use tool-specific syntax that won't work in other AI tools
 

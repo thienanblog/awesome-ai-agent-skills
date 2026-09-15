@@ -55,7 +55,7 @@ PORT_REGISTRY_FILE="${DOCKER_LOCAL_DEV_PORT_REGISTRY:-${XDG_STATE_HOME:-$HOME/.l
 
 Read an existing registry before allocating ports. Treat configured and runtime ports as reserved even when no listener is currently active.
 
-Before creating or refreshing the registry, disclose its path and scan root and ask for confirmation. The scan can record local project names, service names, and paths:
+Creating or refreshing the registry requires authorization covering the scan root and output path because it records local project names and paths. Reuse that authorization if already given; a single-project setup does not imply a user-wide scan:
 
 ```bash
 node ./scripts/scan-host-ports.mjs \

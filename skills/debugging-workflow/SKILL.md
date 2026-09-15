@@ -1,91 +1,35 @@
 ---
 name: debugging-workflow
-description: Coordinator-routed specialist for reproducing and isolating unexplained failures before fixing the confirmed cause. Use after project-development-mindset routes root-cause work here, or directly when explicitly invoked or installed standalone. Do not use for known-cause fixes, routine implementation test failures, test strategy, or an established performance bottleneck.
+description: Reproduce, isolate, and fix unexplained failures, regressions, or flaky behavior. Use when the cause is uncertain; a known-cause fix usually needs only the normal implementation workflow.
 ---
 
 # Debugging Workflow
 
-Use this skill when the task starts from a failure or unexplained behavior. Preserve business intent, isolate the smallest failing case, and fix the confirmed cause.
+Use evidence to locate the failing boundary and fix the cause while preserving business intent.
 
-Run this skill in the main conversation. Do not spawn subagents, agent teams, or
-delegated parallel workers unless the user explicitly approves the proposed
-count and scope after being told that doing so can increase usage. Ask again
-before expanding an approved scope.
+## Working agreement
 
-## Operating Rules
+Follow the user's request and applicable repository instructions over these defaults. Use existing authorization; ask only about missing decisions that materially affect scope, cost, safety, or the result. Continue independent authorized work while awaiting an answer.
 
-- Reproduce before fixing when possible.
-- Read logs, stack traces, test output, screenshots, and source-of-truth docs before changing code.
-- Do not replace unusual business logic with a generic solution.
-- Do not make broad refactors while the failure cause is still unknown.
-- Form one hypothesis at a time and test it with the fastest reliable check.
-- Keep temporary debug code local and remove it before completion.
-- Add or update a regression test when practical.
-- If the root cause is performance-related, return routing control to
-  `project-development-mindset` and replace this workflow with
-  `performance-optimization` when available.
-- If the main work becomes test strategy, return routing control to the
-  coordinator and replace this workflow with `testing-verification` when
-  available.
+Run in the main conversation by default. Delegation can increase usage: obtain explicit approval for the proposed agent count and scope before using subagents. Reuse that approval within its bounds; ask again before expanding the approved count or scope.
 
-## Workflow
+## Investigate
 
-### 1. Capture The Failure
+1. Capture the failing command or flow, input, expected behavior, actual result, and relevant environment. Read the error and nearby source before expanding the search.
+2. Reproduce the smallest useful case when practical. If reproduction is unavailable, distinguish what logs or source prove from what remains a hypothesis.
+3. Trace the symptom through the affected boundaries. Choose checks that distinguish plausible causes; independent observations can run together when safe. Avoid stacking speculative fixes.
+4. For a UI failure, inspect the supplied image or rendered state. Annotate only if it makes a material ambiguity easier to resolve; a screenshot does not automatically require a question.
 
-- Record the exact command, URL, input, account state, branch, environment, and error output.
-- Preserve stack traces and failing assertions.
-- For UI bugs, capture the target element/region screenshot first, then full page only if needed.
-- For user screenshots that are ambiguous, annotate unclear regions with labels and ask before coding.
+Read [debugging-playbook.md](references/debugging-playbook.md) for deeper isolation, flaky failures, or temporary instrumentation. Keep sensitive data out of logs and remove temporary debug code.
 
-### 2. Read Source Of Truth
+## Fix and verify
 
-- Read `AGENTS.md`, `CLAUDE.md`, relevant docs, feature specs, design-system docs, route/API/schema files, and nearby tests.
-- Identify whether current behavior is wrong or the expectation is unclear.
-- If docs and code disagree, call out the conflict instead of silently choosing one.
+Make the smallest coherent fix, preserving unusual business rules unless evidence shows they are the defect. Avoid unrelated refactors. Add a regression test when it provides durable protection, ideally demonstrating failure before the fix.
 
-### 3. Reproduce And Minimize
+Rerun the original failure and affected checks. Complete repository-required checks; broaden only when a remaining risk warrants it and authorization permits. Reuse valid results instead of asking routinely whether to run a full suite.
 
-- Run the smallest command or flow that exposes the failure.
-- Reduce the input, state, fixture, route, component, or test to the smallest failing case.
-- Keep reproduction steps repeatable.
+If measurement or test design becomes the main work, consult the relevant specialist directly when available. No coordinator handoff is needed merely to use another reference.
 
-### 4. Isolate
+## Report
 
-- Trace the failure from symptom to boundary: UI event, API request, controller, service, database, queue, cache, external dependency, build step, or deployment config.
-- Inspect recent changes only as a clue, not proof.
-- Use logs, debugger output, targeted prints, breakpoints, or temporary instrumentation carefully.
-- Use Binary Debug only when normal reproduction and fast checks do not isolate the cause.
-
-Read `references/debugging-playbook.md` for deeper isolation patterns.
-
-### 5. Fix The Confirmed Cause
-
-- Make the smallest change that fixes the confirmed cause.
-- Preserve public APIs and documented behavior unless changing them is the task.
-- Keep unrelated cleanup separate.
-- Remove temporary debug code.
-
-### 6. Prove And Document
-
-- Rerun the failing check first.
-- Run related targeted tests.
-- After the diagnosis or fix and targeted verification are complete, list any
-  broader or full-suite checks and ask the user whether to run them. Do not run
-  them without explicit approval unless higher-priority repository instructions
-  require them.
-- Add or update a regression test when possible.
-- Document difficult bugs in feature docs or project memory when the project would benefit.
-
-## Reporting
-
-Report:
-
-- Reproduction steps or why reproduction was not possible.
-- Root cause.
-- Files changed.
-- Tests/checks/screenshots run.
-- Any remaining uncertainty or skipped verification.
-
-## References
-
-- `references/debugging-playbook.md`: reproduction, isolation, Binary Debug, logs, UI bugs, backend bugs, and flaky failures.
+Explain the cause, fix, and evidence that the failure is resolved. Include reproduction limits or remaining uncertainty. Record a difficult bug in existing durable docs only when future work would benefit.

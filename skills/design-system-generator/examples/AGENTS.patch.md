@@ -1,7 +1,5 @@
-## Design System
-All UI components and pages must follow `DESIGN_SYSTEM.md`:
-- Use design tokens (no hardcoded colors/sizes).
-- Reuse shared components, wrappers, utilities, and motion rules before creating new ones.
-- Implement component states (hover/focus/disabled/loading/error).
-- For UI changes, capture the target element/region before full-page screenshots.
-- Meet accessibility and performance requirements.
+## Design system
+
+For visual or interaction changes, read `DESIGN_SYSTEM.md` and use its project-owned tokens, components, and verification guidance.
+
+<!-- Adapt the path to the actual owner. Omit this section if an equivalent route already exists. -->

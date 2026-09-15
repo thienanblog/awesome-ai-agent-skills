@@ -11,9 +11,9 @@ consolidation, migrations, and stale-document removal.
    runbook/reference, active coordination, or historical evidence.
 3. Trace realistic module and feature tasks from the nearest router to their owner
    and required context.
-4. Apply the context completeness gate to representative owner documents. Verify
-   questionable facts against focused source, schemas, configuration, tests, and
-   repository history.
+4. Check relevant actors, rules, contracts, side effects, and ownership in
+   representative documents. Verify questionable facts against focused source,
+   schemas, configuration, tests, and repository history.
 5. Identify duplicated facts, competing owners, missing routes, hidden dependencies,
    stale names or links, and default paths polluted by historical material.
 
@@ -26,8 +26,8 @@ When the user requested cleanup or documentation changes:
 7. Move still-valid facts into their owners, replace copies with links when useful,
    update incoming routes, and then remove obsolete files.
 8. Run focused documentation checks and re-trace the affected context paths.
-   After the cleanup is complete, list any broader repository or full-suite
-   checks and ask the user whether to run them.
+   Complete applicable required gates; use broader checks only when a concrete
+   coverage gap warrants them and the authorization permits.
 
 Do not redesign the entire documentation tree merely because a different layout is
 possible. Require evidence of ambiguity, missing context, duplication, or excessive

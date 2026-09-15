@@ -1,60 +1,17 @@
-# Recover an invalid subtask
+# Recover invalidated work
 
-Read this reference when a planned or integrated subtask becomes invalid. Treat
-every verified integration commit as a recovery checkpoint.
+Stop dependent work and identify the earliest invalid change, affected dependents, and last verified integration tip. A clean cherry-pick does not prove a later change is independent; inspect its contracts and tests.
 
-## Identify the invalid suffix
+## Preserve first
 
-1. Stop downstream dependent work.
-2. Identify the earliest invalid commit and the last-known-good integration
-   commit immediately before it.
-3. Use ledger dependency edges to mark the invalid commit and every transitive
-   dependent subtask invalid. In `A -> B -> C -> D`, invalidating `C` invalidates
-   both `C` and `D`.
-4. Preserve a later subtask only after its diff, contracts, and tests prove it is
-   independent. A clean cherry-pick is not proof of independence.
-5. Invalidate all aggregate evidence for the failed tree.
+Inspect user changes and current publication state. Preserve a uniquely named recovery branch or other project-supported checkpoint before an authorized history change. Do not automatically reset, discard, or rewrite history. An ordinary forward fix is often sufficient.
 
-## Recover unpublished work
+For unpublished work that needs rebuilding, create a replacement branch from the verified checkpoint and reconstruct only the invalidated responsibilities. Keep the failed tip until the replacement passes the relevant checks.
 
-If the invalid subtask is still on its subtask branch, discard it when it has no
-reusable work. When useful, preserve reviewed, non-sensitive work in a temporary
-local WIP commit on a uniquely named backup branch, then create a replacement
-subtask branch from the unchanged integration checkpoint.
+For published work, prefer reviewed forward fixes or coherent revert/rebuild commits. Shared-history rewriting requires explicit authorization and consideration of active reviewers and CI. Preserve dependent behavior while recovering; do not label a knowingly broken intermediate state complete.
 
-If an invalid suffix is already integrated but remains local and unpublished:
+## Revalidate
 
-1. Create a uniquely named backup branch at the failed tip.
-2. Create a replacement integration branch from the last-known-good commit.
-3. Rebuild each invalidated subtask through the normal implementation, review,
-   verification, commit, and integration loop.
-4. Keep the failed branch until the rebuilt suffix and final local gate pass.
+Review the recovery diff and run checks for rebuilt responsibilities and affected cross-subtask contracts. Reuse evidence only where inputs and conditions remain valid. Record new commits and recovery points; a full-suite rerun needs a concrete coverage reason and any approval required by project policy.
 
-Do not use destructive reset as routine recovery. Preserve the failed tip before
-replacing an unpublished integration branch.
-
-## Recover published work
-
-If the invalid suffix was pushed or its final review request is open, do not
-rewrite shared history by default.
-
-1. Revert dependent commits in reverse order. Prefer one coherent, reviewed
-   recovery change when repository policy permits; do not mark a temporarily
-   broken intermediate revert as a checkpoint.
-2. Rebuild invalidated subtasks with new commits and update the existing
-   aggregate review request.
-3. Replace or force-update a published integration branch only with explicit
-   authorization after accounting for reviewer state and authorized Remote CI
-   evidence.
-
-## Revalidate and clean up
-
-Run compact affected checks after each rebuilt subtask and focused aggregate
-checks on the completed replacement tree. Then report any broader or full suite
-and ask the user whether to run it. Bind all new evidence to the replacement
-commit and tree SHAs.
-
-Delete failed, backup, replacement, or superseded integration branches only
-after recovery succeeds and cleanup is authorized. Read
-[branch-cleanup.md](branch-cleanup.md) and apply its ownership checks to every
-exact branch name. Never force-push as routine recovery.
+Clean up exact task-owned recovery branches only after successful recovery and within authorization, following [branch-cleanup.md](branch-cleanup.md). Report remaining invalid work or unsafe recovery choices directly.

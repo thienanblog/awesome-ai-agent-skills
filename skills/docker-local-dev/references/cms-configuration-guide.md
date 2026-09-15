@@ -91,4 +91,4 @@ docker compose exec app ./vendor/bin/drush status
 docker compose run --rm cli --version
 ```
 
-Then verify the HTTP route, static assets, upload path permissions, database connectivity, and local debug logging. Require explicit approval before installation, updates, database imports, cache-wide destructive operations, or content mutations.
+Then verify the HTTP route, static assets, upload path permissions, database connectivity, and local debug logging. Use authorization covering installation, updates, imports, destructive cache operations, or content mutations; request only missing permission for their effects.

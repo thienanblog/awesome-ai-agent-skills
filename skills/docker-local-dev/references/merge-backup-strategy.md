@@ -29,7 +29,7 @@ Inspect all Compose files together, including overrides and profiles. Resolve th
 - **Merge:** add or adapt services and related app configuration while retaining valid custom behavior.
 - **Replace:** generate a new coherent stack only when the user explicitly accepts the larger change.
 
-Prefer focused repair or merge. Ask before replacement or any change that invalidates existing volumes, networks, service names, local domains, or team commands.
+Prefer focused repair or merge. Explain changes that invalidate volumes, networks, service names, local domains, or team commands, and resolve authorization for their effects. Reuse an explicit replacement request rather than asking again; preserve unrelated work and data.
 
 ## Merge Rules
 

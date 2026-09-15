@@ -1,7 +1,7 @@
 {
   "name": "office-web-ui-skills",
-  "version": "1.31.1",
-  "description": "Operational dashboard and back-office UI implementation, coordinator-routed when project-development-mindset is available and directly usable when installed alone.",
+  "version": "1.32.0",
+  "description": "Operational dashboards and back-office interfaces with clear data hierarchy, reusable components, and practical visual verification.",
   "homepage": "https://github.com/thienanblog/awesome-ai-agent-skills",
   "repository": "https://github.com/thienanblog/awesome-ai-agent-skills",
   "license": "MIT",
@@ -13,8 +13,8 @@
   "skills": "./skills/",
   "interface": {
     "displayName": "Office Web UI Skills",
-    "shortDescription": "Operational dashboard and back-office UI implementation, coordinator-routed when project-development-mindset is available and directly usable when installed alone.",
-    "longDescription": "Operational dashboard and back-office UI implementation, coordinator-routed when project-development-mindset is available and directly usable when installed alone.",
+    "shortDescription": "Operational dashboards and back-office interfaces with clear data hierarchy, reusable components, and practical visual verification.",
+    "longDescription": "Operational dashboards and back-office interfaces with clear data hierarchy, reusable components, and practical visual verification.",
     "developerName": "Ân Vũ",
     "category": "Productivity",
     "capabilities": [

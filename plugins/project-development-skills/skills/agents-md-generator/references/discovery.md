@@ -2,9 +2,9 @@
 
 Use this checklist to collect only facts that can change persistent agent behavior.
 
-## Script-first discovery
+## Optional detector
 
-Run the launcher from its installed skill directory, not from an assumed path inside the target repository:
+For a broad or unfamiliar repository, use the launcher to index instruction paths and declared signals. A focused known-file edit can use direct inspection. Run it from the installed skill directory:
 
 ```bash
 "<skill-directory>/scripts/detect-agent-context" \

@@ -20,6 +20,10 @@ skills/<skill-name>/
 - Every `SKILL.md` requires YAML frontmatter with `name` and `description`; do not add `author`.
 - Write actionable workflows for a specific problem, with references for details that do not belong in the main skill.
 - Keep guidance compatible across agent tools unless the capability is inherently tool-specific.
+- Keep instructions focused on non-obvious decisions, evidence, and domain constraints. Prefer adaptable workflows to fixed questionnaires, tool-call order, numerical confidence scores, or arbitrary skill-count limits.
+- Reuse authorization already given and preserve explicit repository limits. Do not add routine approval pauses or broader-test offers without a material reason.
+- When changing behavior guidance, align references, templates, adapter prompts, and plugin descriptions so they do not restore an obsolete rule.
+- Distinguish editorial/static review from measured model behavior. Do not claim model performance gains without representative evaluations.
 
 ## Neutral Skill Editing
 

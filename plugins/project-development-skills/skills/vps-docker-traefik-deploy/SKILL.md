@@ -1,105 +1,47 @@
 ---
 name: vps-docker-traefik-deploy
-description: Coordinator-routed specialist for production Docker Compose deployment on self-hosted VPS or cloud servers with Traefik, DNS, registries, storage, backups, rollback, and host hardening. Use after project-development-mindset makes production deployment primary, or directly when explicitly invoked or installed standalone. Do not use for local Docker development, deployment-adjacent app changes, or generic cloud hosting.
+description: Prepare or operate production Docker Compose deployments on a VPS with Traefik, DNS, registries, persistent storage, backups, and rollback. Use for production infrastructure and releases, rather than local development.
 ---
 
 # VPS Docker Traefik Deploy
 
-## Overview
+Deliver the requested deployment work using the project's operating contract. Distinguish planning and file preparation from changing a live environment.
 
-Use this skill to turn an application stack into a real production deployment plan with secure host setup, reverse proxying, registry-based releases, private admin access, persistent storage, backups, and rollback.
+## Working agreement
 
-Run this skill in the main conversation. Do not spawn subagents, agent teams, or
-delegated parallel workers unless the user explicitly approves the proposed
-count and scope after being told that doing so can increase usage. Ask again
-before expanding an approved scope.
+Follow the user's request and applicable repository instructions over these defaults. Use existing authorization; ask only about missing decisions that materially affect scope, cost, safety, or the result. Continue independent authorized work while awaiting an answer.
 
-Prefer Ubuntu LTS or Debian stable. Prefer immutable image tags. Prefer Traefik for public ingress and SSH tunnels for admin-only access.
+Run in the main conversation by default. Delegation can increase usage: obtain explicit approval for the proposed agent count and scope before using subagents. Reuse that approval within its bounds; ask again before expanding the approved count or scope.
 
-## Workflow
+## Establish the target
 
-1. Establish facts before changing anything.
-2. Minimize the public network surface.
-3. Baseline the host with a non-root operator account.
-4. Install Docker from the official stable channel.
-5. Deploy Traefik separately from the app stack.
-6. Keep state outside container writable layers.
-7. Deploy app images by pull, not by rebuilding on the server.
-8. Validate health, backup, restore, rollback, and pruning.
+Read existing runbooks, Compose and Traefik configuration, release scripts, and available host evidence. Establish the target host, OS, domains, ingress, registry, persistent data, backup/restore expectations, and deployment authorization. Discover facts before asking; a routine release does not need a fresh infrastructure questionnaire.
 
-## Establish Facts
+For an existing deployment, preserve supported topology and required release gates. For a new one, prefer a supported Ubuntu LTS or Debian stable host, an operator account with appropriate privileges, registry-built immutable images, and Traefik ingress. Verify current official installation guidance when provisioning; reference commands are examples, not a reason to reinstall a working host.
 
-Confirm these points first:
+## Keep production boundaries explicit
 
-- operating system and version
-- public domains and subdomains
-- TLS strategy: HTTP challenge or DNS challenge
-- public services: website, API, websocket, admin UI, registry
-- private services: database, Redis, dashboards
-- registry type: managed or self-hosted
-- persistent data locations
-- backup destination and retention
-- restore expectations
-- whether a single VPS is still acceptable
+- Use authorization already granted for the named environment and action. Prepare configuration, diffs, checks, and rollback before asking for any missing live-operation approval. Ask about a new destructive migration or exposure outside that scope.
+- Keep databases, caches, registry/admin dashboards, and internal app ports private by default. Expose only needed ingress and operator access, commonly SSH, HTTP/ACME, and HTTPS. Use loopback bindings and SSH tunnels for private operator tools when suitable.
+- Keep credentials out of images, source, logs, and reports. Preserve persistent state outside container writable layers.
+- Use immutable image tags or digests and retain the prior release. Avoid server-side rebuilds and mutable `latest` references for releases unless the established operating contract provides equivalent reproducibility.
+- Address backup and rollback for affected persistent state. A container rollback cannot undo an incompatible database migration; establish the recovery path before applying it.
 
-If the project already has deployment docs, read them first and treat them as the application-specific contract.
+## Prepare, deploy, verify
 
-## Public Exposure Rules
+Choose only the references needed for the work:
 
-Default public ports:
+| Work | Reference |
+|---|---|
+| New host, operator access, SSH/firewall, Docker | [server-baseline.md](references/server-baseline.md) |
+| Traefik, TLS, DNS, dashboard access | [traefik-dns.md](references/traefik-dns.md) |
+| Registries, persistence, capacity, backup and restore | [registry-storage-backup.md](references/registry-storage-backup.md) |
+| Rollout, health, rollback, maintenance | [deploy-checklist.md](references/deploy-checklist.md) |
 
-- `22/tcp` for SSH
-- `80/tcp` for HTTP redirect and ACME when needed
-- `443/tcp` for HTTPS
+Validate the effective configuration without exposing secrets, confirm image availability and recovery readiness, then execute the authorized rollout. Verify container health, public routes/TLS, logs, and affected application flows. Test restore in an isolated target when required; never restore over live data as a casual verification step.
 
-Keep these private unless there is a strong reason:
+Reuse valid evidence for unchanged responsibilities, while completing the project's production release gate. Pruning, retention changes, DNS changes, and host hardening belong in a release only when needed and authorized.
 
-- Traefik dashboard
-- MariaDB or PostgreSQL
-- Redis
-- private registry
-- app service ports that can sit behind Traefik
-- internal admin tools
+## Handoff
 
-If a GUI tool is required, bind the service to `127.0.0.1` only and use an SSH tunnel from the operator workstation.
-
-## Output Requirements
-
-When using this skill, produce a deployment answer that includes:
-
-- target topology
-- exact public ports
-- folder layout
-- user and permission model
-- Docker and Traefik install method
-- DNS record plan
-- Traefik routing plan
-- registry flow
-- persistent data plan
-- storage growth plan
-- backup and restore plan
-- rollout and rollback commands
-
-## Mandatory Guardrails
-
-- Do not recommend public exposure of database, Redis, registry, or proxy dashboards by default.
-- Do not recommend deploying as the host root account.
-- Do not recommend mutable `latest` tags for production.
-- Do not keep important state only inside container writable layers.
-- Do not call a plan complete unless backup and rollback are addressed.
-
-## Reference Files
-
-Read these files only when needed:
-
-- [references/server-baseline.md](references/server-baseline.md)
-  Use for Ubuntu 24.04 host prep, non-root users, SSH hardening, swap, firewall, Docker install.
-
-- [references/traefik-dns.md](references/traefik-dns.md)
-  Use for Traefik layout, dashboard tunneling, DNS, subdomains, Cloudflare, and routing patterns.
-
-- [references/registry-storage-backup.md](references/registry-storage-backup.md)
-  Use for private registries, image retention, bind mounts versus volumes, S3-compatible storage, backup, restore, and cleanup.
-
-- [references/deploy-checklist.md](references/deploy-checklist.md)
-  Use for rollout steps, post-deploy verification, rollback, and maintenance cadence.
+Report what was prepared or deployed, the target and immutable release identifier, checks and results, and rollback readiness. For new infrastructure, include topology, public exposure, state ownership, and recovery commands. Do not reproduce the full infrastructure plan for every routine release or claim a restore was tested when only its configuration was inspected.

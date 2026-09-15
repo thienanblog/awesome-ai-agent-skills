@@ -54,7 +54,7 @@ Do not raise an instruction-size setting as a substitute for compaction.
 
 ## Recovery
 
-When the file is tracked by Git, use the working-tree diff as the recovery mechanism. Do not create `.backup` files or commits automatically. For an untracked file whose replacement is explicitly requested, ask before making a backup and state where it will be written.
+When the file is tracked by Git, use the working-tree diff as the recovery mechanism. Do not create `.backup` files or commits automatically. For an untracked file whose replacement is requested, preserve content needed for recovery in an appropriate local location. State that path; ask only when placement or retention has a material unresolved consequence.
 
 ## Verification checklist
 

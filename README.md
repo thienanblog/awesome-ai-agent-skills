@@ -136,67 +136,76 @@ You can also copy individual skill instructions directly into your AI agent's co
 
 ## Usage Examples
 
-For normal project work, start with the project mindset skill and let the agent
-route to related skills:
+Choose the skill that fits the task. Use the general project workflow when the
+work spans several responsibilities or the right starting point is unclear:
 
 ```text
 Use $project-development-mindset to implement the approved checkout redesign and verify the changed behavior.
 ```
 
-The mindset skill inspects the repository before loading a specialist. It keeps
-routine testing, documentation alignment, browser checks, framework use, and
-container commands in the core workflow; when one concern becomes the primary
-work, it loads at most one matching specialist and switches instead of stacking
-full workflows.
-
-`brainstorm-first` is independent. Use it before the mindset when the user asks
-for three options or when an ambiguous high-impact request needs a decision. It
-stops for selection; implementation then starts as a fresh mindset-coordinated
-phase. Reviewable multi-subtask delivery is also intentionally opt-in and never
-activates from task size or a routine plan alone.
+Specialists can be used directly. Routine tests, documentation updates, framework
+commands, and browser checks stay within the implementation task; they do not
+require a routing ceremony or a fixed number of loaded skills.
 
 ```text
-Use $brainstorm-first to create and compare three checkout redesign concepts, recommend one, and stop for my selection.
-```
-
-Laravel, Docker local-development, and office-dashboard plugins remain usable on
-their own. When the mindset is installed too, their skills defer automatic
-routing to it while preserving direct explicit invocation.
-
-All bundled skills run in the main conversation by default. A skill must not spawn subagents, agent teams, or delegated parallel workers unless it first explains that they can increase usage and the user explicitly approves the proposed agent count and scope. Expanding that scope requires fresh approval.
-
-If you want an exact workflow, invoke that skill directly:
-
-```text
+Use $debugging-workflow to isolate and fix this intermittent checkout failure.
 Use $ui-ux-concept-implementation to implement Concept B for this pricing page.
 ```
 
-For a large migration that should remain local until aggregate review:
+For a decision before implementation:
 
 ```text
-Use $run-reviewable-subtask-loop to split this migration into right-sized, coherent subtasks that are meaningful to code, review, and test, then deliver them through one agreed aggregate PR or commit-and-push path.
+Use $brainstorm-first to compare three checkout redesign concepts, recommend one, and wait for my selection.
 ```
+
+Brainstorming honors the requested option count and decision boundary. If you ask
+the agent to choose and implement, it can continue within that authorization.
+Reviewable delivery remains opt-in:
+
+```text
+Use $run-reviewable-subtask-loop to deliver this migration as coherent reviewed commits and one aggregate PR.
+```
+
+All bundled skills run in the main conversation by default. Delegation can increase
+usage and requires explicit approval for the proposed agent count and scope. That
+approval is reused within its bounds; expanding the count or scope requires fresh
+approval. A request for subtasks does not authorize subagents.
+
+## Instruction design
+
+The skills focus on task-specific decisions, evidence, and real operating
+constraints. They reuse existing authorization, ask only about material unresolved
+choices, and scale verification to changed behavior and repository requirements.
+They avoid fixed questionnaires, invented confidence scores, mandatory full-suite
+offers, and repeated workflow handoffs.
+
+The September 2026 revision was informed by OpenAI's
+[GPT-6 Astra prompting guidance](https://developers.openai.com/api/docs/guides/latest-model/gpt-6-astra.md#prompting-best-practices).
+The content remains tool-agnostic: it neither selects a model nor assumes that
+stronger models make verification or data/production boundaries unnecessary.
+See the [audit and review notes](docs/skill-audit-2026-09.md) for per-skill changes,
+compatibility notes, and the limits of validation.
 
 ## Available Skills
 
 <!-- SKILLS_TABLE_START -->
 | Skill | Description |
 |-------|-------------|
-| [agents-md-generator](./skills/agents-md-generator) | Coordinator-routed specialist for creating, auditing, compacting, or restructuring AGENTS.md, AGENTS.override.md, nested instructions, or optional CLAUDE.md compatibility files. Use after project-development-mindset identifies repository instructions as the primary deliverable, or directly when explicitly invoked or installed standalone. Do not use for routine instruction reading or a small required update accompanying code. |
-| [brainstorm-first](./skills/brainstorm-first) | Independent pre-implementation workflow for explicit brainstorming, three-way comparison, reality checks, diagnosis options, UI concept generation, or ambiguous high-impact decisions. Produce exactly three practical options, recommend one, and stop for selection. Do not combine with project-development-mindset or implementation specialists before selection; do not use for ordinary fixes or an approved approach. |
-| [debugging-workflow](./skills/debugging-workflow) | Coordinator-routed specialist for reproducing and isolating unexplained failures before fixing the confirmed cause. Use after project-development-mindset routes root-cause work here, or directly when explicitly invoked or installed standalone. Do not use for known-cause fixes, routine implementation test failures, test strategy, or an established performance bottleneck. |
-| [design-system-generator](./skills/design-system-generator) | Coordinator-routed specialist for generating or substantially updating DESIGN_SYSTEM.md and its durable token, component, accessibility, motion, visual-QA, and asset rules. Use after project-development-mindset routes that primary deliverable here, or directly when explicitly invoked or installed standalone. Do not use for one-off UI implementation, visual polish, screenshot matching, or consuming an existing design system. |
-| [docker-local-dev](./skills/docker-local-dev) | Coordinator-routed specialist for creating, repairing, or materially extending local-development Docker Compose, Dockerfiles, databases, and supporting services. Use after project-development-mindset makes local container topology the primary work, or directly when explicitly invoked or installed standalone. Do not use merely to run existing container commands, or for production deployment and VPS operations. |
-| [documentation-guidelines](./skills/documentation-guidelines) | Coordinator-routed specialist for documentation architecture, broad audits, canonical ownership, module/feature docs, contracts, workflows, runbooks, or stale-content consolidation. Use after project-development-mindset makes documentation the primary deliverable, or directly when explicitly invoked or installed standalone. Do not use for routine docs alignment accompanying code or configuration changes. |
-| [laravel-11-12-app-guidelines](./skills/laravel-11-12-app-guidelines) | Coordinator-routed implementation guidance for confirmed Laravel 11 or 12 repositories when framework conventions materially own the work. Use after project-development-mindset inspects laravel/framework, or directly when explicitly invoked or installed standalone. Never load both Laravel version skills; Laravel 12-to-13 upgrades use the Laravel 13 skill. Do not use merely for supporting Sail, Docker, test, or frontend commands. |
-| [laravel-13-app-guidelines](./skills/laravel-13-app-guidelines) | Coordinator-routed implementation and upgrade guidance for confirmed Laravel 13 repositories or Laravel 12-to-13 upgrades when framework conventions materially own the work. Use after project-development-mindset inspects the installed or target laravel/framework major, or directly when explicitly invoked or installed standalone. Never load both Laravel version skills; do not use merely for supporting Docker, test, frontend, or Artisan commands. |
-| [office-web-ui-system](./skills/office-web-ui-system) | Coordinator-routed implementation specialist for admin dashboards, internal tools, CRM/ERP management, back-office, CRUD, and reporting UI. Use after project-development-mindset makes an operational dashboard primary, or directly when explicitly invoked or installed standalone. Owns dashboard screenshot/reference work; do not combine with general ui-ux-concept-implementation by default. Excludes marketing and consumer UI. |
-| [performance-optimization](./skills/performance-optimization) | Coordinator-routed specialist for measured latency, CPU, memory, query, payload, rendering, bundle, caching, or build/test bottlenecks. Use after project-development-mindset establishes performance as the primary work, or directly when explicitly invoked or installed standalone. Use debugging first for unexplained failures; do not use for routine performance-aware implementation. |
-| [project-development-mindset](./skills/project-development-mindset) | Primary coordinator for repository implementation, diagnosis, verification, and durable changes to code, configuration, tests, or documentation. Use first for ordinary project work; inspect before routing to at most one specialist for the current primary concern. Do not use for general explanations, passive inspection with no project-work outcome, or the independent brainstorm-first decision phase unless explicitly invoked. |
-| [run-reviewable-subtask-loop](./skills/run-reviewable-subtask-loop) | Explicit-opt-in delivery specialist for executing a large plan, migration, refactor, or roadmap as sequential reviewable commits on one integration branch. Use only when directly requested or explicitly accepted after a project-development-mindset proposal; never infer activation from size, an internal plan, or the word subtask. Subtasks are not subagents; delegation and Remote CI require separate approval. |
-| [testing-verification](./skills/testing-verification) | Coordinator-routed specialist when test strategy, coverage, QA, acceptance verification, CI-check design, browser verification, Playwright E2E, or visual comparison is the primary work. Use after project-development-mindset routes here, or directly when explicitly invoked or installed standalone. Do not use merely because implementation needs focused tests; unexplained failures route to debugging first. |
-| [ui-ux-concept-implementation](./skills/ui-ux-concept-implementation) | Implement an already-selected visual direction from a mockup, screenshot, or reference site in an existing project, using project-owned code and equivalent-state browser comparison. Use when visual fidelity is primary, directly or after project-development-mindset routing. Do not use for concept generation, routine UI edits, or supporting browser checks; prefer a dashboard-specific workflow for operational dashboards when available. |
-| [vps-docker-traefik-deploy](./skills/vps-docker-traefik-deploy) | Coordinator-routed specialist for production Docker Compose deployment on self-hosted VPS or cloud servers with Traefik, DNS, registries, storage, backups, rollback, and host hardening. Use after project-development-mindset makes production deployment primary, or directly when explicitly invoked or installed standalone. Do not use for local Docker development, deployment-adjacent app changes, or generic cloud hosting. |
+| [agents-md-generator](./skills/agents-md-generator) | Create, audit, or compact repository instructions in AGENTS.md, scoped overrides, and requested tool compatibility files. Use to preserve non-obvious project rules while removing stale, duplicated, or generic guidance. |
+| [brainstorm-first](./skills/brainstorm-first) | Explore and compare practical options before implementation. Use for requested brainstorming, requirements tradeoffs, diagnosis options, or UI concepts; skip when the approach is already selected. |
+| [debugging-workflow](./skills/debugging-workflow) | Reproduce, isolate, and fix unexplained failures, regressions, or flaky behavior. Use when the cause is uncertain; a known-cause fix usually needs only the normal implementation workflow. |
+| [design-system-generator](./skills/design-system-generator) | Create or revise a project design system covering tokens, components, accessibility, motion, and visual verification. Use when the durable design-system document is the deliverable, rather than a one-off UI edit. |
+| [docker-local-dev](./skills/docker-local-dev) | Create or repair local Docker Compose services, Dockerfiles, mounts, networking, and readiness checks. Use when container configuration is the deliverable; ordinary container commands and production deployment are separate concerns. |
+| [documentation-guidelines](./skills/documentation-guidelines) | Create, audit, or consolidate durable project documentation, including feature rules, contracts, workflows, and runbooks. Use when documentation is the main deliverable; routine code changes can update their owning docs directly. |
+| [laravel-11-12-app-guidelines](./skills/laravel-11-12-app-guidelines) | Implement changes in Laravel 11 or 12 using the installed framework, frontend, and command runner. Select by composer evidence; Laravel 12-to-13 upgrades use laravel-13-app-guidelines. |
+| [laravel-13-app-guidelines](./skills/laravel-13-app-guidelines) | Implement Laravel 13 changes or upgrade Laravel 12 to 13 using verified package versions and project conventions. Use only for the installed or requested major; optional framework features are not required dependencies. |
+| [office-web-ui-system](./skills/office-web-ui-system) | Build or improve operational dashboards, admin tools, CRM/ERP, CRUD, reporting, and record-management interfaces. Use for dense workflows and dashboard reference matching; excludes marketing and unrelated consumer UI. |
+| [performance-optimization](./skills/performance-optimization) | Measure and improve latency, resource use, queries, rendering, or build/test throughput. Use when performance is the primary problem; preserve correctness and compare equivalent workloads. |
+| [project-development-mindset](./skills/project-development-mindset) | Plan and carry repository changes through implementation, verification, and handoff. Use for project work that needs a general development workflow; select specialist guidance when it adds task-specific value. |
+| [run-reviewable-subtask-loop](./skills/run-reviewable-subtask-loop) | Deliver an explicitly requested multi-subtask plan as sequential reviewed and verified commits with one aggregate publication path. Use only when the user requests or accepts this workflow; subtasks do not authorize subagents. |
+| [testing-verification](./skills/testing-verification) | Design or assess tests, acceptance checks, CI coverage, and browser verification. Use when verification is the main deliverable or requires specialist judgment; ordinary implementation can keep its focused checks inline. |
+| [ui-ux-concept-implementation](./skills/ui-ux-concept-implementation) | Implement a selected mockup, screenshot, or visual reference in an existing project and compare the rendered result. Use when visual fidelity drives the work; use dashboard guidance for operational surfaces when it fits better. |
+| [vps-docker-traefik-deploy](./skills/vps-docker-traefik-deploy) | Prepare or operate production Docker Compose deployments on a VPS with Traefik, DNS, registries, persistent storage, backups, and rollback. Use for production infrastructure and releases, rather than local development. |
 <!-- SKILLS_TABLE_END -->
 
 ## Plugin Groups
@@ -206,10 +215,10 @@ Plugins bundle related skills so you can install by domain. The source of truth 
 <!-- PLUGINS_TABLE_START -->
 | Plugin | Description | Skills |
 |--------|-------------|--------|
-| [project-development-skills](./plugin-groups.json) | A coordinator-first development bundle: project-development-mindset routes to one specialist at a time, while brainstorm-first remains an independent pre-implementation decision workflow. | [project-development-mindset](./skills/project-development-mindset)<br>[brainstorm-first](./skills/brainstorm-first)<br>[run-reviewable-subtask-loop](./skills/run-reviewable-subtask-loop)<br>[testing-verification](./skills/testing-verification)<br>[debugging-workflow](./skills/debugging-workflow)<br>[performance-optimization](./skills/performance-optimization)<br>[agents-md-generator](./skills/agents-md-generator)<br>[documentation-guidelines](./skills/documentation-guidelines)<br>[design-system-generator](./skills/design-system-generator)<br>[ui-ux-concept-implementation](./skills/ui-ux-concept-implementation)<br>[vps-docker-traefik-deploy](./skills/vps-docker-traefik-deploy) |
-| [laravel-app-skills](./plugin-groups.json) | Version-exclusive Laravel 11/12 and Laravel 13 implementation guidance, coordinator-routed when project-development-mindset is available and directly usable when installed alone. | [laravel-11-12-app-guidelines](./skills/laravel-11-12-app-guidelines)<br>[laravel-13-app-guidelines](./skills/laravel-13-app-guidelines) |
-| [devops-skills](./plugin-groups.json) | Local-development Docker configuration, coordinator-routed when project-development-mindset is available and directly usable when installed alone. | [docker-local-dev](./skills/docker-local-dev) |
-| [office-web-ui-skills](./plugin-groups.json) | Operational dashboard and back-office UI implementation, coordinator-routed when project-development-mindset is available and directly usable when installed alone. | [office-web-ui-system](./skills/office-web-ui-system) |
+| [project-development-skills](./plugin-groups.json) | Focused development workflows for implementation, decisions, debugging, verification, documentation, UI, and deployment. Use the guidance that fits the task. | [project-development-mindset](./skills/project-development-mindset)<br>[brainstorm-first](./skills/brainstorm-first)<br>[run-reviewable-subtask-loop](./skills/run-reviewable-subtask-loop)<br>[testing-verification](./skills/testing-verification)<br>[debugging-workflow](./skills/debugging-workflow)<br>[performance-optimization](./skills/performance-optimization)<br>[agents-md-generator](./skills/agents-md-generator)<br>[documentation-guidelines](./skills/documentation-guidelines)<br>[design-system-generator](./skills/design-system-generator)<br>[ui-ux-concept-implementation](./skills/ui-ux-concept-implementation)<br>[vps-docker-traefik-deploy](./skills/vps-docker-traefik-deploy) |
+| [laravel-app-skills](./plugin-groups.json) | Laravel 11/12 and Laravel 13 guidance selected by installed or target framework version, with project-specific frontend and command conventions. | [laravel-11-12-app-guidelines](./skills/laravel-11-12-app-guidelines)<br>[laravel-13-app-guidelines](./skills/laravel-13-app-guidelines) |
+| [devops-skills](./plugin-groups.json) | Local Docker development configuration with project-compatible services, networking, persistence, and readiness checks. | [docker-local-dev](./skills/docker-local-dev) |
+| [office-web-ui-skills](./plugin-groups.json) | Operational dashboards and back-office interfaces with clear data hierarchy, reusable components, and practical visual verification. | [office-web-ui-system](./skills/office-web-ui-system) |
 <!-- PLUGINS_TABLE_END -->
 
 ## Repository Cleanup

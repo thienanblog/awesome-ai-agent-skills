@@ -1,7 +1,7 @@
 {
   "name": "laravel-app-skills",
-  "version": "1.31.1",
-  "description": "Version-exclusive Laravel 11/12 and Laravel 13 implementation guidance, coordinator-routed when project-development-mindset is available and directly usable when installed alone.",
+  "version": "1.32.0",
+  "description": "Laravel 11/12 and Laravel 13 guidance selected by installed or target framework version, with project-specific frontend and command conventions.",
   "homepage": "https://github.com/thienanblog/awesome-ai-agent-skills",
   "repository": "https://github.com/thienanblog/awesome-ai-agent-skills",
   "license": "MIT",
@@ -14,8 +14,8 @@
   "skills": "./skills/",
   "interface": {
     "displayName": "Laravel App Skills",
-    "shortDescription": "Version-exclusive Laravel 11/12 and Laravel 13 implementation guidance, coordinator-routed when project-development-mindset is available and directly usable when installed alone.",
-    "longDescription": "Version-exclusive Laravel 11/12 and Laravel 13 implementation guidance, coordinator-routed when project-development-mindset is available and directly usable when installed alone.",
+    "shortDescription": "Laravel 11/12 and Laravel 13 guidance selected by installed or target framework version, with project-specific frontend and command conventions.",
+    "longDescription": "Laravel 11/12 and Laravel 13 guidance selected by installed or target framework version, with project-specific frontend and command conventions.",
     "developerName": "Ân Vũ",
     "category": "Productivity",
     "capabilities": [
