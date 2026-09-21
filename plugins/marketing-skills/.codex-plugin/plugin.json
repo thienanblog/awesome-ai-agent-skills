@@ -1,0 +1,31 @@
+{
+  "name": "marketing-skills",
+  "version": "1.33.0",
+  "description": "Marketing decision framework for judging whether a plan is worth running, finding and winning the first clients, positioning, offers, copy, ad creatives, and cold outreach.",
+  "homepage": "https://github.com/thienanblog/awesome-ai-agent-skills",
+  "repository": "https://github.com/thienanblog/awesome-ai-agent-skills",
+  "license": "MIT",
+  "keywords": [
+    "codex",
+    "skills",
+    "marketing-mindset"
+  ],
+  "skills": "./skills/",
+  "interface": {
+    "displayName": "Marketing Skills",
+    "shortDescription": "Marketing decision framework for judging whether a plan is worth running, finding and winning the first clients, positioning, offers, copy, ad creatives, and cold outreach.",
+    "longDescription": "Marketing decision framework for judging whether a plan is worth running, finding and winning the first clients, positioning, offers, copy, ad creatives, and cold outreach.",
+    "developerName": "Ân Vũ",
+    "category": "Productivity",
+    "capabilities": [
+      "Read",
+      "Write"
+    ],
+    "websiteURL": "https://github.com/thienanblog/awesome-ai-agent-skills",
+    "defaultPrompt": [
+      "Use marketing-mindset to guide this project task.",
+      "Apply marketing-skills to review this repository."
+    ],
+    "brandColor": "#10A37F"
+  }
+}

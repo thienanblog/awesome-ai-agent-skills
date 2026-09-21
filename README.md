@@ -44,6 +44,9 @@ Skills are self-contained instruction sets that teach AI agents specific workflo
 
 # Install office web UI skill
 /plugin install office-web-ui-skills@awesome-ai-agent-skills
+
+# Install marketing decision framework skill
+/plugin install marketing-skills@awesome-ai-agent-skills
 ```
 
 **Updating the marketplace**
@@ -91,6 +94,7 @@ In the plugin browser:
    - `laravel-app-skills`
    - `devops-skills`
    - `office-web-ui-skills`
+   - `marketing-skills`
 3. Select **Install plugin**.
 4. Start a new thread and ask Codex normally, or type `@` to choose the plugin or one of its bundled skills explicitly.
 
@@ -199,6 +203,7 @@ compatibility notes, and the limits of validation.
 | [documentation-guidelines](./skills/documentation-guidelines) | Create, audit, or consolidate durable project documentation, including feature rules, contracts, workflows, and runbooks. Use when documentation is the main deliverable; routine code changes can update their owning docs directly. |
 | [laravel-11-12-app-guidelines](./skills/laravel-11-12-app-guidelines) | Implement changes in Laravel 11 or 12 using the installed framework, frontend, and command runner. Select by composer evidence; Laravel 12-to-13 upgrades use laravel-13-app-guidelines. |
 | [laravel-13-app-guidelines](./skills/laravel-13-app-guidelines) | Implement Laravel 13 changes or upgrade Laravel 12 to 13 using verified package versions and project conventions. Use only for the installed or requested major; optional framework features are not required dependencies. |
+| [marketing-mindset](./skills/marketing-mindset) | Use when the user needs a marketer's operating mindset for marketing, growth, or client-acquisition work — how to evaluate an idea, where to get the first customers, what counts as evidence, positioning, offers, copy, ad creatives, or cold outreach. It returns honest judgment and concrete next moves instead of a tactic library. |
 | [office-web-ui-system](./skills/office-web-ui-system) | Build or improve operational dashboards, admin tools, CRM/ERP, CRUD, reporting, and record-management interfaces. Use for dense workflows and dashboard reference matching; excludes marketing and unrelated consumer UI. |
 | [performance-optimization](./skills/performance-optimization) | Measure and improve latency, resource use, queries, rendering, or build/test throughput. Use when performance is the primary problem; preserve correctness and compare equivalent workloads. |
 | [project-development-mindset](./skills/project-development-mindset) | Plan and carry repository changes through implementation, verification, and handoff. Use for project work that needs a general development workflow; select specialist guidance when it adds task-specific value. |
@@ -219,6 +224,7 @@ Plugins bundle related skills so you can install by domain. The source of truth 
 | [laravel-app-skills](./plugin-groups.json) | Laravel 11/12 and Laravel 13 guidance selected by installed or target framework version, with project-specific frontend and command conventions. | [laravel-11-12-app-guidelines](./skills/laravel-11-12-app-guidelines)<br>[laravel-13-app-guidelines](./skills/laravel-13-app-guidelines) |
 | [devops-skills](./plugin-groups.json) | Local Docker development configuration with project-compatible services, networking, persistence, and readiness checks. | [docker-local-dev](./skills/docker-local-dev) |
 | [office-web-ui-skills](./plugin-groups.json) | Operational dashboards and back-office interfaces with clear data hierarchy, reusable components, and practical visual verification. | [office-web-ui-system](./skills/office-web-ui-system) |
+| [marketing-skills](./plugin-groups.json) | Marketing decision framework for judging whether a plan is worth running, finding and winning the first clients, positioning, offers, copy, ad creatives, and cold outreach. | [marketing-mindset](./skills/marketing-mindset) |
 <!-- PLUGINS_TABLE_END -->
 
 ## Repository Cleanup
