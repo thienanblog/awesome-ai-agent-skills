@@ -55,6 +55,14 @@
       "skills": [
         "office-web-ui-system"
       ]
+    },
+    {
+      "name": "marketing-skills",
+      "displayName": "Marketing Skills",
+      "description": "Marketing decision framework for judging whether a plan is worth running, finding and winning the first clients, positioning, offers, copy, ad creatives, and cold outreach.",
+      "skills": [
+        "marketing-mindset"
+      ]
     }
   ]
 }
