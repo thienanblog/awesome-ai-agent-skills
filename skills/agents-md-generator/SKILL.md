@@ -7,9 +7,7 @@ description: Create, audit, or compact repository instructions in AGENTS.md, sco
 
 Produce a small instruction layer containing verified project facts that materially change agent behavior. General engineering knowledge belongs outside always-loaded instructions.
 
-## Working agreement
-
-Follow the user's request and applicable repository instructions over these defaults. Use existing authorization; ask only about missing decisions that materially affect scope, cost, safety, or the result. Continue independent authorized work while awaiting an answer.
+## Delegation
 
 Run in the main conversation by default. Delegation can increase usage: obtain explicit approval for the proposed agent count and scope before using subagents. Reuse that approval within its bounds; ask again before expanding the approved count or scope.
 

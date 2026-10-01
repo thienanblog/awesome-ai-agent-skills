@@ -1,0 +1,4 @@
+interface:
+  display_name: "Laravel 11/12 App Guidelines"
+  short_description: "Laravel 11 and 12 changes by installed stack"
+  default_prompt: "Use $laravel-11-12-app-guidelines to implement this change using the installed Laravel version, frontend, and command runner."

@@ -1,0 +1,4 @@
+interface:
+  display_name: "Design System Generator"
+  short_description: "Project design-system document"
+  default_prompt: "Use $design-system-generator to write a design system grounded in this product's existing stack and visual language."

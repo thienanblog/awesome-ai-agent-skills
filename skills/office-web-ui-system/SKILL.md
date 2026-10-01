@@ -7,9 +7,7 @@ description: Build or improve operational dashboards, admin tools, CRM/ERP, CRUD
 
 Create a clear operational interface that supports scanning, filtering, comparing, editing, and managing records. Preserve usable space and the product's visual identity.
 
-## Working agreement
-
-Follow the user's request and applicable repository instructions over these defaults. Use existing authorization; ask only about missing decisions that materially affect scope, cost, safety, or the result. Continue independent authorized work while awaiting an answer.
+## Delegation
 
 Run in the main conversation by default. Delegation can increase usage: obtain explicit approval for the proposed agent count and scope before using subagents. Reuse that approval within its bounds; ask again before expanding the approved count or scope.
 
@@ -17,9 +15,9 @@ Run in the main conversation by default. Delegation can increase usage: obtain e
 
 Inspect the framework, component library, design-system sources, tokens, shared shell, and representative screens. Infer whether the work is an operational surface from the request and project; ask only if that distinction remains unclear and would change the design.
 
-Identify the primary task and dominant region. Use dashboard/report, CRUD/list, workspace/detail, and form/wizard as composition guides, not a required classification exercise. Read [page-type-playbook.md](references/page-type-playbook.md) for an unfamiliar page type.
+Identify the primary task and dominant region. Use dashboard/report, CRUD/list, workspace/detail, and form/wizard as composition guides. Read [page-type-playbook.md](references/page-type-playbook.md) for an unfamiliar page type.
 
-For screenshot-driven work, establish what should match and what should adapt to the existing product. A supplied target already expresses a direction; do not require another concept-selection phase.
+For screenshot-driven work, establish what should match and what should adapt to the existing product. A supplied target is the selected direction.
 
 ## Compose for real work
 

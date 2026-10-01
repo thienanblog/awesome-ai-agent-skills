@@ -7,15 +7,13 @@ description: Prepare or operate production Docker Compose deployments on a VPS w
 
 Deliver the requested deployment work using the project's operating contract. Distinguish planning and file preparation from changing a live environment.
 
-## Working agreement
-
-Follow the user's request and applicable repository instructions over these defaults. Use existing authorization; ask only about missing decisions that materially affect scope, cost, safety, or the result. Continue independent authorized work while awaiting an answer.
+## Delegation
 
 Run in the main conversation by default. Delegation can increase usage: obtain explicit approval for the proposed agent count and scope before using subagents. Reuse that approval within its bounds; ask again before expanding the approved count or scope.
 
 ## Establish the target
 
-Read existing runbooks, Compose and Traefik configuration, release scripts, and available host evidence. Establish the target host, OS, domains, ingress, registry, persistent data, backup/restore expectations, and deployment authorization. Discover facts before asking; a routine release does not need a fresh infrastructure questionnaire.
+Read existing runbooks, Compose and Traefik configuration, release scripts, and available host evidence. Establish the target host, OS, domains, ingress, registry, persistent data, backup/restore expectations, and deployment authorization. Discover facts before asking; for a routine release the existing runbook and configuration usually answer them.
 
 For an existing deployment, preserve supported topology and required release gates. For a new one, prefer a supported Ubuntu LTS or Debian stable host, an operator account with appropriate privileges, registry-built immutable images, and Traefik ingress. Verify current official installation guidance when provisioning; reference commands are examples, not a reason to reinstall a working host.
 
@@ -44,4 +42,4 @@ Reuse valid evidence for unchanged responsibilities, while completing the projec
 
 ## Handoff
 
-Report what was prepared or deployed, the target and immutable release identifier, checks and results, and rollback readiness. For new infrastructure, include topology, public exposure, state ownership, and recovery commands. Do not reproduce the full infrastructure plan for every routine release or claim a restore was tested when only its configuration was inspected.
+Report what was prepared or deployed, the target and immutable release identifier, checks and results, and rollback readiness. For new infrastructure, include topology, public exposure, state ownership, and recovery commands. Keep a routine release report to what changed. Say a restore was tested only when it actually ran, not when its configuration was inspected.

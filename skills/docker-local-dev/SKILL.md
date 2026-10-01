@@ -5,9 +5,7 @@ description: Create or repair local Docker Compose services, Dockerfiles, mounts
 
 # Docker Local Development
 
-## Working agreement
-
-Follow the user's request and applicable repository instructions over these defaults. Use existing authorization; ask only about missing decisions that materially affect scope, cost, safety, or the result. Continue independent authorized work while awaiting an answer.
+## Delegation
 
 Run in the main conversation by default. Delegation can increase usage: obtain explicit approval for the proposed agent count and scope before using subagents. Reuse that approval within its bounds; ask again before expanding the approved count or scope.
 
@@ -87,22 +85,9 @@ Use assets as starting points, not immutable output. Remove unselected services 
 
 ### 4. Preview and generate
 
-For a material setup change, briefly summarize:
+For a material change to an existing stack, state what will change — files, services and versions, host ports and domains, mount strategy — as part of doing it.
 
-- files to create or modify
-- inferred services and versions
-- host ports and domains
-- source/dependency mount strategy
-- important changes to an existing stack
-
-Generate the smallest coherent setup within the existing authorization:
-
-1. local env example and ignored local env file when needed
-2. dev Dockerfile or dev build target
-3. `.dockerignore`
-4. `compose.yaml` without the obsolete top-level `version`
-5. selected proxy, process, and helper configuration
-6. concise usage notes only when useful or requested
+Generate the smallest coherent setup within the existing authorization. Depending on the project that is a dev Dockerfile or build target, `.dockerignore`, `compose.yaml` without the obsolete top-level `version`, the selected proxy or process configuration, and, when configuration is needed, an env example plus an ignored local env file. Add usage notes only when useful or requested.
 
 Prefer:
 

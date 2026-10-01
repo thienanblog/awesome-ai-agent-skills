@@ -1,0 +1,4 @@
+interface:
+  display_name: "AGENTS.md Generator"
+  short_description: "Create or compact repository instructions"
+  default_prompt: "Use $agents-md-generator to audit and compact this repository's agent instructions, keeping only verified, non-obvious rules."

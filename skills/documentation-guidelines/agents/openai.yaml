@@ -1,0 +1,4 @@
+interface:
+  display_name: "Documentation Guidelines"
+  short_description: "Durable project documentation"
+  default_prompt: "Use $documentation-guidelines to update the documentation that owns this behavior and verify it against the source."

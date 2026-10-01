@@ -1,7 +1,4 @@
 interface:
   display_name: "Brainstorm First"
-  short_description: "Explicit comparison of practical options"
+  short_description: "Compare options before implementing"
   default_prompt: "Use $brainstorm-first to compare practical approaches and recommend one within my decision boundaries."
-
-policy:
-  allow_implicit_invocation: false

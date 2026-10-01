@@ -1,24 +1,21 @@
 ---
 name: project-development-mindset
-description: Plan and carry repository changes through implementation, verification, and handoff. Use when the user explicitly selects this coordination workflow; ordinary repository changes do not require it.
+description: Plan and carry repository changes through implementation, verification, and handoff. Use only when the user invokes this skill by name; ordinary repository changes proceed without it.
+disable-model-invocation: true
 ---
 
 # Project Development Mindset
 
-Use this coordinator when the user explicitly selects it. Task size, mixed responsibilities, or uncertainty alone do not activate it.
-
 Deliver the requested outcome using project evidence and the smallest coherent change. Scale investigation and verification to impact, uncertainty, and reversibility.
 
-## Working agreement
-
-Follow the user's request and applicable repository instructions over these defaults. Use existing authorization; ask only about missing decisions that materially affect scope, cost, safety, or the result. Continue independent authorized work while awaiting an answer.
+## Delegation
 
 Run in the main conversation by default. Delegation can increase usage: obtain explicit approval for the proposed agent count and scope before using subagents. Reuse that approval within its bounds; ask again before expanding the approved count or scope.
 
 ## Establish the task
 
 - Inspect applicable instructions, Git state, and the source, tests, configuration, and docs relevant to the request. Preserve unrelated user work and follow the repository's branch and freshness policy.
-- Identify observable success criteria and affected contracts. Use a short plan for work with dependencies or material uncertainty; a routine fix needs no planning ceremony.
+- Identify observable success criteria and affected contracts. Plan in proportion to dependencies and uncertainty.
 - Distinguish intended behavior from current behavior. Resolve stale or conflicting docs against source and runtime evidence; ask only when the remaining choice belongs to the user.
 - Keep the original objective and accepted changes in view during long work. A status question or correction usually steers the task rather than replacing it.
 
@@ -41,12 +38,12 @@ Run in the main conversation by default. Delegation can increase usage: obtain e
 
 ## Use specialist guidance selectively
 
-Start directly with a specialist when the task clearly calls for it. Within this explicitly selected workflow, coordinate responsibilities when ownership is unclear or several responsibilities overlap. Routine tests, docs edits, framework commands, and browser checks do not each need another skill.
+Routine tests, docs edits, framework commands, and browser checks stay part of implementation. Bring in a specialist skill when its domain is the main difficulty of the current step.
 
-Read [quality-skill-routing.md](references/quality-skill-routing.md) when choosing a specialist would help, or [ui-ux-concept-routing.md](references/ui-ux-concept-routing.md) for visual decisions and reference matching. Load only relevant guidance; there is no fixed skill-count quota. Avoid duplicate workflows and discard obsolete phase instructions as the task changes. An unavailable optional skill should not block work the current tools can complete.
+Read [quality-skill-routing.md](references/quality-skill-routing.md) when choosing a specialist would help, or [ui-ux-concept-routing.md](references/ui-ux-concept-routing.md) for visual decisions and reference matching. Load only relevant guidance, avoid running two workflows for the same responsibility, and let go of a phase's instructions once the task moves on. An unavailable optional skill should not block work the current tools can complete.
 
-Use `brainstorm-first` only when the user explicitly selects that workflow; otherwise compare options directly as needed. Use `run-reviewable-subtask-loop` only when explicitly requested or accepted; task size and internal subtasks do not activate it or authorize subagents.
+`run-reviewable-subtask-loop` is the user's to invoke; task size and internal subtasks neither activate it nor authorize subagents.
 
 ## Handoff
 
-Lead with what changed and why. Report relevant checks and their results, remaining gaps, and any decision still needed. Compare the delivered behavior with the user's criteria; fix in-scope gaps before stopping. Describe uncertainty with evidence instead of an invented numerical confidence score.
+Lead with what changed and why. Report relevant checks and their results, remaining gaps, and any decision still needed. Compare the delivered behavior with the user's criteria; fix in-scope gaps before stopping. Describe remaining uncertainty through the evidence behind it.

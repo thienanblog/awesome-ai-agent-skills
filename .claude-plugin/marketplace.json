@@ -6,14 +6,14 @@
   },
   "metadata": {
     "description": "Community-shared skills for AI coding agents",
-    "version": "1.32.1"
+    "version": "1.32.2"
   },
   "plugins": [
     {
       "name": "project-development-skills",
       "source": "./plugins/project-development-skills",
       "description": "Focused development workflows for implementation, decisions, debugging, verification, documentation, UI, and deployment. Use the guidance that fits the task.",
-      "version": "1.32.1",
+      "version": "1.32.2",
       "author": {
         "name": "Ân Vũ",
         "email": "8651688+thienanblog@users.noreply.github.com"
@@ -35,7 +35,7 @@
       "name": "laravel-app-skills",
       "source": "./plugins/laravel-app-skills",
       "description": "Laravel 11/12 and Laravel 13 guidance selected by installed or target framework version, with project-specific frontend and command conventions.",
-      "version": "1.32.1",
+      "version": "1.32.2",
       "author": {
         "name": "Ân Vũ",
         "email": "8651688+thienanblog@users.noreply.github.com"
@@ -55,7 +55,7 @@
       "name": "devops-skills",
       "source": "./plugins/devops-skills",
       "description": "Local Docker development configuration with project-compatible services, networking, persistence, and readiness checks.",
-      "version": "1.32.1",
+      "version": "1.32.2",
       "author": {
         "name": "Ân Vũ",
         "email": "8651688+thienanblog@users.noreply.github.com"
@@ -74,7 +74,7 @@
       "name": "office-web-ui-skills",
       "source": "./plugins/office-web-ui-skills",
       "description": "Operational dashboards and back-office interfaces with clear data hierarchy, reusable components, and practical visual verification.",
-      "version": "1.32.1",
+      "version": "1.32.2",
       "author": {
         "name": "Ân Vũ",
         "email": "8651688+thienanblog@users.noreply.github.com"

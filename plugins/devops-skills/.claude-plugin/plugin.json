@@ -1,6 +1,6 @@
 {
   "name": "devops-skills",
-  "version": "1.32.1",
+  "version": "1.32.2",
   "description": "Local Docker development configuration with project-compatible services, networking, persistence, and readiness checks.",
   "author": {
     "name": "Ân Vũ",
