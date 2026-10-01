@@ -1,4 +1,4 @@
 interface:
   display_name: "Office Web UI System"
-  short_description: "Office web app playbook for dashboards, pages, components, and locators"
+  short_description: "Operational dashboards and back-office UI"
   default_prompt: "Use $office-web-ui-system to improve this operational interface using the existing visual language, clear data hierarchy, reusable components, and browser verification."

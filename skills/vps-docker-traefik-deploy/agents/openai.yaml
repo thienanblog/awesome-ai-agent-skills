@@ -1,0 +1,4 @@
+interface:
+  display_name: "VPS Docker Traefik Deploy"
+  short_description: "Production Compose deployment with Traefik"
+  default_prompt: "Use $vps-docker-traefik-deploy to prepare this production deployment with rollback and backup readiness."

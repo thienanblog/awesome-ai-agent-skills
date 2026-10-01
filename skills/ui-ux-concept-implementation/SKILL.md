@@ -10,9 +10,7 @@ description: Implement a selected mockup, screenshot, or visual reference in an 
 Turn a selected visual direction into working UI while preserving the project's
 product identity and producing browser evidence against the target.
 
-## Working agreement
-
-Follow the user's request and applicable repository instructions over these defaults. Use existing authorization; ask only about missing decisions that materially affect scope, cost, safety, or the result. Continue independent authorized work while awaiting an answer.
+## Delegation
 
 Run in the main conversation by default. Delegation can increase usage: obtain explicit approval for the proposed agent count and scope before using subagents. Reuse that approval within its bounds; ask again before expanding the approved count or scope.
 

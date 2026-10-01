@@ -82,3 +82,14 @@ The release is **1.32.0**. Plugin/skill identifiers and manifest schemas are unc
 Workflow defaults intentionally change. Users who need exactly three scored options, a mandatory selection pause, one specialist at a time, per-subtask branches, persisted/deleted plan files, or separate approval for every CI trigger should state those requirements in their request or repository policy. Existing explicit requirements continue to apply.
 
 No model A/B benchmark or representative end-to-end execution of all 15 workflows was run. Static validation and helper tests cannot prove Astra quality, speed, cost, compliance, or behavior in every host. The practical outcome established here is a smaller, internally reviewed instruction set with unchanged packaging and helper compatibility.
+
+## October 2026 follow-up (1.32.2)
+
+A second editorial pass after 1.32.1 made these changes. It is static review, with the same limits as above: no model evaluation was run.
+
+- **Invocation.** `project-development-mindset` and `run-reviewable-subtask-loop` are by-name only on Claude Code (`disable-model-invocation: true`) as well as Codex. Claude Code ignores unknown frontmatter keys and Codex deserializes only `name`, `description`, and `metadata`, so the key is safe on both. `brainstorm-first` returns to automatic discovery for requested brainstorming and choose-before-implementing comparisons; "explicitly selects this workflow" did not say whether a plain request to brainstorm qualified.
+- **Shared boilerplate.** The generic first paragraph of "Working agreement" was removed from all 15 skills. The delegation consent gate remains under "Delegation".
+- **Negations of deleted rules.** Sentences that only denied an older rule (skill-count quotas, mandatory confidence scores, routine full-suite questions, questionnaires, coordinator handoffs) were removed or restated as the positive behavior.
+- **Rewrites.** `performance-optimization` and `laravel-11-12-app-guidelines` now lead with the constraints that are easy to get wrong and drop general knowledge. `testing-verification` no longer names a specific browser tool, and its visual reference no longer carries a fixed state checklist or a hard-coded design-system path.
+- **Laravel 13 check.** Compared with the official 13.x release notes, upgrade guide, starter kits, and Boost pages on October 1, 2026. Existing claims held. Corrected the JSON:API anchor, and added the session `serialization` and default-prefix upgrade effects, Boost project rules (`.ai/rules`, `record-rule`), and a caution that Boost documentation coverage can trail a package's newest major.
+- **Codex adapters.** Every skill now has `agents/openai.yaml`; stale prompts were refreshed.

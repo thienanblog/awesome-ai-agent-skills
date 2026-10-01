@@ -144,8 +144,7 @@ Use $project-development-mindset to implement the approved checkout redesign and
 ```
 
 Specialists can be used directly. Routine tests, documentation updates, framework
-commands, and browser checks stay within the implementation task; they do not
-require a routing ceremony or a fixed number of loaded skills.
+commands, and browser checks stay within the implementation task.
 
 ```text
 Use $debugging-workflow to isolate and fix this intermittent checkout failure.
@@ -171,22 +170,24 @@ usage and requires explicit approval for the proposed agent count and scope. Tha
 approval is reused within its bounds; expanding the count or scope requires fresh
 approval. A request for subtasks does not authorize subagents.
 
-### Codex invocation policy
+### Invocation policy
 
-`project-development-mindset`, `brainstorm-first`, and
-`run-reviewable-subtask-loop` are explicit-only in Codex through
-`agents/openai.yaml` (`allow_implicit_invocation: false`). They remain available
-through the explicit skill invocations shown above. Routine planning, comparisons,
-and implementation do not need an extra workflow.
+`project-development-mindset` and `run-reviewable-subtask-loop` run only when you
+invoke them by name. Claude Code enforces this through `disable-model-invocation: true`
+in the skill frontmatter (invoke with `/project-development-mindset` or
+`/run-reviewable-subtask-loop`), and Codex through `agents/openai.yaml`
+(`allow_implicit_invocation: false`; invoke with `$skill-name`). Other hosts may
+honor neither setting, so each description also states the by-name boundary.
 
-`debugging-workflow` and `testing-verification` retain automatic discovery for
-unexplained failures and specialist verification work respectively. A known-cause
-fix or routine checks do not require those skills. Other specialist skills retain
-their existing invocation settings.
+`brainstorm-first` is discovered automatically when you ask to brainstorm, want
+alternatives or UI concepts to choose from, or ask for a comparison before any
+change is made. The specialist skills are discovered from their descriptions:
+`debugging-workflow` for unexplained failures, `testing-verification` when
+verification is the deliverable, and so on. A known-cause fix or routine checks
+proceed without them.
 
 This is a scope decision, not a measured claim that a particular model no longer
-benefits from these workflows. Other hosts may not honor Codex metadata; keep the
-explicit selection boundaries in the skill instructions as well.
+benefits from these workflows.
 
 ## Instruction design
 
@@ -209,7 +210,7 @@ compatibility notes, and the limits of validation.
 | Skill | Description |
 |-------|-------------|
 | [agents-md-generator](./skills/agents-md-generator) | Create, audit, or compact repository instructions in AGENTS.md, scoped overrides, and requested tool compatibility files. Use to preserve non-obvious project rules while removing stale, duplicated, or generic guidance. |
-| [brainstorm-first](./skills/brainstorm-first) | Explore and compare practical options before implementation. Use when the user explicitly selects this comparison workflow for requirements, diagnosis options, or UI concepts; ordinary decisions do not require it. |
+| [brainstorm-first](./skills/brainstorm-first) | Compare practical options and recommend one before implementation. Use when the user asks to brainstorm, wants alternatives or UI concepts to choose from, or asks for a comparison before any change is made; a decision the agent can settle during normal work proceeds without it. |
 | [debugging-workflow](./skills/debugging-workflow) | Reproduce, isolate, and fix unexplained failures, regressions, or flaky behavior. Use when the cause is uncertain; a known-cause fix usually needs only the normal implementation workflow. |
 | [design-system-generator](./skills/design-system-generator) | Create or revise a project design system covering tokens, components, accessibility, motion, and visual verification. Use when the durable design-system document is the deliverable, rather than a one-off UI edit. |
 | [docker-local-dev](./skills/docker-local-dev) | Create or repair local Docker Compose services, Dockerfiles, mounts, networking, and readiness checks. Use when container configuration is the deliverable; ordinary container commands and production deployment are separate concerns. |
@@ -218,8 +219,8 @@ compatibility notes, and the limits of validation.
 | [laravel-13-app-guidelines](./skills/laravel-13-app-guidelines) | Implement Laravel 13 changes or upgrade Laravel 12 to 13 using verified package versions and project conventions. Use only for the installed or requested major; optional framework features are not required dependencies. |
 | [office-web-ui-system](./skills/office-web-ui-system) | Build or improve operational dashboards, admin tools, CRM/ERP, CRUD, reporting, and record-management interfaces. Use for dense workflows and dashboard reference matching; excludes marketing and unrelated consumer UI. |
 | [performance-optimization](./skills/performance-optimization) | Measure and improve latency, resource use, queries, rendering, or build/test throughput. Use when performance is the primary problem; preserve correctness and compare equivalent workloads. |
-| [project-development-mindset](./skills/project-development-mindset) | Plan and carry repository changes through implementation, verification, and handoff. Use when the user explicitly selects this coordination workflow; ordinary repository changes do not require it. |
-| [run-reviewable-subtask-loop](./skills/run-reviewable-subtask-loop) | Deliver an explicitly requested multi-subtask plan as sequential reviewed and verified commits with one aggregate publication path. Use only when the user requests or accepts this workflow; subtasks do not authorize subagents. |
+| [project-development-mindset](./skills/project-development-mindset) | Plan and carry repository changes through implementation, verification, and handoff. Use only when the user invokes this skill by name; ordinary repository changes proceed without it. |
+| [run-reviewable-subtask-loop](./skills/run-reviewable-subtask-loop) | Deliver a multi-subtask plan as sequential reviewed and verified commits with one aggregate publication path. Use only when the user invokes this skill by name; subtasks do not authorize subagents. |
 | [testing-verification](./skills/testing-verification) | Design or assess tests, acceptance checks, CI coverage, and browser verification. Use when verification is the main deliverable or requires specialist judgment; ordinary implementation can keep its focused checks inline. |
 | [ui-ux-concept-implementation](./skills/ui-ux-concept-implementation) | Implement a selected mockup, screenshot, or visual reference in an existing project and compare the rendered result. Use when visual fidelity drives the work; use dashboard guidance for operational surfaces when it fits better. |
 | [vps-docker-traefik-deploy](./skills/vps-docker-traefik-deploy) | Prepare or operate production Docker Compose deployments on a VPS with Traefik, DNS, registries, persistent storage, backups, and rollback. Use for production infrastructure and releases, rather than local development. |

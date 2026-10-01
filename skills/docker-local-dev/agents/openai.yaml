@@ -1,0 +1,4 @@
+interface:
+  display_name: "Docker Local Dev"
+  short_description: "Local Docker Compose configuration"
+  default_prompt: "Use $docker-local-dev to create or repair this project's local Docker Compose setup and verify that it starts."

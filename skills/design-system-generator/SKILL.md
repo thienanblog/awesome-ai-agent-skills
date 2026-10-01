@@ -7,15 +7,13 @@ description: Create or revise a project design system covering tokens, component
 
 Produce a concise design system grounded in the product's actual stack and visual language. Document decisions that make future UI work consistent.
 
-## Working agreement
-
-Follow the user's request and applicable repository instructions over these defaults. Use existing authorization; ask only about missing decisions that materially affect scope, cost, safety, or the result. Continue independent authorized work while awaiting an answer.
+## Delegation
 
 Run in the main conversation by default. Delegation can increase usage: obtain explicit approval for the proposed agent count and scope before using subagents. Reuse that approval within its bounds; ask again before expanding the approved count or scope.
 
 ## Inspect before proposing
 
-Read existing design docs, brand references, representative screens, shared components, theme configuration, tokens, and build tooling. Infer framework, CSS approach, themes, browser support, and export formats from those sources. Ask only about unresolved product choices that materially affect the document; do not require a questionnaire.
+Read existing design docs, brand references, representative screens, shared components, theme configuration, tokens, and build tooling. Infer framework, CSS approach, themes, browser support, and export formats from those sources. Ask only about unresolved product choices that materially affect the document.
 
 Preserve an established coherent system. For a new product, recommend one suitable direction within the user's constraints; compare alternatives only when useful or requested. Do not add a component library or migrate build tooling merely to match this skill's examples.
 
@@ -45,4 +43,4 @@ If discoverability needs an instruction-file link, use the minimal pattern in [e
 
 Check documented paths, token names, component APIs, and build claims against their owners. Inspect representative rendered components when making visual decisions or changing tokens; report when visual validation could not run. Remove placeholders, contradictions, and duplicate sources of truth.
 
-Report the document and any exports, the material decisions, verification performed, and unresolved choices. A documentation task alone does not require an application-wide test suite.
+Report the document and any exports, the material decisions, verification performed, and unresolved choices.

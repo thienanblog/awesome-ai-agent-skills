@@ -5,86 +5,45 @@ description: Measure and improve latency, resource use, queries, rendering, or b
 
 # Performance Optimization
 
-Use this skill when performance is the main concern. Measure first, optimize the confirmed bottleneck, and verify improvement without changing business behavior accidentally.
+Make a performance claim that survives scrutiny: a confirmed bottleneck, a change that addresses it, and a before/after comparison under the same conditions, with business behavior unchanged.
 
-## Working agreement
-
-Follow the user's request and applicable repository instructions over these defaults. Use existing authorization; ask only about missing decisions that materially affect scope, cost, safety, or the result. Continue independent authorized work while awaiting an answer.
+## Delegation
 
 Run in the main conversation by default. Delegation can increase usage: obtain explicit approval for the proposed agent count and scope before using subagents. Reuse that approval within its bounds; ask again before expanding the approved count or scope.
 
-## Operating Rules
+## Define the claim and its envelope
 
-- Do not optimize blindly. Capture a baseline or concrete symptom first.
-- Define a benchmark envelope before comparing results: workload, starting data,
-  cache state, command and flags, resource limits, and concurrent activity.
-- Read the rules and instrumentation relevant to the measured path.
-- Preserve business logic and data correctness.
-- Prefer low-risk local improvements before broad architecture changes.
-- Treat caching as a contract: define invalidation, freshness, and user-specific data boundaries.
-- Treat infrastructure health as part of correctness. Reject measurements with
-  crashes, OOM kills, unexpected restarts, failed cleanup, or orphan processes.
-- Avoid adding dependencies or infrastructure unless measurement justifies them.
-- For an unexplained correctness failure, isolate it before optimizing. Consult debugging or testing guidance only when it adds useful depth to the work.
+Establish what is slow, where, for whom, and compared to what, then capture a baseline before changing anything: timing, query count, payload, memory, CPU, bundle size, Web Vitals, a profile, or logs.
 
-## Workflow
+Results are comparable only inside a fixed benchmark envelope, so record it: workload and data size, starting state, warm or cold cache, account and permissions, command and flags, worker count, retries, resource limits, and concurrent activity on the host. For noisy measurements, repeat enough to report a representative value and its spread; the best run is not the result.
 
-### 1. Define The Performance Claim
+Infrastructure health is part of the measurement. A run with crashes, OOM kills, unexpected restarts, failed setup or cleanup, or orphan processes is rejected and noted, not averaged in.
 
-- Identify what is slow, where, for whom, and compared to what.
-- Capture baseline evidence: timing, query count, payload size, memory, CPU, bundle size, Web Vitals, screenshot, profile, or logs.
-- Identify the environment and data size used for measurement.
-- Fix the workload and starting state. Record warm or cold cache, account and
-  permissions, worker count, retries, resource limits, and unrelated workloads.
-- For noisy measurements, run enough repetitions to report a representative
-  value and spread instead of selecting the best run.
+An unexplained correctness failure comes first: isolate it before optimizing, because a faster wrong answer is not an improvement.
 
-### 2. Find The Bottleneck
+## Find the bottleneck
 
-- Separate backend latency, database time, network payload, frontend rendering, asset loading, build tooling, and external dependency time.
-- Separate setup, exercise, and cleanup costs. A browser or test runner on the
-  host can still drive memory, CPU, and database work inside services.
-- Measure workload amplification where relevant: request volume, statement
-  classes, row growth, repeated fixture work, background jobs, and retries.
-- Check source-of-truth docs for expected behavior before changing data flow.
-- Inspect existing instrumentation, logs, traces, query debug output, profiler data, and browser performance tools when available.
+Attribute the time before choosing a fix. Separate backend, database, network, frontend rendering, asset loading, build tooling, and external dependencies; within a test or benchmark run, separate setup, exercise, and cleanup.
 
-Read `references/performance-playbook.md` for domain-specific checks.
+Measure the work a flow produces instead of inferring it from where the driver runs. A browser or test runner on the host can still drive memory, CPU, and database load inside services, and a few visible actions can amplify into many requests, statements, rows, jobs, and retries.
 
-### 3. Choose The Smallest Useful Fix
+Use existing instrumentation, traces, query logs, and profilers, and read the rules that govern the measured path before changing its data flow. [performance-playbook.md](references/performance-playbook.md) has domain checks for databases, backends, frontends, assets, builds, tests, and caching.
 
-- Database: indexes, eager loading, joins, batching, pagination, field selection, avoiding N+1.
-- Backend: reduce redundant work, stream or queue heavy work, avoid large in-memory operations, cache carefully.
-- Frontend: reduce unnecessary renders, split data, virtualize large lists, lazy load, memoize where useful, optimize images/fonts.
-- Build/tests: cache dependencies, batch or reuse validated setup, isolate
-  shared-state tests, sweep concurrency gradually, and avoid unnecessary full
-  rebuilds. Do not weaken authentication, authorization, realtime, or other
-  behavior under test merely to make a suite faster.
+## Fix the confirmed cause
 
-### 4. Verify Improvement
+Start with the smallest change that addresses the measured bottleneck, and reach for new dependencies, infrastructure, or architecture only when measurement shows the local fix is insufficient.
 
-- Rerun the same measurement.
-- Compare before/after using the same data and environment when possible.
-- When concurrency exposes a failure, reproduce and fix the focused case before
-  rerunning the full benchmark. Do not hide races or failed requests by only
-  increasing timeouts or retries.
-- Verify service health, cleanup, state restoration, and process termination on
-  success, failure, and handled interruption where the workflow mutates state.
-- Add regression coverage or guardrails when practical.
-- Keep improvements within the agreed correctness, freshness, accessibility, and UX requirements. Obtain a decision for a material tradeoff not already accepted.
-- Complete required checks and reuse valid focused evidence. Broaden measurements or tests only when the performance claim or an unresolved regression risk needs them, within the agreed budget.
+- A cache is a contract. Define its invalidation, freshness, and per-user or per-tenant boundaries before relying on it.
+- A faster suite must still test the same thing. Keep authentication, authorization, realtime, and other behavior under test intact.
+- When concurrency exposes a failure, reproduce and fix the focused case. Raising timeouts or retries hides races and failed requests.
+- A tradeoff in correctness, freshness, accessibility, or UX that the user has not accepted is theirs to decide.
 
-## Reporting
+## Verify
 
-Report:
+Rerun the same measurement inside the same envelope and compare. Where the workflow mutates state, confirm service health, cleanup, state restoration, and process termination on success, failure, and handled interruption.
 
-- Baseline and after measurement.
-- Benchmark envelope, repetitions or sample size, and any rejected runs.
-- Bottleneck identified.
-- Change made.
-- Verification command, profiler, screenshot, or metric.
-- Tradeoffs, cache invalidation rules, and remaining risks.
+Complete required checks and reuse focused evidence that is still valid. Broaden measurements or tests when the claim or an unresolved regression risk needs it, within the agreed budget. Add a regression guard when it would catch the bottleneck returning.
 
-## References
+## Report
 
-- `references/performance-playbook.md`: database, backend, frontend, asset, build, test, and caching performance checks.
+Give the baseline and after measurements with the envelope, sample size, and any rejected runs; the bottleneck and the change; how the result was verified; and the tradeoffs, cache invalidation rules, and risks that remain.

@@ -2,47 +2,20 @@
 
 Use this reference for UI/UX tasks, screenshot-driven implementation, and ambiguous user-provided images.
 
-## Ambiguous User Images
+## Ambiguous user images
 
-If the user provides a screenshot, mockup, or marked-up image and it is unclear what to change:
+Inspect the image and the project context first. Ask only when an unresolved visual choice would materially change the result. A separate annotated copy with short labels can make that question easier to answer; otherwise describe the region directly. Keep the original image intact.
 
-Inspect the image and project context first. Ask only if an unresolved visual choice would materially change the result. Use a separate annotated copy with short labels when it makes that question easier to answer; otherwise describe the region directly. Preserve the original image. Do not block ordinary visual work on annotation tooling.
+## Comparable evidence
 
-## Screenshot Scope
+A before/after or target comparison is only meaningful when the conditions match: viewport, theme, language, data, account, and interaction state. Capture the before state ahead of editing when practical, and state any condition that differs in the report.
 
-Capture the element, region, or full page that demonstrates the relevant behavior. A component fix often needs a small region; composition, scroll, and neighboring layout need wider context. Choose scope by evidence needed, without a mandatory capture order.
+Capture the scope the claim needs. A component fix is shown by a small region; composition, scrolling, and neighboring layout need wider context.
 
-## Before And After
+## What to check
 
-For visual changes:
+Verify the states the changed surface can actually enter. Depending on the component these include loading, empty, error, validation, disabled, hover and focus, responsive layout, and each supported theme. Interactive elements also need keyboard navigation and visible focus.
 
-- Capture a before screenshot before editing when practical.
-- Capture an after screenshot at the same viewport and state.
-- Use the same data, theme, language, and account state when possible.
-- If the viewport or state differs, state the difference in the final report.
+## Visual source of truth
 
-## What To Verify
-
-Check relevant UI states:
-
-- Default
-- Loading
-- Empty
-- Error
-- Disabled
-- Hover/focus when practical
-- Validation
-- Responsive behavior
-- Dark/light theme if supported
-- Keyboard navigation and visible focus for interactive elements
-
-## Visual Source Of Truth
-
-Before changing visual code, inspect:
-
-- `docs/DESIGN_SYSTEM.md` or equivalent.
-- Existing shared components and wrappers.
-- Theme config, CSS variables, Tailwind config, global CSS, utility classes, tokens, animation rules, and transition utilities.
-- Existing screenshots or component examples.
-
-Do not create one-off visual styles when a reusable token, wrapper, class, or component exists.
+Before changing visual code, find what already defines the product's look: the design-system document if one exists, shared components and wrappers, theme configuration, tokens and CSS variables, and motion utilities. Reuse those before adding a one-off style, so the change stays consistent with the rest of the product.

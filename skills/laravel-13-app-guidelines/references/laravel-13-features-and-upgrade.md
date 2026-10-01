@@ -49,7 +49,7 @@ Use them only for endpoints whose public contract is JSON:API. Before migrating
 an existing endpoint, evaluate client compatibility, relationship-loading cost,
 pagination, error-object shape, content negotiation, and rollout strategy.
 
-Official source: <https://laravel.com/docs/13.x/eloquent-resources#json-api-resources>
+Official source: <https://laravel.com/docs/13.x/eloquent-resources#jsonapi-resources>
 
 ## Search and Vector Data
 
@@ -100,7 +100,11 @@ Official source: <https://laravel.com/docs/13.x/upgrade#request-forgery-protecti
    queues, serialization, pagination, and custom contract implementations.
 6. Pay special attention to Laravel 13's cache `serializable_classes` allow-list
    when the application stores objects in cache. Prefer scalar or array payloads
-   when practical.
+   when practical. Syncing `config/session.php` with the Laravel 13 skeleton
+   switches session `serialization` from `php` to `json`, which signs out every
+   active user; keep `php` unless that is accepted. Applications relying on
+   framework fallback prefixes get new cache keys and session cookie names
+   unless `CACHE_PREFIX`, `REDIS_PREFIX`, and `SESSION_COOKIE` are set.
 7. Test route matching, authentication, sessions, cache continuity, jobs,
    database writes, pagination, and custom framework integrations. Run the full
    locally reproducible CI suite.

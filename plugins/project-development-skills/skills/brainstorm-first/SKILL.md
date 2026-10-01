@@ -1,17 +1,13 @@
 ---
 name: brainstorm-first
-description: Explore and compare practical options before implementation. Use when the user explicitly selects this comparison workflow for requirements, diagnosis options, or UI concepts; ordinary decisions do not require it.
+description: Compare practical options and recommend one before implementation. Use when the user asks to brainstorm, wants alternatives or UI concepts to choose from, or asks for a comparison before any change is made; a decision the agent can settle during normal work proceeds without it.
 ---
 
 # Brainstorm First
 
-Use this workflow when the user explicitly selects it. Routine option comparisons can be handled directly without loading this skill.
-
 Turn uncertainty into a useful decision. Compare approaches against the user's actual goal and constraints, and challenge an impractical request with concrete evidence.
 
-## Working agreement
-
-Follow the user's request and applicable repository instructions over these defaults. Use existing authorization; ask only about missing decisions that materially affect scope, cost, safety, or the result. Continue independent authorized work while awaiting an answer.
+## Delegation
 
 Run in the main conversation by default. Delegation can increase usage: obtain explicit approval for the proposed agent count and scope before using subagents. Reuse that approval within its bounds; ask again before expanding the approved count or scope.
 
@@ -35,14 +31,14 @@ Use comparable criteria, and recommend one with a short rationale. Give numerica
 
 ## Respect the decision boundary
 
-When the user requested options for selection, present the comparison and wait before implementation. Read-only investigation and requested temporary previews are allowed during that phase. If the user already authorized choosing and implementing the best approach, explain the choice and continue within that scope. A selected approach does not need another generic approval gate.
+When the user requested options for selection, present the comparison and wait before implementation. Read-only investigation and requested temporary previews are allowed during that phase. If the user already authorized choosing and implementing the best approach, explain the choice and continue within that scope. Once an approach is selected, implement it.
 
-For a requested hybrid, reconcile the actual conflicts and continue once the direction is clear; do not restart a fixed three-option exercise automatically. Use implementation guidance only when implementation begins.
+For a requested hybrid, reconcile the actual conflicts and continue once the direction is clear.
 
 ## UI concepts
 
 Inspect the existing product, supplied references, content, and design system. Keep concepts comparable in functional scope and content while varying meaningful visual or interaction choices.
 
-When visual previews are requested, use an available image or rendering tool, inspect the results, and present each direction with its tradeoffs. Follow that tool's instructions; the skill does not prescribe the number of tool calls. If the requested preview cannot be produced, explain the limitation, provide useful concept descriptions, and obtain a decision before substituting a deliverable that changes the requested result.
+When visual previews are requested, use an available image or rendering tool, inspect the results, and present each direction with its tradeoffs. If the requested preview cannot be produced, explain the limitation, provide useful concept descriptions, and obtain a decision before substituting a deliverable that changes the requested result.
 
 Treat concept previews as references until production asset use is intended and authorized. Preserve the selected reference when later comparison needs it.

@@ -1,15 +1,14 @@
 ---
 name: run-reviewable-subtask-loop
-description: Deliver an explicitly requested multi-subtask plan as sequential reviewed and verified commits with one aggregate publication path. Use only when the user requests or accepts this workflow; subtasks do not authorize subagents.
+description: Deliver a multi-subtask plan as sequential reviewed and verified commits with one aggregate publication path. Use only when the user invokes this skill by name; subtasks do not authorize subagents.
+disable-model-invocation: true
 ---
 
 # Run Reviewable Subtask Loop
 
-Deliver coherent, recoverable increments and review the aggregate result before publication. Use this workflow only after explicit opt-in; a large task or an internal plan alone is insufficient.
+Deliver coherent, recoverable increments and review the aggregate result before publication.
 
-## Working agreement
-
-Follow the user's request and applicable repository instructions over these defaults. Use existing authorization; ask only about missing decisions that materially affect scope, cost, safety, or the result. Continue independent authorized work while awaiting an answer.
+## Delegation
 
 Run in the main conversation by default. Delegation can increase usage: obtain explicit approval for the proposed agent count and scope before using subagents. Reuse that approval within its bounds; ask again before expanding the approved count or scope.
 
@@ -27,7 +26,7 @@ Inspect remote triggers before publication. Read [remote-ci.md](references/remot
 
 Use the conversation or an existing project progress surface. Persist a plan only when requested or needed for recovery across sessions; use the repository's established location. Record exact task-owned artifact paths and preserve them according to the user's retention preference.
 
-For each subtask, track its responsibility, acceptance criteria, dependencies, focused checks, status, and resulting commit. Add findings, evidence, and recovery points as they exist. Do not prescribe a fixed number of subtasks or plan files.
+For each subtask, track its responsibility, acceptance criteria, dependencies, focused checks, status, and resulting commit. Add findings, evidence, and recovery points as they exist.
 
 Split at boundaries that have distinct review, test, rollout, or recovery value. Keep source and generated output together. Combine mechanical fragments; separate unrelated contracts or risky migrations. Adjust implementation details within the agreed outcome, and ask before materially changing an approved scope.
 
@@ -46,15 +45,15 @@ Keep dependent work behind unresolved failures. For invalidated work, read [reco
 
 Review the complete diff against the intended base and map it to the user's criteria. Fetch the base again before delivery. If it advanced, assess the integration risk and follow repository policy; obtain direction before an unapproved merge or history rewrite.
 
-Run the smallest aggregate checks that cover the changed responsibilities and their contracts, plus required release or repository gates. Reuse valid subtask evidence. Respect explicit suite budgets; propose broader tests only for a concrete gap instead of always asking for a full run.
+Run the smallest aggregate checks that cover the changed responsibilities and their contracts, plus required release or repository gates. Reuse valid subtask evidence. Respect explicit suite budgets; propose broader tests only for a concrete gap.
 
-For material visual work, inspect relevant rendered states and viewports and compare any selected reference. Use earlier browser checks when they help expose design or integration errors; there is no requirement to defer all visual work to the end. Follow the host browser policy and distinguish manual Browser evidence from source-controlled E2E tests.
+For material visual work, inspect relevant rendered states and viewports and compare any selected reference. Check in the browser as early as it helps expose design or integration errors. Follow the host browser policy and distinguish manual Browser evidence from source-controlled E2E tests.
 
 Record the final commit/tree and the inputs or environment on which checks depended. Changes invalidate affected evidence, not every unrelated check. Revalidate changed contracts after conflict resolution; a documentation-only progress update does not by itself invalidate runtime tests. Provider-required checks may still need the current PR SHA.
 
 ## Publish and clean up
 
-Use the authorized aggregate path: one PR, or commit and push if that is what the user requested. Keep intermediate branches local unless remote backup or collaboration is requested. Report the result, meaningful review fixes, checks, and gaps in plain language without a mandatory confidence score.
+Use the authorized aggregate path: one PR, or commit and push if that is what the user requested. Keep intermediate branches local unless remote backup or collaboration is requested. Report the result, meaningful review fixes, checks, and gaps in plain language.
 
 Merge only when requested, repository-required checks pass on the candidate, and no unresolved finding makes the merge unsafe. Verify the resulting commit/tree, including any base changes. An existing passing check does not need a local rerun merely because the next step is squash merge.
 

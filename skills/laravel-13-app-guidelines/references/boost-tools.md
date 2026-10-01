@@ -12,6 +12,10 @@ Official source: <https://laravel.com/docs/13.x/boost>
   packages, database engine, and available models.
 - Read repository instructions and local Boost-generated guidelines. Local rules
   override generic examples.
+- When the project keeps Boost project rules, consult `.ai/rules/index.md` for
+  the rule files matching the paths being edited. Record a new durable rule
+  through the `record-rule` tool so the index stays current; a hand-written rule
+  file is not discovered until the index is regenerated.
 - Use database connection and schema inspection before proposing migrations or
   engine-specific queries.
 
@@ -24,7 +28,9 @@ Official source: <https://laravel.com/docs/13.x/boost>
   `form request authorization`, `after commit queued listener`, and
   `json api sparse fieldsets`.
 - Use official versioned Laravel or package documentation when Boost is absent,
-  unhealthy, or missing the installed version. State that fallback.
+  unhealthy, or missing the installed version. State that fallback. Boost's
+  documentation coverage can trail a package's newest major, so confirm that
+  results match the installed version before relying on them.
 
 ## Inspect and Diagnose
 
