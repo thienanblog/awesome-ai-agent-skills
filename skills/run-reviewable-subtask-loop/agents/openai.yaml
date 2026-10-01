@@ -1,0 +1,7 @@
+interface:
+  display_name: "Run Reviewable Subtask Loop"
+  short_description: "Opt-in delivery through reviewed commits"
+  default_prompt: "Use $run-reviewable-subtask-loop to deliver the approved plan through reviewed commits within my Git permissions."
+
+policy:
+  allow_implicit_invocation: false

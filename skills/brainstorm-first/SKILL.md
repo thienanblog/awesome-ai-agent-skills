@@ -1,9 +1,11 @@
 ---
 name: brainstorm-first
-description: Explore and compare practical options before implementation. Use for requested brainstorming, requirements tradeoffs, diagnosis options, or UI concepts; skip when the approach is already selected.
+description: Explore and compare practical options before implementation. Use when the user explicitly selects this comparison workflow for requirements, diagnosis options, or UI concepts; ordinary decisions do not require it.
 ---
 
 # Brainstorm First
+
+Use this workflow when the user explicitly selects it. Routine option comparisons can be handled directly without loading this skill.
 
 Turn uncertainty into a useful decision. Compare approaches against the user's actual goal and constraints, and challenge an impractical request with concrete evidence.
 

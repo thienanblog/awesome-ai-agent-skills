@@ -1,6 +1,6 @@
 {
   "name": "project-development-skills",
-  "version": "1.32.0",
+  "version": "1.32.1",
   "description": "Focused development workflows for implementation, decisions, debugging, verification, documentation, UI, and deployment. Use the guidance that fits the task.",
   "homepage": "https://github.com/thienanblog/awesome-ai-agent-skills",
   "repository": "https://github.com/thienanblog/awesome-ai-agent-skills",
@@ -26,8 +26,8 @@
     ],
     "websiteURL": "https://github.com/thienanblog/awesome-ai-agent-skills",
     "defaultPrompt": [
-      "Use the project-development skill that fits this task; start with project-development-mindset when the work needs general coordination.",
-      "Compare practical options with brainstorm-first when a decision is requested, or implement an already selected approach with the relevant skill.",
+      "Use the specialist development skill that fits this task. Routine implementation does not require a coordinator.",
+      "Use $brainstorm-first to compare practical options for this requested decision; respect my selection and implementation boundaries.",
       "Complete this project change with proportionate checks and existing authorization. Use run-reviewable-subtask-loop only when explicitly requested or accepted."
     ],
     "brandColor": "#10A37F"

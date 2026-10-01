@@ -16,10 +16,10 @@ Use a specialist directly when its purpose clearly matches the task. For mixed o
 | Production VPS/Traefik deployment | `vps-docker-traefik-deploy` |
 | Installed Laravel 11/12 | `laravel-11-12-app-guidelines` |
 | Laravel 13 or a requested 12-to-13 upgrade | `laravel-13-app-guidelines` |
-| Requested option comparison before implementation | `brainstorm-first` |
+| Explicitly selected option-comparison workflow | `brainstorm-first` |
 | Explicitly accepted delivery through reviewable subtasks | `run-reviewable-subtask-loop` |
 
-Use the current skill catalog; names here do not establish availability. An equivalent installed capability is suitable. Do not install an optional skill silently or block ordinary work because one is absent.
+Honor each skill's invocation policy; a routing reference does not authorize loading an explicit-only skill. Use the current skill catalog; names here do not establish availability. An equivalent installed capability is suitable. Do not install an optional skill silently or block ordinary work because one is absent.
 
 ## Avoid conflicting guidance
 

@@ -1,6 +1,6 @@
 {
   "name": "laravel-app-skills",
-  "version": "1.32.0",
+  "version": "1.32.1",
   "description": "Laravel 11/12 and Laravel 13 guidance selected by installed or target framework version, with project-specific frontend and command conventions.",
   "homepage": "https://github.com/thienanblog/awesome-ai-agent-skills",
   "repository": "https://github.com/thienanblog/awesome-ai-agent-skills",

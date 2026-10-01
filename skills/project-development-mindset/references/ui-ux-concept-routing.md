@@ -16,7 +16,7 @@ Stay in the general workflow for small local UI fixes that do not depend on conc
 
 ## Concepts And Selection
 
-When the user asks for multiple concepts, use `brainstorm-first` when available:
+When the user asks for multiple concepts, compare them directly. Use `brainstorm-first` only if the user explicitly selects that workflow:
 
 - Give each concept a stable name and explain its meaningful tradeoffs.
 - Recommend one concept using technical, usability, accessibility, consistency, and implementation evidence.

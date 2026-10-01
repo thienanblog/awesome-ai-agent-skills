@@ -1,9 +1,11 @@
 ---
 name: project-development-mindset
-description: Plan and carry repository changes through implementation, verification, and handoff. Use for project work that needs a general development workflow; select specialist guidance when it adds task-specific value.
+description: Plan and carry repository changes through implementation, verification, and handoff. Use when the user explicitly selects this coordination workflow; ordinary repository changes do not require it.
 ---
 
 # Project Development Mindset
+
+Use this coordinator when the user explicitly selects it. Task size, mixed responsibilities, or uncertainty alone do not activate it.
 
 Deliver the requested outcome using project evidence and the smallest coherent change. Scale investigation and verification to impact, uncertainty, and reversibility.
 
@@ -39,11 +41,11 @@ Run in the main conversation by default. Delegation can increase usage: obtain e
 
 ## Use specialist guidance selectively
 
-Start directly with a specialist when the task clearly calls for it. Use this general workflow when ownership is unclear or several responsibilities need coordination. Routine tests, docs edits, framework commands, and browser checks do not each need another skill.
+Start directly with a specialist when the task clearly calls for it. Within this explicitly selected workflow, coordinate responsibilities when ownership is unclear or several responsibilities overlap. Routine tests, docs edits, framework commands, and browser checks do not each need another skill.
 
 Read [quality-skill-routing.md](references/quality-skill-routing.md) when choosing a specialist would help, or [ui-ux-concept-routing.md](references/ui-ux-concept-routing.md) for visual decisions and reference matching. Load only relevant guidance; there is no fixed skill-count quota. Avoid duplicate workflows and discard obsolete phase instructions as the task changes. An unavailable optional skill should not block work the current tools can complete.
 
-Use `brainstorm-first` for a requested comparison or a material decision that needs options. Use `run-reviewable-subtask-loop` only when explicitly requested or accepted; task size and internal subtasks do not activate it or authorize subagents.
+Use `brainstorm-first` only when the user explicitly selects that workflow; otherwise compare options directly as needed. Use `run-reviewable-subtask-loop` only when explicitly requested or accepted; task size and internal subtasks do not activate it or authorize subagents.
 
 ## Handoff
 
