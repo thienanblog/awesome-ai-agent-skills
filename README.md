@@ -224,6 +224,7 @@ compatibility notes, and the limits of validation.
 | [testing-verification](./skills/testing-verification) | Design or assess tests, acceptance checks, CI coverage, and browser verification. Use when verification is the main deliverable or requires specialist judgment; ordinary implementation can keep its focused checks inline. |
 | [ui-ux-concept-implementation](./skills/ui-ux-concept-implementation) | Implement a selected mockup, screenshot, or visual reference in an existing project and compare the rendered result. Use when visual fidelity drives the work; use dashboard guidance for operational surfaces when it fits better. |
 | [vps-docker-traefik-deploy](./skills/vps-docker-traefik-deploy) | Prepare or operate production Docker Compose deployments on a VPS with Traefik, DNS, registries, persistent storage, backups, and rollback. Use for production infrastructure and releases, rather than local development. |
+| [publicrecords-skills](https://github.com/GeminiGeorge22/publicrecords-skills) | Agent Skills + MCP plugin (Claude Code, Codex, Copilot, Cursor, Gemini CLI, Kiro) for 18 public-data Apify Actors: SAM.gov, Grants.gov, USAspending, EU/UK tenders, council meetings, ATS jobs, company socials, Google Ads, Etsy, sports odds, Spotify |
 <!-- SKILLS_TABLE_END -->
 
 ## Plugin Groups
